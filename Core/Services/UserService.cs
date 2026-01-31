@@ -12,8 +12,6 @@ namespace CEJ_WebApp.Core.Services
         private readonly string url = Parameters.GetUrlAddress();
         private bool _return = false;
         private string _object = "User";
-        private readonly ILocalStorageService _localStorage;
-
 
         public async Task<UserEntity>? GetUserByUuidAsync(Guid uuid)
         {
@@ -21,7 +19,9 @@ namespace CEJ_WebApp.Core.Services
             {
                 UserEntity _user = new();
 
+                var token = await Parameters.GetTokenAsync();
 
+                Http.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
 
                 string uri = $"{url}{_object}/{uuid}/ByUuid";
 
