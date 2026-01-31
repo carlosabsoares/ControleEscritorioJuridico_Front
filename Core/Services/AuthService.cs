@@ -25,7 +25,7 @@ public class AuthService : IAuthService
     {
         var result = await _loginService.Login(loginRequest);
 
-        if (result is null)
+        if (result is null || string.IsNullOrEmpty(result.Token))
             return null;
 
 

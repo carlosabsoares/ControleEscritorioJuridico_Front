@@ -54,7 +54,7 @@ public partial class LoginPage : ComponentBase
 
     private bool ValidarDados()
     {
-        if (string.IsNullOrWhiteSpace(InputRequest.Usuario) || string.IsNullOrWhiteSpace(InputRequest.Senha))
+        if (string.IsNullOrWhiteSpace(InputRequest.Email) || string.IsNullOrWhiteSpace(InputRequest.Password))
         {
             ExibirMensagem("Usuário e/ou senha inválidos.");
             return false;

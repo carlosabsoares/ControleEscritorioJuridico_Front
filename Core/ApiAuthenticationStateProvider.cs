@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Globalization;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -49,18 +50,18 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 
     private bool TokenExpirou(string dataToken)
     {
-        if (string.IsNullOrWhiteSpace(dataToken)) return false;
 
-        DateTime dataAtualUtc = DateTime.UtcNow;
-        DateTime dataExpiracao =
-            DateTime.ParseExact(dataToken, "yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'", null,
-            System.Globalization.DateTimeStyles.RoundtripKind);
+            if (string.IsNullOrWhiteSpace(dataToken)) return false;
 
-        if (dataExpiracao < dataAtualUtc)
-        {
-            return true;
-        }
-        return false;
+            if (!DateTime.TryParseExact(
+                    dataToken,
+                    "yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind,
+                    out var dataExpiracao))
+                return false;
+
+            return dataExpiracao < DateTime.UtcNow;
     }
     private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
     {

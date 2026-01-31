@@ -45,4 +45,3 @@ Para efetuar login no sistema:
 - Fábio Mendonça [@fabiojmj](https://github.com/fabiojmj) 
 
 
-"# ControleEscritorioJuridico_Front" 

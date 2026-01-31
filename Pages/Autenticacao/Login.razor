@@ -5,10 +5,10 @@
     <DataAnnotationsValidator />
 
     <MudTextField Label="Usuário" HelperText="Campo obrigatório - informe o nome do usuário" RequiredError="Favor informar o nome do usuário"
-                  @bind-Value="InputRequest.Usuario" For="@(() => InputRequest.Usuario)" Variant="@Variant.Outlined" Required="true"></MudTextField>
+                  @bind-Value="InputRequest.Email" For="@(() => InputRequest.Email)" Variant="@Variant.Outlined" Required="true"></MudTextField>
 
     <MudTextField Label="Senha" HelperText="Campo obrigatório - informe a senha" RequiredError="Favor informar a senha"
-                  @bind-Value="InputRequest.Senha" For="@(() => InputRequest.Senha)" InputType="InputType.Password" Variant="@Variant.Outlined" Required="true"></MudTextField>
+                  @bind-Value="InputRequest.Password" For="@(() => InputRequest.Password)" InputType="InputType.Password" Variant="@Variant.Outlined" Required="true"></MudTextField>
 
     <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" class="btn my-5 fw-bold btn-lg sign-up rounded-5 px-5 fs-6">Salvar</MudButton>
 </EditForm>
