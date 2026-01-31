@@ -14,21 +14,14 @@ namespace CEJ_WebApp.Core.Services
         private string _object = "User";
         private readonly ILocalStorageService _localStorage;
 
-        public UserService(ILocalStorageService localStorage) {
-
-            var savedToken = _localStorage!.GetItemAsync<string>("authToken").Result;
-
-            if(savedToken != null)
-            {
-                Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", savedToken);
-            }
-        }
 
         public async Task<UserEntity>? GetUserByUuidAsync(Guid uuid)
         {
             try
             {
                 UserEntity _user = new();
+
+
 
                 string uri = $"{url}{_object}/{uuid}/ByUuid";
 

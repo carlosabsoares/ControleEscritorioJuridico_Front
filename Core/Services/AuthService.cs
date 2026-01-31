@@ -1,8 +1,9 @@
 ﻿using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components.Authorization;
 using CEJ_WebApp.Core.Request;
 using CEJ_WebApp.Core.Response;
 using CEJ_WebApp.Core.Services.Interface;
+using CEJ_WebApp.Model.Dto;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace CEJ_WebApp.Core.Services;
 
@@ -11,14 +12,17 @@ public class AuthService : IAuthService
     private readonly AuthenticationStateProvider _authenticationStateProvider;
     private readonly ILocalStorageService _localStorage;
     private readonly ILoginService _loginService;
+    private readonly IUserService _userService;
 
     public AuthService(ILoginService loginService,
         AuthenticationStateProvider authenticationStateProvider,
+        IUserService userService,
         ILocalStorageService localStorage)
     {
         _loginService = loginService;
         _authenticationStateProvider = authenticationStateProvider;
         _localStorage = localStorage;
+        _userService = userService;
     }
 
     public async Task<LoginResponse>? Login(LoginRequest loginRequest)
@@ -31,14 +35,27 @@ public class AuthService : IAuthService
 
         await _localStorage.SetItemAsync("authToken", result.Token);
         await _localStorage.SetItemAsync("tokenExpiration", result.Expiration);
-        await _localStorage.SetItemAsync("nomeUsuario", result.NomeUsuario);
+        //await _localStorage.SetItemAsync("nomeUsuario", result.NomeUsuario);
 
         ((ApiAuthenticationStateProvider)_authenticationStateProvider)
                             .MarkUserAsAuthenticated(result.NomeUsuario);
 
-        //httpClient.DefaultRequestHeaders.Authorization =
-        //            new AuthenticationHeaderValue("bearer",
-        //                                             loginResult.Token);
+
+        ////Captura informações para sessão de usuário
+        //var userInfo = await _userService.GetUserByUuidAsync(result.UserUuid);
+
+        //if (userInfo is null)
+        //    return null;
+
+        //var userSession = new LoginUserResponseDto
+        //{
+        //    UserUuid = result.UserUuid,
+        //    CompanyUuid = result.CompanyUuid,
+        //    Email = userInfo.Email,
+        //    FirstName = "userInfo.FirstName",
+        //    Nome = userInfo.Name,
+        //    Role = userInfo.Role
+        //};
 
         return result;
     }

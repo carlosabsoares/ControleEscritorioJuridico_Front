@@ -15,46 +15,6 @@ public class LoginService : ILoginService
     private string _object = "Authenticated";
 
 
-    //public async Task<LoginResponse> Login(LoginRequest loginRequest)
-    //{
-    //    var endpoint = $"{url}{_object}/Login";
-
-    //    //using var response = await Http.PostAsJsonAsync(endpoint, loginRequest)
-    //    //                               .ConfigureAwait(false);
-
-    //    var response = await Http.PostAsJsonAsync(endpoint, loginRequest);
-
-
-    //    // ERRO
-    //    if (!response.IsSuccessStatusCode)
-    //    {
-    //        var error = await response.Content
-    //                                  .ReadFromJsonAsync<LoginResponse>()
-    //                                  .ConfigureAwait(false);
-
-    //        return error ?? new LoginResponse
-    //        {
-    //            Error = "Erro desconhecido ao autenticar."
-    //        };
-    //    }
-
-    //    // SUCESSO
-    //    var auth = await response.Content
-    //                             .ReadFromJsonAsync<AuthenticateUserDto>()
-    //                             .ConfigureAwait(false);
-
-    //    if (auth is null)
-    //        return new LoginResponse { Error = "Resposta inválida do servidor." };
-
-    //    return new LoginResponse
-    //    {
-    //        NomeUsuario = auth.User.Nome,
-    //        Token = auth.Token,
-    //        Expiration = DateTime.UtcNow.AddHours(8).ToString()
-    //    };
-    //}
-
-
     public async Task<LoginResponse>? Login(LoginRequest loginRequest)
     {
 
@@ -80,7 +40,10 @@ public class LoginService : ILoginService
             Error = string.Empty,
             Expiration = DateTime.UtcNow.AddHours(8).ToString(),
             NomeUsuario = returnValue!.User.Nome,
-            Token = returnValue.Token
+            Token = returnValue.Token,
+            UserUuid = returnValue.User.UserUuid,
+            CompanyUuid = returnValue.User.CompanyUuid,  
+            Role = returnValue.User.Role
         };
 
         return _return;

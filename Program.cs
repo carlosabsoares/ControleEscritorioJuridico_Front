@@ -1,13 +1,14 @@
 using Blazored.LocalStorage;
+using CEJ_WebApp;
+using CEJ_WebApp.Core;
+using CEJ_WebApp.Core.Services;
+using CEJ_WebApp.Core.Services.Interface;
+using CEJ_WebApp.Model;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor;
 using MudBlazor.Services;
-using CEJ_WebApp;
-using CEJ_WebApp.Core;
-using CEJ_WebApp.Core.Services;
-using CEJ_WebApp.Core.Services.Interface;
 
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -31,10 +32,12 @@ builder.Services.AddMudServices(config =>
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
-
-
 builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+//builder.Services.AddScoped<UserSessionInformation>();
 
 
 await builder.Build().RunAsync();
