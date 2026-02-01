@@ -53,16 +53,15 @@ public class LoginService : ILoginService
         var returnValue = await response.Content.ReadFromJsonAsync<AuthenticateUserDto>();
 
         await _localStorage.SetItemAsync("authToken", returnValue.Token);
-        //await _localStorage.SetItemAsync("tokenExpiration", returnValue.Expiration);
-        //await _localStorage.SetItemAsync("nomeUsuario", result.NomeUsuario);
-
 
         var userInfo = await _userService.GetUserByUuidAsync(returnValue!.User!.UserUuid);
+
+        //var a = await _parameters.GetTokenExpirationDateAsync();
 
         var _return = new LoginResponse
         {
             Error = string.Empty,
-            Expiration = DateTime.UtcNow.AddHours(8).ToString(),
+            Expiration = (await _parameters.GetTokenExpirationDateAsync()).ToString(),
             NomeUsuario = returnValue!.User.Nome,
             Token = returnValue.Token,
             UserUuid = returnValue.User.UserUuid,
