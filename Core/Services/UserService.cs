@@ -9,9 +9,16 @@ namespace CEJ_WebApp.Core.Services
     public class UserService : IUserService
     {
         private readonly HttpClient Http = new();
-        private readonly string url = Parameters.GetUrlAddress();
+        private string url ;
         private bool _return = false;
         private string _object = "User";
+        private readonly Parameters Parameters;
+
+        public UserService(Parameters parameters)
+        {
+            Parameters = parameters;
+            url = Parameters.GetUrlAddress();
+        }
 
         public async Task<UserEntity>? GetUserByUuidAsync(Guid uuid)
         {
@@ -20,6 +27,9 @@ namespace CEJ_WebApp.Core.Services
                 UserEntity _user = new();
 
                 var token = await Parameters.GetTokenAsync();
+
+                if (Http.DefaultRequestHeaders.Contains("Authorization"))
+                    Http.DefaultRequestHeaders.Remove("Authorization");
 
                 Http.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
 

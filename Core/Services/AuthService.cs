@@ -33,29 +33,12 @@ public class AuthService : IAuthService
             return null;
 
 
-        await _localStorage.SetItemAsync("authToken", result.Token);
+        //await _localStorage.SetItemAsync("authToken", result.Token);
         await _localStorage.SetItemAsync("tokenExpiration", result.Expiration);
         //await _localStorage.SetItemAsync("nomeUsuario", result.NomeUsuario);
 
         ((ApiAuthenticationStateProvider)_authenticationStateProvider)
                             .MarkUserAsAuthenticated(result.NomeUsuario);
-
-
-        ////Captura informações para sessão de usuário
-        //var userInfo = await _userService.GetUserByUuidAsync(result.UserUuid);
-
-        //if (userInfo is null)
-        //    return null;
-
-        //var userSession = new LoginUserResponseDto
-        //{
-        //    UserUuid = result.UserUuid,
-        //    CompanyUuid = result.CompanyUuid,
-        //    Email = userInfo.Email,
-        //    FirstName = "userInfo.FirstName",
-        //    Nome = userInfo.Name,
-        //    Role = userInfo.Role
-        //};
 
         return result;
     }

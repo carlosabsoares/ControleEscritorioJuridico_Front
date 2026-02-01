@@ -2,16 +2,18 @@
 
 namespace CEJ_WebApp.Core.Shared
 {
-    public static class Parameters
+    public  class Parameters
     {
-        private static readonly ILocalStorageService _localStorage;
+        private  readonly ILocalStorageService _localStorage;
 
-        public static string GetUrlAddress()
+        public Parameters(ILocalStorageService localStorage)
         {
-            return "https://localhost:1602/v1/";
+            _localStorage = localStorage;
         }
 
-        public static async Task<string> GetTokenAsync() {
+        public  string GetUrlAddress() => "https://localhost:1602/v1/";
+
+        public  async Task<string> GetTokenAsync() {
 
             var savedToken = await _localStorage.GetItemAsync<string>("authToken");
 

@@ -3,6 +3,7 @@ using CEJ_WebApp;
 using CEJ_WebApp.Core;
 using CEJ_WebApp.Core.Services;
 using CEJ_WebApp.Core.Services.Interface;
+using CEJ_WebApp.Core.Shared;
 using CEJ_WebApp.Model;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -36,6 +37,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStatePr
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<Parameters>();
 
 //builder.Services.AddScoped<UserSessionInformation>();
 
