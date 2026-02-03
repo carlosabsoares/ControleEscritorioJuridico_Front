@@ -46,8 +46,6 @@ public class AuthService : IAuthService
         if (result is null || string.IsNullOrEmpty(result.Token))
             return null;
 
-        await _localStorage.SetItemAsync("tokenExpiration", result.Expiration);
-
         ((ApiAuthenticationStateProvider)_authenticationStateProvider)
                             .MarkUserAsAuthenticated(result.NomeUsuario);
 
