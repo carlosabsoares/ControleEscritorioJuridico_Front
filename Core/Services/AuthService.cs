@@ -2,6 +2,7 @@
 using CEJ_WebApp.Core.Request;
 using CEJ_WebApp.Core.Response;
 using CEJ_WebApp.Core.Services.Interface;
+using CEJ_WebApp.Model;
 using CEJ_WebApp.Model.Dto;
 using Microsoft.AspNetCore.Components.Authorization;
 
@@ -13,16 +14,29 @@ public class AuthService : IAuthService
     private readonly ILocalStorageService _localStorage;
     private readonly ILoginService _loginService;
     private readonly IUserService _userService;
+    private readonly UserSessionInformation _userSessionInformation;
 
     public AuthService(ILoginService loginService,
         AuthenticationStateProvider authenticationStateProvider,
         IUserService userService,
+        UserSessionInformation userSessionInformation,
         ILocalStorageService localStorage)
     {
         _loginService = loginService;
         _authenticationStateProvider = authenticationStateProvider;
         _localStorage = localStorage;
         _userService = userService;
+        _userSessionInformation = userSessionInformation;
+    }
+
+    private void UserSessionInformationLoad(LoginResponse loginResponse, string email)
+    {
+        _userSessionInformation.CompanyUuid = loginResponse.CompanyUuid;
+        _userSessionInformation.UserUuid = loginResponse.UserUuid;
+        _userSessionInformation.Nome = loginResponse.NomeUsuario;
+        _userSessionInformation.Role = loginResponse.Role;
+        _userSessionInformation.Username = loginResponse.NomeUsuario.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0];
+        _userSessionInformation.Email = email;
     }
 
     public async Task<LoginResponse>? Login(LoginRequest loginRequest)
@@ -36,6 +50,10 @@ public class AuthService : IAuthService
 
         ((ApiAuthenticationStateProvider)_authenticationStateProvider)
                             .MarkUserAsAuthenticated(result.NomeUsuario);
+
+
+        UserSessionInformationLoad(result, loginRequest.Email);
+
 
         return result;
     }

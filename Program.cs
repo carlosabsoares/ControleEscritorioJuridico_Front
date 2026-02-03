@@ -40,7 +40,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<Parameters>();
 
-//builder.Services.AddScoped<UserSessionInformation>();
+builder.Services.AddScoped<UserSessionInformation>();
 
 
 await builder.Build().RunAsync();

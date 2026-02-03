@@ -56,12 +56,10 @@ public class LoginService : ILoginService
 
         var userInfo = await _userService.GetUserByUuidAsync(returnValue!.User!.UserUuid);
 
-        //var a = await _parameters.GetTokenExpirationDateAsync();
-
         var _return = new LoginResponse
         {
             Error = string.Empty,
-            Expiration = (await _parameters.GetTokenExpirationDateAsync()).ToString(),
+            Expiration = DateTime.Now.ToString(),
             NomeUsuario = returnValue!.User.Nome,
             Token = returnValue.Token,
             UserUuid = returnValue.User.UserUuid,
