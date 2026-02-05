@@ -17,10 +17,20 @@
                                      ToggledIcon="@Icons.Material.Filled.MenuOpen" ToggledTitle="Esconder menu" ToggledColor="Color.Surface">
                 </MudToggleIconButton>
                 <MudSpacer />
-                <MudToggleIconButton @bind-Toggled="@_isDarkMode" Edge="Edge.Start"
+@*                 <MudToggleIconButton @bind-Toggled="@_isDarkMode" Edge="Edge.Start"
                                      Icon="@Icons.Material.Filled.DarkMode" T
-                                     tMode" ToggledTitle="Modo claro" ToggledColor="Color.Surface">
-                </MudToggleIconButton>
+                                     tMode" ToggledTitle="Modo claro" ToggledColor="Color.Surface"> *@
+
+                <MudToggleIconButton @bind-Toggled="_isDarkMode"
+                                     Edge="Edge.Start"
+                                     Icon="@Icons.Material.Filled.DarkMode"
+                                     ToggledIcon="@Icons.Material.Filled.LightMode"
+                                     Title="Modo escuro"
+                                     ToggledTitle="Modo claro"
+                                     Color="@(_isDarkMode ? Color.Warning : Color.Surface)"
+                                     ToggledColor="@(_isDarkMode ? Color.Warning : Color.Surface)" />
+
+
                 <div class="d-flex align-center gap-2">
                     <MudText>@UserSessionInformation.Username</MudText>
                     <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@Logout">Sair </MudButton>
