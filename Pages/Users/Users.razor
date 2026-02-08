@@ -1,0 +1,101 @@
+﻿@page "/users"
+
+@using System.Net.Http.Json
+@using CEJ_WebApp.Core.Services
+@using CEJ_WebApp.Model
+@inject HttpClient httpClient
+@inject IUserService userServices
+
+<MudDataGrid @ref="_elementGrid" T="UserEntity" Items="@_elements" ReadOnly="@_readOnly"
+             EditMode="@(_isCellEditMode ? DataGridEditMode.Cell : DataGridEditMode.Form)"
+             StartedEditingItem="@StartedEditingItem" CanceledEditingItem="@CanceledEditingItem" CommittedItemChanges="@CommittedItemChanges"
+             Bordered="true" Dense="true" EditTrigger="@(_editTriggerRowClick ? DataGridEditTrigger.OnRowClick : DataGridEditTrigger.Manual)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Cadastro de usuários</MudText>
+        <MudSpacer />
+        <MudButtonGroup Class="ma-0 pa-0" Color="Color.Success" Variant="Variant.Filled">
+            <MudButton OnClick="NewItemAsync">
+                Adicionar Usuário
+            </MudButton>
+        </MudButtonGroup>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Name" Title="Nome" Editable="false" />
+        <PropertyColumn Property="x => x.Email" />
+        <PropertyColumn Property="x => x.Role.ToString()" />
+        <TemplateColumn Hidden="@_readOnly" CellClass="d-flex justify-between">
+            <CellTemplate>
+                @if (!_isCellEditMode && !_editTriggerRowClick)
+                {
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
+                }
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => DeleteItem(context.Item))" />
+            </CellTemplate>
+            <EditTemplate>
+                @if (!_isCellEditMode && !_editTriggerRowClick)
+                {
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
+                }
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => DeleteItem(context.Item))" />
+            </EditTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
+
+
+@code {
+    private IEnumerable<UserEntity> _elementMasterList = [];
+    private List<UserEntity> _elements = [];
+    private bool _readOnly;
+    private bool _isCellEditMode;
+    private List<string> _events = new();
+    private bool _editTriggerRowClick;
+    private MudDataGrid<UserEntity> _elementGrid = default!;
+    private string _searchString;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadManufactures();
+    }
+
+    private async Task LoadManufactures()
+    {
+        _elementMasterList = await userServices.GetUserAllAsync();
+        _elements = _elementMasterList.Take(5).ToList();
+    }
+
+    private async Task NewItemAsync()
+    {
+        var elem = new UserEntity();
+        if (_isCellEditMode)
+        {
+            _elements.Insert(0, elem);
+        }
+        else
+        {
+            await _elementGrid.SetEditingItemAsync(elem);
+        }
+    }
+
+    private void DeleteItem(UserEntity item)
+    {
+        _elements.Remove(item);
+    }
+
+    // events
+    private void StartedEditingItem(UserEntity item)
+    {
+        _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+    }
+
+    private void CanceledEditingItem(UserEntity item)
+    {
+        // update code for backing data here if needed
+        _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+    }
+
+    private void CommittedItemChanges(UserEntity item)
+    {
+
+    }
+}

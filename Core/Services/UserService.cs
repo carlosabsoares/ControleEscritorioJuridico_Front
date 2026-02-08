@@ -45,5 +45,31 @@ namespace CEJ_WebApp.Core.Services
                 return new UserEntity();
             }
         }
+
+        public async Task<List<UserEntity>>? GetUserAllAsync()
+        {
+            try
+            {
+                List<UserEntity> _users = new();
+
+                var token = await Parameters.GetTokenAsync();
+
+                if (Http.DefaultRequestHeaders.Contains("Authorization"))
+                    Http.DefaultRequestHeaders.Remove("Authorization");
+
+                Http.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+
+                string uri = $"{url}{_object}";
+
+                _users = await Http.GetFromJsonAsync<List<UserEntity>>(uri);
+
+                return _users;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+                return new List<UserEntity>();
+            }
+        }
     }
 }

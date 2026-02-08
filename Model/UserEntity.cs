@@ -5,6 +5,7 @@ namespace CEJ_WebApp.Model
 {
     public class UserEntity
     {
+        public Guid Uuid { get; set; }
         public string Name { get; set; } = null!;
 
         [EmailAddress]
