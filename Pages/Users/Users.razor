@@ -1,101 +1,92 @@
 ﻿@page "/users"
-
-@using System.Net.Http.Json
-@using CEJ_WebApp.Core.Services
+@page "/users/Index"
 @using CEJ_WebApp.Model
-@inject HttpClient httpClient
-@inject IUserService userServices
-
-<MudDataGrid @ref="_elementGrid" T="UserEntity" Items="@_elements" ReadOnly="@_readOnly"
-             EditMode="@(_isCellEditMode ? DataGridEditMode.Cell : DataGridEditMode.Form)"
-             StartedEditingItem="@StartedEditingItem" CanceledEditingItem="@CanceledEditingItem" CommittedItemChanges="@CommittedItemChanges"
-             Bordered="true" Dense="true" EditTrigger="@(_editTriggerRowClick ? DataGridEditTrigger.OnRowClick : DataGridEditTrigger.Manual)">
-    <ToolBarContent>
-        <MudText Typo="Typo.h6">Cadastro de usuários</MudText>
-        <MudSpacer />
-        <MudButtonGroup Class="ma-0 pa-0" Color="Color.Success" Variant="Variant.Filled">
-            <MudButton OnClick="NewItemAsync">
-                Adicionar Usuário
-            </MudButton>
-        </MudButtonGroup>
-    </ToolBarContent>
-    <Columns>
-        <PropertyColumn Property="x => x.Name" Title="Nome" Editable="false" />
-        <PropertyColumn Property="x => x.Email" />
-        <PropertyColumn Property="x => x.Role.ToString()" />
-        <TemplateColumn Hidden="@_readOnly" CellClass="d-flex justify-between">
-            <CellTemplate>
-                @if (!_isCellEditMode && !_editTriggerRowClick)
-                {
-                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
-                }
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => DeleteItem(context.Item))" />
-            </CellTemplate>
-            <EditTemplate>
-                @if (!_isCellEditMode && !_editTriggerRowClick)
-                {
-                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
-                }
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => DeleteItem(context.Item))" />
-            </EditTemplate>
-        </TemplateColumn>
-    </Columns>
-</MudDataGrid>
 
 
-@code {
-    private IEnumerable<UserEntity> _elementMasterList = [];
-    private List<UserEntity> _elements = [];
-    private bool _readOnly;
-    private bool _isCellEditMode;
-    private List<string> _events = new();
-    private bool _editTriggerRowClick;
-    private MudDataGrid<UserEntity> _elementGrid = default!;
-    private string _searchString;
+<Modal @ref="modalInsert" title="Inserir usuário"
+       UseStaticBackdrop="true"
+       CloseOnEscape="false"
+	   IsVerticallyCentered="true"
+       Size="ModalSize.Large">
+    <BodyTemplate>
+        <EditForm Model="@user" OnValidSubmit="@OnIncludeQuiz">
+            <DataAnnotationsValidator />
+@*             <div class="form-group">
+                <label>Description</label>
+                <InputText id="txtQuizDescription" class="form-control" @bind-Value=@category.Description />
+                <ValidationMessage For="@(()=> category.Description)" />
+            </div> *@
+        </EditForm>
 
-    protected override async Task OnInitializedAsync()
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalInsertClick">Close</Button>
+        <Button Color="ButtonColor.Primary" @onclick="OnIncludeQuiz">Include</Button>
+    </FooterTemplate>
+</Modal>
+
+<h1>Usuários</h1>
+<hr />
+
+<div>
+
+    <MudFab Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.Add" Label="Usuário" OnClick="OnShowModalInsertClick" />
+
+</div>
+<br />
+
+@code{
+
+	UserEntity user = new UserEntity();
+    bool allowRowSelectOnRowClick = true;
+
+    private Modal modalInsert = default!;
+    private Modal modalUpdate = default!;
+
+
+    private async Task OnShowModalInsertClick()
     {
-        await LoadManufactures();
+        user = new UserEntity();
+        await modalInsert.ShowAsync();
     }
 
-    private async Task LoadManufactures()
+    private async Task OnIncludeQuiz()
     {
-        _elementMasterList = await userServices.GetUserAllAsync();
-        _elements = _elementMasterList.Take(5).ToList();
+        // if (!string.IsNullOrEmpty(user.Name))
+        // {
+        //     var include = await categoryService.ObjectAdd(category);
+
+        //     if (include)
+        //     {
+        //         ShowMessage(ToastType.Success, "Insert Success.");
+
+        //         await GetCategoriesAsync();
+        //     }
+        //     else
+        //     {
+        //         ShowMessage(ToastType.Danger, "Insert Error.");
+        //     }
+
+        //     category = new QuizDto();
+
+        //     gridCategory.Reload();
+        // }
+
+        OnHideModalInsertClick();
     }
 
-    private async Task NewItemAsync()
+    private async Task OnHideModalInsertClick()
     {
-        var elem = new UserEntity();
-        if (_isCellEditMode)
-        {
-            _elements.Insert(0, elem);
-        }
-        else
-        {
-            await _elementGrid.SetEditingItemAsync(elem);
-        }
+        await modalInsert.HideAsync();
     }
 
-    private void DeleteItem(UserEntity item)
+    private async Task OnShowModalEditClick()
     {
-        _elements.Remove(item);
+        await modalUpdate.ShowAsync();
     }
 
-    // events
-    private void StartedEditingItem(UserEntity item)
+    private async Task OnHideModalEditClick()
     {
-        _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
-    }
-
-    private void CanceledEditingItem(UserEntity item)
-    {
-        // update code for backing data here if needed
-        _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
-    }
-
-    private void CommittedItemChanges(UserEntity item)
-    {
-
+        await modalUpdate.HideAsync();
     }
 }
