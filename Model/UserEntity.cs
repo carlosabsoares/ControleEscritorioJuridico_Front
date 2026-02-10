@@ -25,6 +25,7 @@ namespace CEJ_WebApp.Model
 
         public long AddressId { get; set; } = 0;
 
-        public AddressEntity Address { get; set; } = null!;
+        public  AddressEntity Address { get; set; } = new AddressEntity();
+        public bool Active { get; set; } = false;
     }
 }
