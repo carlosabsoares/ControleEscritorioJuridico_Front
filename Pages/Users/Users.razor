@@ -1,92 +1,210 @@
 ﻿@page "/users"
 @page "/users/Index"
 @using CEJ_WebApp.Model
+@using CEJ_WebApp.Model.Dto
+@using CEJ_WebApp.Model.Enum
+@inject IUserService _userService
 
 
 <Modal @ref="modalInsert" title="Inserir usuário"
-       UseStaticBackdrop="true"
-       CloseOnEscape="false"
+	   UseStaticBackdrop="true"
+	   CloseOnEscape="false"
 	   IsVerticallyCentered="true"
-       Size="ModalSize.Large">
-    <BodyTemplate>
-        <EditForm Model="@user" OnValidSubmit="@OnIncludeQuiz">
-            <DataAnnotationsValidator />
-@*             <div class="form-group">
-                <label>Description</label>
-                <InputText id="txtQuizDescription" class="form-control" @bind-Value=@category.Description />
-                <ValidationMessage For="@(()=> category.Description)" />
-            </div> *@
-        </EditForm>
+	   Size="ModalSize.Large">
+	<BodyTemplate>
+		<EditForm Model="@user" OnValidSubmit="@OnIncludeQuiz">
+			<DataAnnotationsValidator />
 
-    </BodyTemplate>
-    <FooterTemplate>
-        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalInsertClick">Close</Button>
-        <Button Color="ButtonColor.Primary" @onclick="OnIncludeQuiz">Include</Button>
-    </FooterTemplate>
+			<div class="row">
+				<!-- Coluna Nome -->
+				<div class="col-md-6">
+					<div class="form-group">
+						<label>Nome</label>
+						<InputText id="txtUserName" class="form-control" @bind-Value=@user.Name />
+						<ValidationMessage For="@(() => user.Name)" />
+					</div>
+				</div>
+
+				<!-- Coluna Perfil -->
+				<div class="col-md-6">
+					<div class="form-group">
+						<label>Perfil</label>
+						<InputSelect class="form-control" @bind-Value="user.Role">
+							<option value="">Selecione</option>
+							<option value="@UserRoleType.Operador">Operador</option>
+							<option value="@UserRoleType.Gerente">Gerente</option>
+							<option value="@UserRoleType.Administrador">Administrador</option>
+						</InputSelect>
+					</div>
+				</div>
+			</div>
+
+
+
+
+		</EditForm>
+
+	</BodyTemplate>
+	<FooterTemplate>
+		<Button Color="ButtonColor.Secondary" @onclick="OnHideModalInsertClick">Close</Button>
+		<Button Color="ButtonColor.Primary" @onclick="OnIncludeQuiz">Include</Button>
+	</FooterTemplate>
 </Modal>
 
-<h1>Usuários</h1>
-<hr />
-
+@* Cabeçalho da página *@
 <div>
+	<MudStack Row="true"
+			  Justify="Justify.SpaceBetween"
+			  AlignItems="MudBlazor.AlignItems.Center"
+			  Class="mb-3">
 
-    <MudFab Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.Add" Label="Usuário" OnClick="OnShowModalInsertClick" />
+		<MudText Typo="Typo.h4">Usuários</MudText>
 
+		<MudFab Color="Color.Tertiary"
+				StartIcon="@Icons.Material.Filled.Add"
+				Label="Usuário"
+				OnClick="OnShowModalInsertClick" />
+
+	</MudStack>
 </div>
+
+<hr />
 <br />
 
-@code{
+<div class="card">
+	<h4 class="card-header">Quiz</h4>
+	<div class="card-body">
+
+		<Grid TItem="UserDto"
+			  AllowFiltering="true"
+			  AllowPaging = "true"
+			  AllowSorting = "true"
+			  Class="table table-hover table-bordered table-striped"
+			  PageSize="5"
+			  DataProvider="UserDtoDataProvider"
+			  Responsive = "true">
+
+			<GridColumn TItem="UserDto" HeaderText="Nome" PropertyName="Name" SortKeySelector="item => item.Name">
+				@context.Name
+			</GridColumn>
+			<GridColumn TItem="UserDto" HeaderText="Email" PropertyName="Email" SortKeySelector="item => item.Email">
+				@context.Email
+			</GridColumn>
+			<GridColumn TItem="UserDto" HeaderText="Perfil" PropertyName="Role" SortKeySelector="item => item.Role">
+				@context.Role
+			</GridColumn>
+
+		</Grid>
+
+
+		@*         <RadzenDataGrid @ref="gridUser"
+                        AllowRowSelectOnRowClick="@allowRowSelectOnRowClick"
+                        AllowFiltering="true"
+                        FilterPopupRenderMode="Radzen.PopupRenderMode.OnDemand"
+                        FilterCaseSensitivity="Radzen.FilterCaseSensitivity.CaseInsensitive"
+                        AllowPaging="true"
+                        PageSize="5"
+                        AllowSorting="true"
+                        Data="@usersDto"
+                        TItem="UserDto"
+                        ColumnWidth="200px">
+            <Columns>
+                <RadzenDataGridColumn TItem="UserDto" Property="Name" Title="Nome" Width="180px" />
+                <RadzenDataGridColumn TItem="UserDto" Property="Email" Title="Email" TextAlign="TextAlign.Center" Width="80px" />
+                <RadzenDataGridColumn TItem="UserDto" Property="Role" Title="Perfil" TextAlign="TextAlign.Center" Width="80px" />
+            </Columns>
+        </RadzenDataGrid> *@
+	</div>
+
+</div>
+
+<br />
+
+@code {
+
+	RadzenDataGrid<UserDto> gridUser;
 
 	UserEntity user = new UserEntity();
-    bool allowRowSelectOnRowClick = true;
+	List<UserDto> usersDto = new List<UserDto>();
 
-    private Modal modalInsert = default!;
-    private Modal modalUpdate = default!;
+	bool allowRowSelectOnRowClick = true;
 
+	private Modal modalInsert = default!;
+	private Modal modalUpdate = default!;
 
-    private async Task OnShowModalInsertClick()
-    {
-        user = new UserEntity();
-        await modalInsert.ShowAsync();
-    }
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadManufactures();
+	}
 
-    private async Task OnIncludeQuiz()
-    {
-        // if (!string.IsNullOrEmpty(user.Name))
-        // {
-        //     var include = await categoryService.ObjectAdd(category);
+	async Task LoadManufactures()
+	{
+		usersDto = await GetUsersDtoAsync();
+	}
 
-        //     if (include)
-        //     {
-        //         ShowMessage(ToastType.Success, "Insert Success.");
+	private async Task<GridDataProviderResult<UserDto>> UserDtoDataProvider(GridDataProviderRequest<UserDto> request)
+	{
+		var usersDto = await GetUsersDtoAsync();
 
-        //         await GetCategoriesAsync();
-        //     }
-        //     else
-        //     {
-        //         ShowMessage(ToastType.Danger, "Insert Error.");
-        //     }
+		return await Task.FromResult(request.ApplyTo(usersDto));
+	}
 
-        //     category = new QuizDto();
+	private async Task<List<UserDto>> GetUsersDtoAsync()
+	{
+		var usersEntity = await _userService.GetUserAllAsync();
 
-        //     gridCategory.Reload();
-        // }
+		return usersEntity.Select(x => new UserDto()
+		{
+			Uuid = x.Uuid,
+			Name = x.Name,
+			Email = x.Email,
+			Role = x.Role.ToString(),
+		}).ToList();
+	}
 
-        OnHideModalInsertClick();
-    }
+	private async Task OnShowModalInsertClick()
+	{
+		user = new UserEntity();
+		await modalInsert.ShowAsync();
+	}
 
-    private async Task OnHideModalInsertClick()
-    {
-        await modalInsert.HideAsync();
-    }
+	private async Task OnIncludeQuiz()
+	{
+		// if (!string.IsNullOrEmpty(user.Name))
+		// {
+		//     var include = await categoryService.ObjectAdd(category);
 
-    private async Task OnShowModalEditClick()
-    {
-        await modalUpdate.ShowAsync();
-    }
+		//     if (include)
+		//     {
+		//         ShowMessage(ToastType.Success, "Insert Success.");
 
-    private async Task OnHideModalEditClick()
-    {
-        await modalUpdate.HideAsync();
-    }
+		//         await GetCategoriesAsync();
+		//     }
+		//     else
+		//     {
+		//         ShowMessage(ToastType.Danger, "Insert Error.");
+		//     }
+
+		//     category = new QuizDto();
+
+		//     gridCategory.Reload();
+		// }
+
+		OnHideModalInsertClick();
+	}
+
+	private async Task OnHideModalInsertClick()
+	{
+		await modalInsert.HideAsync();
+	}
+
+	private async Task OnShowModalEditClick()
+	{
+		await modalUpdate.ShowAsync();
+	}
+
+	private async Task OnHideModalEditClick()
+	{
+		await modalUpdate.HideAsync();
+	}
 }

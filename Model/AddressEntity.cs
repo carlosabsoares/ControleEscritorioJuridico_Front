@@ -1,14 +1,39 @@
-﻿namespace CEJ_WebApp.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CEJ_WebApp.Model
 {
     public class AddressEntity
     {
+        [Required]
+        [MinLength(2)]
+        [MaxLength(100)]
         public string Street { get; set; } = null!;
+
+        [MinLength(2)]
+        [MaxLength(100)]
         public string Number { get; set; } = null!;
+
+        [MinLength(2)]
+        [MaxLength(50)]
         public string Complement { get; set; } = null!;
+
+        [MinLength(2)]
+        [MaxLength(50)]
         public string? Neighborhood { get; set; } = null!;
+
+        [MinLength(2)]
+        [MaxLength(100)]
         public string City { get; set; } = null!;
+
+        [MinLength(2)]
+        [MaxLength(50)]
         public string State { get; set; } = null!;
+
+        [MaxLength(10)]
         public string ZipCode { get; set; } = null!;
+
+        [MinLength(2)]
+        [MaxLength(50)]
         public string Country { get; set; } = "Brasil";
 
         public DateTime CreateAt { get; set; } = DateTime.Now;
