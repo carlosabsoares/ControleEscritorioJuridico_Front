@@ -6,5 +6,6 @@ namespace CEJ_WebApp.Core.Services.Interface
     {
         Task<UserEntity>? GetUserByUuidAsync(Guid uuid);
         Task<List<UserEntity>>? GetUserAllAsync();
+        Task<bool> AddAsync(UserEntity userEntity);
     }
 }

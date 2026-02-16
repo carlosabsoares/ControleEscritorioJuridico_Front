@@ -4,18 +4,16 @@ namespace CEJ_WebApp.Model
 {
     public class AddressEntity
     {
-        [Required]
+        [Required(ErrorMessage ="Logradouro é obrigatório")]
         [MinLength(2)]
         [MaxLength(100)]
         public string Street { get; set; } = null!;
 
-        [MinLength(2)]
-        [MaxLength(100)]
+
         public string Number { get; set; } = null!;
 
-        [MinLength(2)]
-        [MaxLength(50)]
-        public string Complement { get; set; } = null!;
+
+        public string? Complement { get; set; }
 
         [MinLength(2)]
         [MaxLength(50)]

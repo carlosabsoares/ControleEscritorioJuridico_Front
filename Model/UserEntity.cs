@@ -27,5 +27,6 @@ namespace CEJ_WebApp.Model
 
         public  AddressEntity Address { get; set; } = new AddressEntity();
         public bool Active { get; set; } = false;
+        public Guid CompanyUuid { get; set; }
     }
 }

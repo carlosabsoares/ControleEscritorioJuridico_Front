@@ -4,195 +4,215 @@
 @using CEJ_WebApp.Model.Dto
 @using CEJ_WebApp.Model.Enum
 @inject IUserService _userService
+@inject IJSRuntime JS
 
 
 <Modal @ref="modalInsert" title="Inserir usuário"
-	   UseStaticBackdrop="true"
-	   CloseOnEscape="false"
-	   IsVerticallyCentered="true"
-	   Size="ModalSize.Large">
-	<BodyTemplate>
-		<EditForm Model="@user" OnValidSubmit="@OnIncludeUser">
-			<DataAnnotationsValidator />
+       UseStaticBackdrop="true"
+       CloseOnEscape="false"
+       IsVerticallyCentered="true"
+       Size="ModalSize.Large">
+    <BodyTemplate>
+        <EditForm Model="@user" OnValidSubmit="@OnIncludeUser">
+            <DataAnnotationsValidator />
 
-			<div class="row">
-				<!-- Coluna Nome -->
-				<div class="col-md-6">
-					<div class="form-group">
-						<label>Nome</label>
-						<InputText id="txtUserName" class="form-control" @bind-Value=@user!.Name />
-						<ValidationMessage For="@(() => user!.Name)" />
-					</div>
-				</div>
+            <div class="row">
+                <!-- Coluna Nome -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <InputText id="txtUserName" class="form-control" @bind-Value=@user.Name />
+                        <ValidationMessage For="@(() => user.Name)" />
+                    </div>
+                </div>
 
-				<!-- Coluna Perfil -->
-				<div class="col-md-6">
-					<div class="form-group">
-						<label>Perfil</label>
-						<InputSelect class="form-select" @bind-Value="user.Role">
-							<option value="">Selecione</option>
-							<option value="@UserRoleType.Operador">Operador</option>
-							<option value="@UserRoleType.Gerente">Gerente</option>
-							<option value="@UserRoleType.Administrador">Administrador</option>
-						</InputSelect>
-					</div>
-				</div>
-			</div>
+                <!-- Coluna Perfil -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Perfil</label>
+                        <InputSelect class="form-select" @bind-Value="user.Role">
+                            <option value="">Selecione</option>
+                            <option value="@UserRoleType.Operador">Operador</option>
+                            <option value="@UserRoleType.Gerente">Gerente</option>
+                            <option value="@UserRoleType.Administrador">Administrador</option>
+                        </InputSelect>
+                    </div>
+                </div>
+            </div>
 
-			<div class="row">
-				<!-- Coluna Email -->
-				<div class="col-md-6">
-					<div class="form-group">
-						<label>Email</label>
-						<InputText id="txtUserEmail" class="form-control" @bind-Value=@user!.Email />
-						<ValidationMessage For="@(() => user!.Email)" />
-					</div>
-				</div>
+            <div class="row">
+                <!-- Coluna Email -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <InputText id="txtUserEmail" class="form-control" @bind-Value=@user!.Email />
+                        <ValidationMessage For="@(() => user.Email)" />
+                    </div>
+                </div>
 
-				<!-- Coluna Password -->
-				<div class="col-md-6">
-					<div class="form-group">
-						<label>Senha</label>
-						<PasswordInput id="txtUserPassword" class="form-control" @bind-Value=@user!.Password />
-						<ValidationMessage For="@(() => user!.Password)" />
-					</div>
-				</div>
-			</div>
+                <!-- Coluna Password -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <PasswordInput id="txtUserPassword" class="form-control" @bind-Value=@user!.Password />
+                        <ValidationMessage For="@(() => user.Password)" />
+                    </div>
+                </div>
+            </div>
 
-			<div class="card">
-				<h4 class="card-header">Endereço</h4>
-				<div class="card-body">
-					<div class="row">
-						<!-- Coluna CEP -->
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>CEP</label>
-								<InputText id="txtUserCep" class="form-control" @bind-Value=@user!.Address!.ZipCode />
-								<ValidationMessage For="@(() => user!.Address!.ZipCode)" />
-							</div>
-						</div>
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>pesquisar</label>
-								<Button @ref="findCepUserButton" Color="ButtonColor.Primary" Size="BlazorBootstrap.ButtonSize.Small" TooltipTitle="Pesquisar">
-									<Icon Name="IconName.BrowserSafari"></Icon>
-								</Button>
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<!-- Coluna Logradouro -->
-						<div class="col-md-6">
-							<div class="form-group">
-								<label>Logradouro</label>
-								<InputText id="txtUserStreet" class="form-control" @bind-Value=@user!.Address!.Street />
-								<ValidationMessage For="@(() => user!.Address!.Street)" />
-							</div>
-						</div>
-						<!-- Coluna Numero -->
-						<div class="col-md-3">
-							<div class="form-group">
-								<label>Numero</label>
-								<InputText id="txtUserNumber" type="number"
-										   inputmode="numeric"
-										   pattern="[0-9]*" class="form-control" @bind-Value=@user!.Address!.Number />
-								<ValidationMessage For="@(() => user!.Address!.Number)" />
-							</div>
-						</div>
-						<!-- Coluna Complemento -->
-						<div class="col-md-3">
-							<div class="form-group">
-								<label>Complemento</label>
-								<InputText id="txtUserComplement" class="form-control" @bind-Value=@user!.Address!.Complement />
-								<ValidationMessage For="@(() => user!.Address!.Complement)" />
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<!-- Coluna Bairro -->
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>Bairro</label>
-								<InputText id="txtUserNeighborhood" class="form-control" @bind-Value=@user!.Address!.Neighborhood />
-								<ValidationMessage For="@(() => user!.Address!.Neighborhood)" />
-							</div>
-						</div>
-						<!-- Coluna Cidade -->
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>Cidade</label>
-								<InputText id="txtUserCity" class="form-control" @bind-Value=@user!.Address!.City />
-								<ValidationMessage For="@(() => user!.Address!.City)" />
-							</div>
-						</div>
-						<!-- Coluna Estado -->
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>Estado</label>
-								<InputText id="txtUserState" class="form-control" @bind-Value=@user!.Address!.State />
-								<ValidationMessage For="@(() => user!.Address!.State)" />
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+            <div class="card">
+                <h4 class="card-header">Endereço</h4>
+                <div class="card-body">
+
+                    <!-- Coluna CEP -->
+                    <div class="row">
+                        <div class="input-group">
+                            <RadzenMask style="max-width: 180px;"
+                                        Mask="*****-***"
+                                        CharacterPattern="[0-9]"
+                                        Placeholder="00000-000"
+                                        @bind-Value="@user.Address.ZipCode"
+                                        class="form-control" />
+
+                            <button class="btn btn-primary" @onclick="OnFindCepClick">
+                                🔍 Pesquisar
+                            </button>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <!-- Coluna Logradouro -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Logradouro</label>
+                                <InputText id="txtUserStreet" class="form-control" @bind-Value=@user!.Address!.Street />
+                                <ValidationMessage For="@(() => user!.Address!.Street)" />
+                            </div>
+                        </div>
+                        <!-- Coluna Numero -->
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Numero</label>
+                                <InputText id="txtUserNumber" type="number"
+                                           inputmode="numeric"
+                                           pattern="[0-9]*" class="form-control" @bind-Value=@user!.Address!.Number />
+                                <ValidationMessage For="@(() => user!.Address!.Number)" />
+                            </div>
+                        </div>
+                        <!-- Coluna Complemento -->
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Complemento</label>
+                                <InputText id="txtUserComplement" class="form-control" @bind-Value=@user!.Address!.Complement />
+                                <ValidationMessage For="@(() => user!.Address!.Complement)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!-- Coluna Bairro -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Bairro</label>
+                                <InputText id="txtUserNeighborhood" class="form-control" @bind-Value=@user!.Address!.Neighborhood />
+                                <ValidationMessage For="@(() => user!.Address!.Neighborhood)" />
+                            </div>
+                        </div>
+                        <!-- Coluna Cidade -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Cidade</label>
+                                <InputText id="txtUserCity" class="form-control" @bind-Value=@user!.Address!.City />
+                                <ValidationMessage For="@(() => user!.Address!.City)" />
+                            </div>
+                        </div>
+                        <!-- Coluna Estado -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Estado</label>
+                                <InputText id="txtUserState" class="form-control" @bind-Value=@user!.Address!.State />
+                                <ValidationMessage For="@(() => user!.Address!.State)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
 
-		</EditForm>
+        </EditForm>
 
-	</BodyTemplate>
-	<FooterTemplate>
-		<Button Color="ButtonColor.Secondary" @onclick="OnHideModalInsertClick">Close</Button>
-		<Button Color="ButtonColor.Primary" @onclick="OnIncludeUser">Include</Button>
-	</FooterTemplate>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalInsertClick">Fechar</Button>
+        <Button Color="ButtonColor.Primary"
+                @onclick="OnIncludeUser">
+            <Icon Name="IconName.Save"></Icon>
+            Salvar
+        </Button>
+
+    </FooterTemplate>
 </Modal>
 
 @* Cabeçalho da página *@
-<div>
-	<MudStack Row="true"
-			  Justify="Justify.SpaceBetween"
-			  AlignItems="MudBlazor.AlignItems.Center"
-			  Class="mb-3">
+@* <div>
+    <MudStack Row="true"
+              Justify="Justify.SpaceBetween"
+              AlignItems="MudBlazor.AlignItems.Center"
+              Class="mb-3">
 
-		<MudText Typo="Typo.h4">Usuários</MudText>
+        <MudText Typo="Typo.h4">Usuários</MudText>
 
-		<MudFab Color="Color.Tertiary"
-				StartIcon="@Icons.Material.Filled.Add"
-				Label="Usuário"
-				OnClick="OnShowModalInsertClick" />
+        <MudFab Color="Color.Tertiary"
+                StartIcon="@Icons.Material.Filled.Add"
+                Label="Usuário"
+                OnClick="OnShowModalInsertClick" />
 
-	</MudStack>
-</div>
-
-<hr />
-<br />
+    </MudStack>
+</div> *@ 
 
 <div class="card">
-	<h4 class="card-header">Quiz</h4>
-	<div class="card-body">
+    <div class="card-header">
 
-		<Grid @ref="gridUser"
-			  TItem="UserDto"
-			  AllowFiltering="true"
-			  AllowPaging="true"
-			  AllowSorting="true"
-			  Class="table table-hover table-bordered table-striped"
-			  PageSize="5"
-			  DataProvider="UserDtoDataProvider"
-			  Responsive="true">
+        <MudStack Row="true"
+                  Justify="Justify.SpaceBetween"
+                  AlignItems="MudBlazor.AlignItems.Center"
+                  Class="mb-3">
 
-			<GridColumn TItem="UserDto" HeaderText="Nome" PropertyName="Name" SortKeySelector="item => item.Name">
-				@context.Name
-			</GridColumn>
-			<GridColumn TItem="UserDto" HeaderText="Email" PropertyName="Email" SortKeySelector="item => item.Email">
-				@context.Email
-			</GridColumn>
-			<GridColumn TItem="UserDto" HeaderText="Perfil" PropertyName="Role" SortKeySelector="item => item.Role">
-				@context.Role
-			</GridColumn>
-			<GridColumn TItem="UserDto" HeaderText="Ações" Width="120" Filterable="false" HeaderTextAlignment="Alignment.Center">
-				<div class="d-flex justify-content-center gap-1 p-1">
-					@* 					<MudFab Color="Color.Primary"
+            <h4>Usuário</h4>
+
+            <MudFab Color="Color.Tertiary"
+                    StartIcon="@Icons.Material.Filled.Add"
+                    Label="Usuário"
+                    OnClick="OnShowModalInsertClick" />
+
+        </MudStack>
+
+        
+
+    </div>
+    <div class="card-body">
+
+        <Grid @ref="gridUser"
+              TItem="UserDto"
+              AllowFiltering="true"
+              AllowPaging="true"
+              AllowSorting="true"
+              Class="table table-hover table-bordered table-striped"
+              PageSize="5"
+              DataProvider="UserDtoDataProvider"
+              Responsive="true">
+
+            <GridColumn TItem="UserDto" HeaderText="Nome" PropertyName="Name" SortKeySelector="item => item.Name">
+                @context.Name
+            </GridColumn>
+            <GridColumn TItem="UserDto" HeaderText="Email" PropertyName="Email" SortKeySelector="item => item.Email">
+                @context.Email
+            </GridColumn>
+            <GridColumn TItem="UserDto" HeaderText="Perfil" PropertyName="Role" SortKeySelector="item => item.Role">
+                @context.Role
+            </GridColumn>
+            <GridColumn TItem="UserDto" HeaderText="Ações" Width="120" Filterable="false" HeaderTextAlignment="Alignment.Center">
+                <div class="d-flex justify-content-center gap-1 p-1">
+                    @* 					<MudFab Color="Color.Primary"
 							Size="Size.Small"
 							ButtonType="MudBlazor.ButtonType.Button"
 							Icon="@Icons.Material.Filled.Edit"/>
@@ -200,19 +220,19 @@
 							Size="Size.Small"
 							ButtonType="MudBlazor.ButtonType.Button"
 							Icon="@Icons.Material.Filled.Delete"/> *@
-					<Button @ref="editUserButton" Color="ButtonColor.Primary" Size="BlazorBootstrap.ButtonSize.Small" TooltipTitle="Editar">
-						<Icon Name="IconName.PencilFill"></Icon>
-					</Button>
-					<Button @ref="editUserButton" Color="ButtonColor.Danger" Size="BlazorBootstrap.ButtonSize.Small" TooltipTitle="Deletar">
-						<Icon Name="IconName.Trash"></Icon>
-					</Button>
-				</div>
-			</GridColumn>
+                    <Button @ref="editUserButton" Color="ButtonColor.Primary" Size="BlazorBootstrap.ButtonSize.Small" TooltipTitle="Editar">
+                        <Icon Name="IconName.PencilFill"></Icon>
+                    </Button>
+                    <Button @ref="editUserButton" Color="ButtonColor.Danger" Size="BlazorBootstrap.ButtonSize.Small" TooltipTitle="Deletar">
+                        <Icon Name="IconName.Trash"></Icon>
+                    </Button>
+                </div>
+            </GridColumn>
 
-		</Grid>
+        </Grid>
 
 
-		@*         <RadzenDataGrid @ref="gridUser"
+        @*         <RadzenDataGrid @ref="gridUser"
                         AllowRowSelectOnRowClick="@allowRowSelectOnRowClick"
                         AllowFiltering="true"
                         FilterPopupRenderMode="Radzen.PopupRenderMode.OnDemand"
@@ -229,7 +249,7 @@
                 <RadzenDataGridColumn TItem="UserDto" Property="Role" Title="Perfil" TextAlign="TextAlign.Center" Width="80px" />
             </Columns>
         </RadzenDataGrid> *@
-	</div>
+    </div>
 
 </div>
 
@@ -237,115 +257,136 @@
 
 @code {
 
-	//RadzenDataGrid<UserDto> gridUser;
-	private BlazorBootstrap.Button editUserButton = default!;
-	private BlazorBootstrap.Button findCepUserButton = default!;
+    //RadzenDataGrid<UserDto> gridUser;
+    private BlazorBootstrap.Button editUserButton = default!;
+    private BlazorBootstrap.Button findCepUserButton = default!;
+    bool busy = false;
 
-	UserEntity user = new UserEntity();
-	List<UserDto> usersDto = new List<UserDto>();
+    UserEntity user = new UserEntity();
+    List<UserDto> usersDto = new List<UserDto>();
 
-	bool allowRowSelectOnRowClick = true;
+    bool allowRowSelectOnRowClick = true;
 
-	private Modal modalInsert = default!;
-	private Modal modalUpdate = default!;
-	private Grid<UserDto> gridUser = default!;
+    private Modal modalInsert = default!;
+    private Modal modalUpdate = default!;
+    private Grid<UserDto> gridUser = default!;
 
-	List<ToastMessage> messages = new List<ToastMessage>();
+    List<ToastMessage> messages = new List<ToastMessage>();
 
-	protected override async Task OnInitializedAsync()
-	{
-		await LoadManufactures();
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadManufactures();
+    }
 
-	async Task LoadManufactures()
-	{
-		usersDto = await GetUsersDtoAsync();
-	}
+    async Task LoadManufactures()
+    {
+        usersDto = await GetUsersDtoAsync();
+    }
+    private async Task OnFindCepClick()
+    {
+        if (!string.IsNullOrEmpty(user?.Address?.ZipCode))
+        { }
+    }
+    private async Task<GridDataProviderResult<UserDto>> UserDtoDataProvider(GridDataProviderRequest<UserDto> request)
+    {
+        var usersDto = await GetUsersDtoAsync();
 
-	private async Task<GridDataProviderResult<UserDto>> UserDtoDataProvider(GridDataProviderRequest<UserDto> request)
-	{
-		var usersDto = await GetUsersDtoAsync();
+        return await Task.FromResult(request.ApplyTo(usersDto));
+    }
 
-		return await Task.FromResult(request.ApplyTo(usersDto));
-	}
+    private async Task<List<UserDto>> GetUsersDtoAsync()
+    {
+        var usersEntity = await _userService.GetUserAllAsync();
 
-	private async Task<List<UserDto>> GetUsersDtoAsync()
-	{
-		var usersEntity = await _userService.GetUserAllAsync();
+        return usersEntity.Select(x => new UserDto()
+        {
+            Uuid = x.Uuid,
+            Name = x.Name,
+            Email = x.Email,
+            Active = x.Active,
+            Role = x.Role.ToString(),
+        }).ToList();
+    }
 
-		return usersEntity.Select(x => new UserDto()
-		{
-			Uuid = x.Uuid,
-			Name = x.Name,
-			Email = x.Email,
-			Active = x.Active,
-			Role = x.Role.ToString(),
-		}).ToList();
-	}
+    private async Task OnShowModalInsertClick()
+    {
+        user = new UserEntity()
+        {
+            Address = new AddressEntity()
+        };
 
-	private async Task OnShowModalInsertClick()
-	{
-		user = new UserEntity()
-			{
-				Address = new AddressEntity()
-			};
-
-		await modalInsert.ShowAsync();
-	}
+        await modalInsert.ShowAsync();
+    }
 
 
 
-	private async Task OnIncludeUser()
-	{
-		if (!string.IsNullOrEmpty(user.Name))
-		{
-			//var include = await _userService.ObjectAdd(category);
-			//var include = "null";
+    private async Task OnIncludeUser()
+    {
+        if (!string.IsNullOrEmpty(user.Name))
+        {
+            busy = true;
+            //var include = await _userService.ObjectAdd(category);
+            //var include = "null";
 
-			var include = true;
+            try
+            {
 
-		    if (include)
-		    {
-		        ShowMessage(ToastType.Success, "Insert Success.");
+                var include = await _userService.AddAsync(user);
 
-				await GetUsersDtoAsync();
-		    }
-		    else
-		    {
-		        ShowMessage(ToastType.Danger, "Insert Error.");
-		    }
+                if (include)
+                {
+                    busy = false;
+                    ShowMessage(ToastType.Success, "Gravado com sucesso.");
 
-		    user = new UserEntity();
+                    await GetUsersDtoAsync();
+                }
+                else
+                {
+                    busy = false;
+                    ShowMessage(ToastType.Danger, "Error ao gravar.");
+                }
 
-			await gridUser.RefreshDataAsync();
-		}
 
-		OnHideModalInsertClick();
-	}
 
-	private async Task OnHideModalInsertClick()
-	{
-		await modalInsert.HideAsync();
-	}
+                user = new UserEntity();
 
-	private async Task OnShowModalEditClick()
-	{
-		await modalUpdate.ShowAsync();
-	}
+                await gridUser.RefreshDataAsync();
+            }
+            catch (Exception ex)
+            {
+                
+                throw;
+            }
 
-	private async Task OnHideModalEditClick()
-	{
-		await modalUpdate.HideAsync();
-	}
 
-	private void ShowMessage(ToastType toastType, string message) => messages.Add(CreateToastMessage(toastType, message));
+        }
 
-	private ToastMessage CreateToastMessage(ToastType toastType, string message)
-	=> new ToastMessage
-	{
-		Type = toastType,
-		Title = "Speortle Quiz",
-		HelpText = $"{DateTime.Now}",
-		Message = $"{message}. DateTime: {DateTime.Now}",
-	};
+        OnHideModalInsertClick();
+    }
+
+    private async Task OnHideModalInsertClick()
+    {
+        await modalInsert.HideAsync();
+    }
+
+    private async Task OnShowModalEditClick()
+    {
+        await modalUpdate.ShowAsync();
+    }
+
+    private async Task OnHideModalEditClick()
+    {
+        await modalUpdate.HideAsync();
+    }
+
+    private void ShowMessage(ToastType toastType, string message) => messages.Add(CreateToastMessage(toastType, message));
+
+    private ToastMessage CreateToastMessage(ToastType toastType, string message)
+    => new ToastMessage
+    {
+        Type = toastType,
+        Title = "Speortle Quiz",
+        HelpText = $"{DateTime.Now}",
+        Message = $"{message}. DateTime: {DateTime.Now}",
+    };
 }
