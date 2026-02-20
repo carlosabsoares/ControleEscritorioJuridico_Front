@@ -32,6 +32,20 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.SnackbarVariant = MudBlazor.Variant.Filled;
 });
 
+builder.Services.AddScoped(sp =>
+{
+    var http = new HttpClient
+    {
+        BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+    };
+
+    http.DefaultRequestHeaders.Accept.Add(
+        new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+    return http;
+});
+
+
 builder.Services.AddRadzenComponents();
 
 builder.Services.AddBlazorBootstrap();

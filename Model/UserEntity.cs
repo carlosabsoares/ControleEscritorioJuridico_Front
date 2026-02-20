@@ -8,16 +8,17 @@ namespace CEJ_WebApp.Model
     {
         public Guid Uuid { get; set; }
 
-        [Required]
-        [MinLength(3)]
-        [MaxLength(100)]
+        [Required(ErrorMessage ="Nome obrigatório")]
+        [MinLength(3, ErrorMessage = "O nome deve ter no mínimo 3 caracteres.")]
+        [MaxLength(100, ErrorMessage = "O nome deve ter no máximo 100 caracteres.")]
         public string Name { get; set; } = null!;
 
         [EmailAddress]
         public string Email { get; set; } = null!;
 
-        [Required]
-        [MaxLength(20)]
+        [Required(ErrorMessage = "Senha não pode ser nula")]
+        [MinLength(6, ErrorMessage = "Senha deve ter no mínimo 6 dígitos")]
+        [MaxLength(20, ErrorMessage = "Senha deve ter no máximo 20 dígitos")]
         [DataType(DataType.Password)]
         public string Password { get; set; } = null!;
 

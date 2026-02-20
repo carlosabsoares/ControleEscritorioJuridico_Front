@@ -17,7 +17,7 @@ namespace CEJ_WebApp.Model.Dto
         public string Bairro { get; set; }
 
         [JsonProperty("localidade")]
-        public string Cidade { get; set; }
+        public string Localidade { get; set; }
 
         [JsonProperty("uf")]
         public string Uf { get; set; }

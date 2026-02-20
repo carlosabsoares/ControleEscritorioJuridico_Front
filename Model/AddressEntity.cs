@@ -15,19 +15,17 @@ namespace CEJ_WebApp.Model
 
         public string? Complement { get; set; }
 
-        [MinLength(2)]
-        [MaxLength(50)]
+        [MinLength(2, ErrorMessage = "Bairro deve ter no mínimo 2 dígitos")]
+        [MaxLength(50, ErrorMessage = "Bairro deve ter no máximo 50 dígitos")]
         public string? Neighborhood { get; set; } = null!;
 
-        [MinLength(2)]
-        [MaxLength(100)]
+        [MinLength(2, ErrorMessage = "Cidade deve ter no mínimo 2 dígitos")]
+        [MaxLength(100, ErrorMessage = "Cidade deve ter no máximo 100 dígitos")]
         public string City { get; set; } = null!;
 
-        [MinLength(2)]
-        [MaxLength(50)]
         public string State { get; set; } = null!;
 
-        [MaxLength(10)]
+        [MaxLength(10,ErrorMessage = "Cep deve ter no máximo 8 dígitos")]
         public string ZipCode { get; set; } = null!;
 
         [MinLength(2)]

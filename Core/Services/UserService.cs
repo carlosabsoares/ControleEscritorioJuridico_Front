@@ -93,7 +93,39 @@ namespace CEJ_WebApp.Core.Services
                 var _result = await Http.PostAsJsonAsync($"{url}{_object}", userEntity);
 
                 if (_result.IsSuccessStatusCode)
-                    return _return;
+                    _return = true;
+
+
+                return _return;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+                return _return;
+            }
+        }
+
+        public async Task<bool> EditAsync(UserEntity userEntity)
+        {
+            try
+            {
+                var _return = false;
+
+                userEntity.CompanyUuid = _userSessionInformation.CompanyUuid;
+
+                var token = await Parameters.GetTokenAsync();
+
+                if (Http.DefaultRequestHeaders.Contains("Authorization"))
+                    Http.DefaultRequestHeaders.Remove("Authorization");
+
+                Http.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+
+                string uri = $"{url}{_object}";
+
+                var _result = await Http.PutAsJsonAsync($"{url}{_object}", userEntity);
+
+                if (_result.IsSuccessStatusCode)
+                    _return = true;
 
 
                 return _return;
