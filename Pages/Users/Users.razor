@@ -202,16 +202,37 @@
 			</GridColumn>
 			<GridColumn TItem="UserDto" HeaderText="Ações" Width="120" Filterable="false" HeaderTextAlignment="Alignment.Center">
 				<div class="d-flex justify-content-center gap-1 p-1">
-					<Button @ref="editUserButton"
-					        Color="ButtonColor.Primary"
-					        Size="BlazorBootstrap.ButtonSize.Small"
-					        TooltipTitle="Editar"
-					        @onclick="@(async () => await OnShowModalEditClick(context))">
-						<Icon Name="IconName.PencilFill"></Icon>
-					</Button>
-					<Button @ref="editUserButton" Color="ButtonColor.Danger" Size="BlazorBootstrap.ButtonSize.Small" TooltipTitle="Apagar">
-						<Icon Name="IconName.Trash"></Icon>
-					</Button>
+
+					@if (context.Active)
+					{
+						<Button @ref="editUserButton"
+								Color="ButtonColor.Primary"
+								Size="BlazorBootstrap.ButtonSize.Small"
+								TooltipTitle="Editar"
+								@onclick="@(async () => await OnShowModalEditClick(context))">
+							<Icon Name="IconName.PencilFill"></Icon>
+						</Button>
+
+						@if (context.Role != UserRoleType.Operador.ToString())
+						{
+							<Button @ref="editUserButton" Color="ButtonColor.Danger" Size="BlazorBootstrap.ButtonSize.Small" TooltipTitle="Apagar">
+								<Icon Name="IconName.Trash"></Icon>
+							</Button>
+						}
+
+					}
+					else
+					{
+						@if (context.Role != UserRoleType.Operador.ToString())
+						{
+							<Button Color="ButtonColor.Secondary"
+									Size="BlazorBootstrap.ButtonSize.Small"
+									TooltipTitle="Reativar">
+								<Icon Name="IconName.ArrowRepeat"></Icon>
+							</Button>
+						}
+					}
+					)
 				</div>
 			</GridColumn>
 
@@ -432,7 +453,7 @@
 
 		var responseUser = await _userService.GetUserByUuidAsync(data.Uuid);
 
-		if(responseUser == null || string.IsNullOrEmpty(responseUser.Name))
+		if (responseUser == null || string.IsNullOrEmpty(responseUser.Name))
 			ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
 
 		user = responseUser;
