@@ -8,5 +8,8 @@ namespace CEJ_WebApp.Core.Services.Interface
         Task<List<UserEntity>>? GetUserAllAsync();
         Task<bool> AddAsync(UserEntity userEntity);
         Task<bool> EditAsync(UserEntity userEntity);
+        Task<bool> DeactiveAsync(UserEntity userEntity);
+        Task<bool> ReactiveAsync(UserEntity userEntity);
+        //Task<bool> ActiveAsync(UserEntity userEntity);
     }
 }

@@ -55,9 +55,11 @@
 
 				<!-- Coluna Password -->
 				<div class="col-md-6">
-					<div class="form-group">
+					<div class="form-group @(insertMode ? "" : "invisible")">
 						<label>Senha</label>
-						<PasswordInput id="txtUserPassword" class="form-control" @bind-Value=@user!.Password />
+						<PasswordInput id="txtUserPassword"
+									   class="form-control"
+									   @bind-Value="user!.Password" />
 						<ValidationMessage For="@(() => user.Password)" />
 					</div>
 				</div>
@@ -159,6 +161,47 @@
 	</FooterTemplate>
 </Modal>
 
+<Modal @ref="modalDeactiveReactive" title=@modalTitle
+	   UseStaticBackdrop="true"
+	   CloseOnEscape="false"
+	   IsVerticallyCentered="true"
+	   Size="ModalSize.Large">
+	<BodyTemplate>
+		@* <EditForm Model="@user" OnValidSubmit="@OnIncludeUser"> *@
+		<EditForm Model="@user">
+			<DataAnnotationsValidator />
+
+			<div class="row">
+				<!-- Coluna Nome -->
+
+				<div class="col-md-6">
+					<div class="form-group">
+						@if (deactiveMode)
+						{
+							<label>Confirma a desativação do usuário abaixo? </label>
+						}
+						else
+						{
+							<label>Confirma a reativação do usuário abaixo? </label>
+						}
+						
+						<InputText id="txtUserName" class="form-control" @bind-Value=@user.Name />
+						<ValidationMessage For="@(() => user.Name)" />
+					</div>
+				</div>
+			</div>
+		</EditForm>
+
+	</BodyTemplate>
+	<FooterTemplate>
+		<Button Color="ButtonColor.Secondary" @onclick="OnHideModalDeactiveClick">Não</Button>
+		<Button Color="ButtonColor.Primary" @onclick="OnPersisteDeleteModalUser"> Sim </Button>
+
+	</FooterTemplate>
+</Modal>
+
+
+
 <div class="card">
 	<div class="card-header">
 
@@ -181,7 +224,100 @@
 	</div>
 	<div class="card-body">
 
-		<Grid @ref="gridUser"
+		<MudTable @ref="gridUser"
+				  T="UserDto"
+				  Items="@usersDto"
+				  Filter="new Func<UserDto, bool>(FilterUsers)"
+				  FilterMode="FilterMode.Filterable"
+				  FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+				  Hover="true"
+				  Bordered="true"
+				  Striped="true"
+				  Loading="@loading"
+				  Breakpoint="Breakpoint.Sm"
+				  Height="400px"
+				  FixedHeader="true"
+				  HorizontalScrollbar="true">
+
+			<!-- Toolbar com filtro -->
+			<ToolBarContent>
+				<MudText Typo="Typo.subtitle1">Lista de Usuários</MudText>
+				<MudSpacer />
+				<MudTextField @bind-Value="searchString"
+							  Placeholder="Pesquisar..."
+							  Variant="MudBlazor.Variant.Outlined"
+							  Adornment="Adornment.Start"
+							  AdornmentIcon="@Icons.Material.Filled.Search"
+							  IconSize="Size.Small"
+							  DebounceInterval="300"
+							  Immediate="true"
+							  Class="mt-0" />
+			</ToolBarContent>
+
+			<!-- Cabeçalho da tabela -->
+			<HeaderContent>
+				<MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Name)">Nome</MudTableSortLabel></MudTh>
+				<MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
+				<MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Role)">Perfil</MudTableSortLabel></MudTh>
+				<MudTh Style="width: 120px; text-align: center;">Ações</MudTh>
+			</HeaderContent>
+
+			<!-- Linhas da tabela -->
+			<RowTemplate>
+				<MudTd DataLabel="Nome">@context.Name</MudTd>
+				<MudTd DataLabel="Email">@context.Email</MudTd>
+				<MudTd DataLabel="Perfil">@context.Role</MudTd>
+				<MudTd DataLabel="Ações" Style="text-align: center;">
+					<MudStack Row="true" Spacing="1" Justify="Justify.Center">
+						@if (context.Active)
+						{
+							<!-- Botão Alterar -->
+							<MudTooltip Text="Alterar">
+								<MudIconButton Icon="@Icons.Material.Filled.Edit"
+											   Color="Color.Primary"
+											   Size="Size.Small"
+											   OnClick="@(async () => await OnShowModalEditClick(context))" />
+							</MudTooltip>
+
+							<!-- Botão Desativar -->
+							<MudTooltip Text="Desativar">
+								<MudIconButton Icon="@Icons.Material.Filled.Delete"
+											   Color="Color.Error"
+											   Size="Size.Small"
+											   OnClick="@(async () => await OnShowModalDeleteClick(context))" />
+							</MudTooltip>
+						}
+						else
+						{
+							<!-- Botão Reativar -->
+							<MudTooltip Text="Reativar">
+								<MudIconButton Icon="@Icons.Material.Filled.Refresh"
+											   Color="Color.Info"
+											   Size="Size.Small"
+											   OnClick="@(async () => await OnShowModalReactiveClick(context))" />
+							</MudTooltip>
+						}
+					</MudStack>
+				</MudTd>
+			</RowTemplate>
+
+			<!-- Paginação -->
+			<PagerContent>
+				<MudTablePager PageSizeOptions="new int[] { 5, 10, 25, 50 }" />
+			</PagerContent>
+
+			<!-- Mensagem quando não há dados -->
+			<NoRecordsContent>
+				<MudText Align="Align.Center">Nenhum usuário encontrado</MudText>
+			</NoRecordsContent>
+
+			<!-- Loading indicator -->
+			<LoadingContent>
+				<MudText Align="Align.Center">Carregando...</MudText>
+			</LoadingContent>
+		</MudTable>
+
+		@* <Grid @ref="gridUser"
 			  TItem="UserDto"
 			  AllowFiltering="true"
 			  AllowPaging="true"
@@ -208,54 +344,37 @@
 						<Button @ref="editUserButton"
 								Color="ButtonColor.Primary"
 								Size="BlazorBootstrap.ButtonSize.Small"
-								TooltipTitle="Editar"
+								TooltipTitle="Alterar"
 								@onclick="@(async () => await OnShowModalEditClick(context))">
 							<Icon Name="IconName.PencilFill"></Icon>
 						</Button>
 
-						@if (context.Role != UserRoleType.Operador.ToString())
-						{
-							<Button @ref="editUserButton" Color="ButtonColor.Danger" Size="BlazorBootstrap.ButtonSize.Small" TooltipTitle="Apagar">
-								<Icon Name="IconName.Trash"></Icon>
-							</Button>
-						}
+						<Button @ref="editUserButton"
+								Color="ButtonColor.Danger"
+								Size="BlazorBootstrap.ButtonSize.Small"
+								TooltipTitle="Desativar"
+								@onclick="@(async () => await OnShowModalDeleteClick(context))">
+							<Icon Name="IconName.Trash"></Icon>
+						</Button>
+						
 
 					}
 					else
 					{
-						@if (context.Role != UserRoleType.Operador.ToString())
-						{
-							<Button Color="ButtonColor.Secondary"
-									Size="BlazorBootstrap.ButtonSize.Small"
-									TooltipTitle="Reativar">
-								<Icon Name="IconName.ArrowRepeat"></Icon>
-							</Button>
-						}
+
+						<Button Color="ButtonColor.Secondary"
+								Size="BlazorBootstrap.ButtonSize.Small"
+								TooltipTitle="Reativar"
+								@onclick="@(async () => await OnShowModalReactiveClick(context))">
+							<Icon Name="IconName.ArrowRepeat"></Icon>
+						</Button>
+						
 					}
-					)
+					
 				</div>
 			</GridColumn>
 
-		</Grid>
-
-		@* 		<RadzenDataGrid @ref="gridUser"
-						AllowRowSelectOnRowClick="@allowRowSelectOnRowClick"
-						AllowFiltering="true"
-						FilterPopupRenderMode="PopupRenderMode.OnDemand"
-						FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-						AllowPaging="true"
-						PageSize="5"
-						AllowSorting="true"
-						Data="@usersDto"
-						TItem="UserDto"
-						ColumnWidth="200px">
-			<Columns>
-				<RadzenDataGridColumn TItem="UserDto" Property="Name" Title="Nome" />
-				<RadzenDataGridColumn TItem="UserDto" Property="Email" Title="Email" />
-				<RadzenDataGridColumn TItem="UserDto" Property="Role" Title="Perfil" />
-			</Columns>
-		</RadzenDataGrid> *@
-
+		</Grid> *@
 	</div>
 
 </div>
@@ -267,11 +386,18 @@
 	[Inject]
 	public ISnackbar SnackbarService { get; set; } = null!;
 
+	private MudTable<UserDto> gridUser = new();
+	private List<UserDto> users = new();
+	private string searchString = "";
+	private bool loading = false;
+
 	//RadzenDataGrid<UserDto> gridUser;
 	private BlazorBootstrap.Button editUserButton = default!;
 	private BlazorBootstrap.Button findCepUserButton = default!;
 
 	private RadzenMask zipMask = default!;
+	private readonly UserSessionInformation _userSessionInformation;
+
 	//RadzenDataGrid<UserDto> gridUser;
 
 
@@ -281,10 +407,13 @@
 	bool allowRowSelectOnRowClick = true;
 
 	private Modal modalScreen = default!;
-	//private Modal modalUpdate = default!;
-	private Grid<UserDto> gridUser = default!;
+	private Modal modalDeactiveReactive = default!;
+	//private Grid<UserDto> gridUser = default!;
+
+
 
 	bool insertMode = false;
+	bool deactiveMode = false;
 	string modalTitle = string.Empty;
 
 	List<ToastMessage> messages = new List<ToastMessage>();
@@ -299,6 +428,63 @@
 		usersDto = await GetUsersDtoAsync();
 	}
 
+
+	private async Task<GridDataProviderResult<UserDto>> UserDtoDataProvider(GridDataProviderRequest<UserDto> request)
+	{
+		var usersDto = await GetUsersDtoAsync();
+
+		return await Task.FromResult(request.ApplyTo(usersDto));
+	}
+
+	private async Task ExecuteAction(Func<Task<bool>> action, string successMessage)
+	{
+		try
+		{
+			var result = await action();
+
+			if (result)
+			{
+				ExibirMensagem(successMessage, Severity.Success);
+				await ReloadGrid();
+			}
+			else
+			{
+				ExibirMensagem("Erro ao executar operação.", Severity.Error);
+			}
+		}
+		catch (Exception ex)
+		{
+			ExibirMensagem(ex.Message, Severity.Error);
+		}
+	}
+
+
+	private async Task<List<UserDto>> GetUsersDtoAsync()
+	{
+		var usersEntity = await _userService.GetUserAllAsync();
+
+		return usersEntity.Select(x => new UserDto()
+		{
+			Uuid = x.Uuid,
+			Name = x.Name,
+			Email = x.Email,
+
+			Active = x.Active,
+			Role = x.Role.ToString(),
+		}).ToList();
+	}
+
+	private bool FilterUsers(UserDto user)
+	{
+		if (string.IsNullOrWhiteSpace(searchString))
+			return true;
+
+		return user.Name?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true ||
+						user.Email?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true ||
+						user.Role?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true;
+	}
+
+	#region	Ons
 	private async Task OnFindCepClick()
 	{
 		if (!string.IsNullOrEmpty(user?.Address?.ZipCode))
@@ -318,27 +504,6 @@
 			ExibirMensagem("Cep invalido.", Severity.Error);
 			await zipMask.FocusAsync();
 		}
-	}
-	private async Task<GridDataProviderResult<UserDto>> UserDtoDataProvider(GridDataProviderRequest<UserDto> request)
-	{
-		var usersDto = await GetUsersDtoAsync();
-
-		return await Task.FromResult(request.ApplyTo(usersDto));
-	}
-
-	private async Task<List<UserDto>> GetUsersDtoAsync()
-	{
-		var usersEntity = await _userService.GetUserAllAsync();
-
-		return usersEntity.Select(x => new UserDto()
-		{
-			Uuid = x.Uuid,
-			Name = x.Name,
-			Email = x.Email,
-
-			Active = x.Active,
-			Role = x.Role.ToString(),
-		}).ToList();
 	}
 
 	private async Task OnShowModalInsertClick()
@@ -366,7 +531,21 @@
 		insertMode = false;
 		modalTitle = string.Empty;
 
-		OnHideModalInsertClick();
+		await OnHideModalInsertClick();
+	}
+
+
+	private async Task OnPersisteDeleteModalUser()
+	{
+		if (deactiveMode)
+			await OnDeactiveUser();
+		else
+			await OnReactiveUser();
+
+		deactiveMode = false;
+		modalTitle = string.Empty;
+
+		await OnHideModalDeactiveClick();
 	}
 
 	private async Task OnUpdateUser()
@@ -382,8 +561,6 @@
 				if (include)
 				{
 					ExibirMensagem("Gravado com sucesso.", Severity.Success);
-
-					await GetUsersDtoAsync();
 				}
 				else
 				{
@@ -392,7 +569,42 @@
 
 				user = new UserEntity();
 
-				await gridUser.RefreshDataAsync();
+				//await gridUser.RefreshDataAsync();
+				await ReloadGrid();
+
+			}
+			catch (Exception ex)
+			{
+
+				throw;
+			}
+		}
+	}
+
+	private async Task OnDeactiveUser()
+	{
+		if (!string.IsNullOrEmpty(user.Name))
+		{
+
+			try
+			{
+				var include = await _userService.DeactiveAsync(user);
+
+				Console.WriteLine(include);
+
+				if (include)
+				{
+					ExibirMensagem("Desativado com sucesso.", Severity.Success);
+				}
+				else
+				{
+					ExibirMensagem("Error ao gravar.", Severity.Error);
+				}
+
+				user = new UserEntity();
+
+				//await gridUser.RefreshDataAsync();
+				await ReloadGrid();
 			}
 			catch (Exception ex)
 			{
@@ -400,9 +612,66 @@
 				throw;
 			}
 
+		}
+	}
+
+	private async Task OnReactiveUser()
+	{
+		if (!string.IsNullOrEmpty(user.Name))
+		{
+
+			try
+			{
+				var include = await _userService.ReactiveAsync(user);
+
+				Console.WriteLine(include);
+
+				if (include)
+				{
+					ExibirMensagem("Reativado com sucesso.", Severity.Success);
+				}
+				else
+				{
+					ExibirMensagem("Error ao gravar.", Severity.Error);
+				}
+
+				user = new UserEntity();
+
+				//await gridUser.RefreshDataAsync();
+
+				await ReloadGrid();
+				
+			}
+			catch (Exception ex)
+			{
+				ExibirMensagem(ex.Message, Severity.Error);
+			}
 
 		}
 	}
+
+	private async Task ReloadGrid()
+	{
+		//usersDto = await GetUsersDtoAsync();
+
+		// // Limpa qualquer item em edição
+		// gridUser.SetEditingItem(null);
+            
+		// // Recarrega os dados na grid
+		// await gridUser.ReloadServerData();
+            
+		// // Força a atualização da UI
+		// StateHasChanged();
+		loading = true;
+
+		usersDto = await GetUsersDtoAsync();
+
+		loading = false;
+
+		StateHasChanged();
+	}
+	
+
 
 	private async Task OnIncludeUser()
 	{
@@ -411,7 +680,6 @@
 
 			try
 			{
-
 				var include = await _userService.AddAsync(user);
 
 				Console.WriteLine(include);
@@ -419,8 +687,6 @@
 				if (include)
 				{
 					ExibirMensagem("Gravado com sucesso.", Severity.Success);
-
-					await GetUsersDtoAsync();
 				}
 				else
 				{
@@ -429,14 +695,12 @@
 
 				user = new UserEntity();
 
-				await gridUser.RefreshDataAsync();
+				await ReloadGrid();
 			}
 			catch (Exception ex)
 			{
-
-				throw;
+				ExibirMensagem(ex.Message, Severity.Error);
 			}
-
 
 		}
 	}
@@ -444,6 +708,11 @@
 	private async Task OnHideModalInsertClick()
 	{
 		await modalScreen.HideAsync();
+	}
+
+	private async Task OnHideModalDeactiveClick()
+	{
+		await modalDeactiveReactive.HideAsync();
 	}
 
 	private async Task OnShowModalEditClick(UserDto data)
@@ -462,11 +731,43 @@
 		await modalScreen.ShowAsync();
 	}
 
+	private async Task OnShowModalDeleteClick(UserDto data)
+	{
+		deactiveMode = true;
+		modalTitle = "Desativação de usuário";
+
+		var responseUser = await _userService.GetUserByUuidAsync(data.Uuid);
+
+		if (responseUser == null || string.IsNullOrEmpty(responseUser.Name))
+			ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
+
+		user = responseUser;
+
+		//await modalUpdate.ShowAsync();
+		await modalDeactiveReactive.ShowAsync();
+	}
+
+	private async Task OnShowModalReactiveClick(UserDto data)
+	{
+		deactiveMode = false;
+		modalTitle = "Reativação de usuário";
+
+		var responseUser = await _userService.GetUserByUuidAsync(data.Uuid);
+
+		if (responseUser == null || string.IsNullOrEmpty(responseUser.Name))
+			ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
+
+		user = responseUser;
+
+		//await modalUpdate.ShowAsync();
+		await modalDeactiveReactive.ShowAsync();
+	}
+
 	private async Task OnHideModalEditClick()
 	{
 		await modalScreen.HideAsync();
 	}
-
+	#endregion
 
 
 	private void ExibirMensagem(string mensagem, Severity serverity = Severity.Error)

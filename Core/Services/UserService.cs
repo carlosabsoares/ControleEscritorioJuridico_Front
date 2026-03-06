@@ -136,5 +136,69 @@ namespace CEJ_WebApp.Core.Services
                 return _return;
             }
         }
+
+        public async Task<bool> DeactiveAsync(UserEntity userEntity)
+        {
+            try
+            {
+                var _return = false;
+
+                userEntity.CompanyUuid = _userSessionInformation.CompanyUuid;
+
+                var token = await Parameters.GetTokenAsync();
+
+                if (Http.DefaultRequestHeaders.Contains("Authorization"))
+                    Http.DefaultRequestHeaders.Remove("Authorization");
+
+                Http.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+
+                string uri = $"{url}{_object}";
+
+                var _result = await Http.DeleteAsync($"{url}{_object}?Uuid={userEntity.Uuid}");
+
+                if (_result.IsSuccessStatusCode)
+                    _return = true;
+
+
+                return _return;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+                return _return;
+            }
+        }
+
+        public async Task<bool> ReactiveAsync(UserEntity userEntity)
+        {
+            try
+            {
+                var _return = false;
+
+                userEntity.CompanyUuid = _userSessionInformation.CompanyUuid;
+
+                var token = await Parameters.GetTokenAsync();
+
+                if (Http.DefaultRequestHeaders.Contains("Authorization"))
+                    Http.DefaultRequestHeaders.Remove("Authorization");
+
+                Http.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+
+                string uri = $"{url}{_object}";
+
+                var _result = await Http.PatchAsync($"{url}{_object}?Uuid={userEntity.Uuid}", null);
+
+                if (_result.IsSuccessStatusCode)
+                    _return = true;
+
+
+                return _return;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+                return _return;
+            }
+        }
     }
 }

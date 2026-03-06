@@ -40,10 +40,12 @@ public class LoginService : ILoginService
 
         if (!response.IsSuccessStatusCode)
         {
-            var errorResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+            var errorResponse = response.Content.ReadAsStringAsync();
+
             return new LoginResponse
             {
-                Error = errorResponse?.Error ?? "Erro desconhecido ao autenticar.",
+                Error = errorResponse?.Result ?? "Erro desconhecido ao autenticar.",
                 Expiration = string.Empty,
                 NomeUsuario = string.Empty,
                 Token = string.Empty

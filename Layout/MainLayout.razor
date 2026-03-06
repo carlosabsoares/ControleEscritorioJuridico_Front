@@ -11,7 +11,7 @@
     <Authorized>
 
         <MudLayout>
-            <MudAppBar Elevation="0">
+@*             <MudAppBar Elevation="0">
                 <MudToggleIconButton @bind-Toggled="@_isNavOpen" Edge="Edge.Start"
                                      Icon="@Icons.Material.Filled.Menu" Title="Mostrar menu" Color="Color.Surface"
                                      ToggledIcon="@Icons.Material.Filled.MenuOpen" ToggledTitle="Esconder menu" ToggledColor="Color.Surface">
@@ -32,6 +32,56 @@
                     <MudText>@UserSessionInformation.Username</MudText>
                     <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Error" OnClick="@Logout">Sair </MudButton>
                 </div>
+            </MudAppBar> *@
+            <MudAppBar Elevation="0">
+                <MudToggleIconButton @bind-Toggled="@_isNavOpen"
+                                     Edge="Edge.Start"
+                                     Icon="@Icons.Material.Filled.Menu"
+                                     Title="Mostrar menu"
+                                     Color="Color.Surface"
+                                     ToggledIcon="@Icons.Material.Filled.MenuOpen"
+                                     ToggledTitle="Esconder menu"
+                                     ToggledColor="Color.Surface">
+                </MudToggleIconButton>
+
+                <MudSpacer />
+
+                <MudToggleIconButton @bind-Toggled="_isDarkMode"
+                                     Edge="Edge.Start"
+                                     Icon="@Icons.Material.Filled.DarkMode"
+                                     ToggledIcon="@Icons.Material.Filled.LightMode"
+                                     Title="Modo escuro"
+                                     ToggledTitle="Modo claro"
+                                     Color="@(_isDarkMode ? Color.Warning : Color.Surface)"
+                                     ToggledColor="@(_isDarkMode ? Color.Warning : Color.Surface)" />
+
+                <!-- MENU DO USUÁRIO -->
+                <MudMenu>
+                    <ActivatorContent>
+                        <MudButton StartIcon="@Icons.Material.Filled.AccountCircle"
+                                   Variant="MudBlazor.Variant.Text"
+                                   Color="Color.Surface">
+                            @UserSessionInformation.Username
+                        </MudButton>
+                    </ActivatorContent>
+
+@*                     <MudMenuItem Icon="@Icons.Material.Filled.Person" Href="/perfil">
+                        Perfil
+                    </MudMenuItem>
+
+                    <MudMenuItem Icon="@Icons.Material.Filled.Settings" Href="/configuracoes">
+                        Configurações
+                    </MudMenuItem>
+
+                    <MudDivider />
+
+                    <MudMenuItem Icon="@Icons.Material.Filled.Logout"
+                                 Color="Color.Error"
+                                 OnClick="@Logout">
+                        Sair
+                    </MudMenuItem> *@
+                </MudMenu>
+
             </MudAppBar>
 
             <MudDrawer @bind-Open="_isNavOpen" Elevation="1">
