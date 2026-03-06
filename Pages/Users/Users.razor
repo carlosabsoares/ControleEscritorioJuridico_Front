@@ -3,12 +3,19 @@
 @using CEJ_WebApp.Model
 @using CEJ_WebApp.Model.Dto
 @using CEJ_WebApp.Model.Enum
+@using CEJ_WebApp.Components.Users
+
 @inject IUserService _userService
 @inject IExternalService _externalService
 @inject IJSRuntime JS
 @inject NotificationService NotificationService
 @inject ISnackbar Snackbar
 
+<UserModal @ref="userModal"
+		   User="@user"
+		   Title="@modalTitle"
+		   InsertMode="insertMode"
+		   OnSave="OnPersisteModalUser" />
 
 <Modal @ref="modalScreen" title=@modalTitle
 	   UseStaticBackdrop="true"
@@ -16,7 +23,6 @@
 	   IsVerticallyCentered="true"
 	   Size="ModalSize.Large">
 	<BodyTemplate>
-		@* <EditForm Model="@user" OnValidSubmit="@OnIncludeUser"> *@
 		<EditForm Model="@user">
 			<DataAnnotationsValidator />
 
@@ -186,7 +192,7 @@
 							<label>Confirma a reativação do usuário abaixo? </label>
 						}
 						
-						<InputText id="txtUserName" class="form-control" @bind-Value=@user.Name />
+						<InputText id="txtUserName" class="form-control" @bind-Value=@user.Name readonly />
 						<ValidationMessage For="@(() => user.Name)" />
 					</div>
 				</div>
@@ -344,7 +350,6 @@
 
 	//RadzenDataGrid<UserDto> gridUser;
 
-
 	UserEntity user = new UserEntity();
 	List<UserDto> usersDto = new List<UserDto>();
 
@@ -352,6 +357,8 @@
 
 	private Modal modalScreen = default!;
 	private Modal modalDeactiveReactive = default!;
+
+	private UserModal userModal = default!;
 	//private Grid<UserDto> gridUser = default!;
 
 
@@ -457,10 +464,20 @@
 			Address = new AddressEntity()
 		};
 
+		//=====================================================
 		insertMode = true;
 		modalTitle = "Adicionar usuário";
-
+		userModal.User = user;
+		userModal.Title = "Adicionar usuário";
 		await modalScreen.ShowAsync();
+		//=====================================================
+
+		// userModal.User = user;
+		// userModal.Title = "Adicionar usuário";
+		// userModal.InsertMode = true;
+
+		// await userModal.Show();
+
 	}
 
 	private async Task OnPersisteModalUser()
@@ -501,7 +518,7 @@
 	private async Task OnDeactiveUser()
 	{
 		await ExecuteAction(
-			() => _userService.DeactiveAsync(user),
+			() => _userService.DeactiveAsync(user.Uuid),
 			"Usuário desativado com sucesso"
 		);
 	}
@@ -509,7 +526,7 @@
 	private async Task OnReactiveUser()
 	{
 		await ExecuteAction(
-			() => _userService.ReactiveAsync(user),
+			() => _userService.ReactiveAsync(user.Uuid),
 			"Usuário reativado com sucesso"
 		);
 	}
@@ -584,6 +601,9 @@
 		user = responseUser;
 
 		//await modalUpdate.ShowAsync();
+
+
+
 		await modalDeactiveReactive.ShowAsync();
 	}
 

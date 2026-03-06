@@ -1,0 +1,229 @@
+﻿@using CEJ_WebApp.Model
+@using CEJ_WebApp.Model.Enum
+@using CEJ_WebApp.Model.Dto
+@inject IExternalService _externalService
+@inject ISnackbar SnackbarService
+
+<Modal @ref="modal" Title=@Title
+	   UseStaticBackdrop="true"
+	   CloseOnEscape="false"
+	   IsVerticallyCentered="true"
+	   Size="ModalSize.Large">
+	<BodyTemplate>
+		<EditForm Model="@User">
+			<DataAnnotationsValidator />
+
+			<div class="row">
+				<!-- Coluna Nome -->
+				<div class="col-md-6">
+					<div class="form-group">
+						<label>Nome</label>
+						<InputText id="txtUserName" class="form-control" @bind-Value=@User.Name />
+						<ValidationMessage For="@(() => User.Name)" />
+					</div>
+				</div>
+
+				<!-- Coluna Perfil -->
+				<div class="col-md-6">
+					<div class="form-group">
+						<label>Perfil</label>
+						<InputSelect class="form-select" @bind-Value="User.Role">
+							@foreach (var role in Enum.GetValues<UserRoleType>())
+							{
+								<option value="@role">@role</option>
+							}
+						</InputSelect>
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<!-- Coluna Email -->
+				<div class="col-md-6">
+					<div class="form-group">
+						<label>Email</label>
+						<InputText id="txtUserEmail" class="form-control" @bind-Value=@User!.Email />
+						<ValidationMessage For="@(() => User.Email)" />
+					</div>
+				</div>
+
+				<!-- Coluna Password -->
+				<div class="col-md-6">
+					<div class="form-group @(InsertMode ? "" : "invisible")">
+						<label>Senha</label>
+						<PasswordInput id="txtUserPassword"
+									   class="form-control"
+									   @bind-Value="User!.Password" />
+						<ValidationMessage For="@(() => User.Password)" />
+					</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<h4 class="card-header">Endereço</h4>
+				<div class="card-body">
+
+					<!-- Coluna CEP -->
+					<div class="row">
+						<div class="input-group">
+							<RadzenMask @ref="zipMask"
+										style="max-width: 180px;"
+										Mask="*****-***"
+										CharacterPattern="[0-9]"
+										Placeholder="00000-000"
+										@bind-Value="@User.Address.ZipCode"
+										class="form-control" />
+
+							<button class="btn btn-primary" @onclick="OnFindCepClick">
+								🔍 Pesquisar
+							</button>
+						</div>
+					</div>
+					<div class="row">
+						<!-- Coluna Logradouro -->
+						<div class="col-md-6">
+							<div class="form-group">
+								<label>Logradouro</label>
+								<InputText id="txtUserStreet" class="form-control" @bind-Value=@User!.Address!.Street />
+								<ValidationMessage For="@(() => User!.Address!.Street)" />
+							</div>
+						</div>
+						<!-- Coluna Numero -->
+						<div class="col-md-3">
+							<div class="form-group">
+								<label>Numero</label>
+								<InputText id="txtUserNumber" type="number"
+										   inputmode="numeric"
+										   pattern="[0-9]*" class="form-control" @bind-Value=@User!.Address!.Number />
+								<ValidationMessage For="@(() => User!.Address!.Number)" />
+							</div>
+						</div>
+						<!-- Coluna Complemento -->
+						<div class="col-md-3">
+							<div class="form-group">
+								<label>Complemento</label>
+								<InputText id="txtUserComplement" class="form-control" @bind-Value=@User!.Address!.Complement />
+								<ValidationMessage For="@(() => User!.Address!.Complement)" />
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<!-- Coluna Bairro -->
+						<div class="col-md-5">
+							<div class="form-group">
+								<label>Bairro</label>
+								<InputText id="txtUserNeighborhood" class="form-control" @bind-Value=@User!.Address!.Neighborhood />
+								<ValidationMessage For="@(() => User!.Address!.Neighborhood)" />
+							</div>
+						</div>
+						<!-- Coluna Cidade -->
+						<div class="col-md-5">
+							<div class="form-group">
+								<label>Cidade</label>
+								<InputText id="txtUserCity" class="form-control" @bind-Value=@User!.Address!.City />
+								<ValidationMessage For="@(() => User!.Address!.City)" />
+							</div>
+						</div>
+						<!-- Coluna Estado -->
+						<div class="col-md-2">
+							<div class="form-group">
+								<label>Estado</label>
+								<InputSelect class="form-select" @bind-Value="User!.Address!.State">
+									@foreach (var uf in Enum.GetValues<UfType>())
+									{
+										<option value="@uf">@uf.ToString()</option>
+									}
+								</InputSelect>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+		</EditForm>
+
+	</BodyTemplate>
+	<FooterTemplate>
+		<Button Color="ButtonColor.Secondary" @onclick="Hide">
+			<Icon Name="IconName.DoorClosed" /> Fechar
+		</Button>
+		<Button Color="ButtonColor.Primary" @onclick="Save">
+			<Icon Name="IconName.Save" /> Salvar
+		</Button>
+
+	</FooterTemplate>
+</Modal>
+
+
+@code {
+
+    private Modal modal = default!;
+    private RadzenMask zipMask = default!;
+
+    [Parameter]
+    public UserEntity User { get; set; } = new();
+
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public bool InsertMode { get; set; }
+
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    public async Task Show()
+    {
+        await modal.ShowAsync();
+    }
+
+    public async Task Hide()
+    {
+        await modal.HideAsync();
+    }
+
+    private async Task Save()
+    {
+        await OnSave.InvokeAsync();
+    }
+
+    private async Task Close()
+    {
+        await modal.HideAsync();
+    }
+
+
+    private async Task OnFindCepClick()
+    {
+        if (!string.IsNullOrEmpty(User?.Address?.ZipCode))
+        {
+            var address = await _externalService.GetAddressCep(User.Address.ZipCode);
+
+            User.Address.City = address.Localidade;
+
+            User.Address.Neighborhood = address.Bairro;
+            User.Address.Complement = address.Complemento;
+            User.Address.State = address.Uf; //Enum.Parse<UfType>(address.Uf).ToString();
+            User.Address.Street = address.Logradouro;
+            User.Address.ZipCode = address.Cep;
+        }
+        else
+        {
+            ExibirMensagem("Cep invalido.", Severity.Error);
+            await zipMask.FocusAsync();
+        }
+    }
+
+    private void ExibirMensagem(string mensagem, Severity serverity = Severity.Error)
+    {
+        var config = (SnackbarOptions options) =>
+        {
+            options.DuplicatesBehavior = SnackbarDuplicatesBehavior.Prevent;
+        };
+
+        SnackbarService.Add(mensagem, serverity, configure: config, key: "User");
+    }
+
+
+}
