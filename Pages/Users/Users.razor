@@ -7,6 +7,7 @@
 @inject IExternalService _externalService
 @inject IJSRuntime JS
 @inject NotificationService NotificationService
+@inject ISnackbar Snackbar
 
 
 <Modal @ref="modalScreen" title=@modalTitle
@@ -317,64 +318,7 @@
 			</LoadingContent>
 		</MudTable>
 
-		@* <Grid @ref="gridUser"
-			  TItem="UserDto"
-			  AllowFiltering="true"
-			  AllowPaging="true"
-			  AllowSorting="true"
-			  Class="table table-hover table-bordered table-striped"
-			  PageSize="5"
-			  DataProvider="UserDtoDataProvider"
-			  Responsive="true">
 
-			<GridColumn TItem="UserDto" HeaderText="Nome" PropertyName="Name" SortKeySelector="item => item.Name">
-				@context.Name
-			</GridColumn>
-			<GridColumn TItem="UserDto" HeaderText="Email" PropertyName="Email" SortKeySelector="item => item.Email">
-				@context.Email
-			</GridColumn>
-			<GridColumn TItem="UserDto" HeaderText="Perfil" PropertyName="Role" SortKeySelector="item => item.Role">
-				@context.Role
-			</GridColumn>
-			<GridColumn TItem="UserDto" HeaderText="Ações" Width="120" Filterable="false" HeaderTextAlignment="Alignment.Center">
-				<div class="d-flex justify-content-center gap-1 p-1">
-
-					@if (context.Active)
-					{
-						<Button @ref="editUserButton"
-								Color="ButtonColor.Primary"
-								Size="BlazorBootstrap.ButtonSize.Small"
-								TooltipTitle="Alterar"
-								@onclick="@(async () => await OnShowModalEditClick(context))">
-							<Icon Name="IconName.PencilFill"></Icon>
-						</Button>
-
-						<Button @ref="editUserButton"
-								Color="ButtonColor.Danger"
-								Size="BlazorBootstrap.ButtonSize.Small"
-								TooltipTitle="Desativar"
-								@onclick="@(async () => await OnShowModalDeleteClick(context))">
-							<Icon Name="IconName.Trash"></Icon>
-						</Button>
-						
-
-					}
-					else
-					{
-
-						<Button Color="ButtonColor.Secondary"
-								Size="BlazorBootstrap.ButtonSize.Small"
-								TooltipTitle="Reativar"
-								@onclick="@(async () => await OnShowModalReactiveClick(context))">
-							<Icon Name="IconName.ArrowRepeat"></Icon>
-						</Button>
-						
-					}
-					
-				</div>
-			</GridColumn>
-
-		</Grid> *@
 	</div>
 
 </div>
@@ -440,21 +384,19 @@
 	{
 		try
 		{
-			var result = await action();
-
-			if (result)
+			if (await action())
 			{
-				ExibirMensagem(successMessage, Severity.Success);
+				Snackbar.Add(successMessage, Severity.Success);
 				await ReloadGrid();
 			}
 			else
 			{
-				ExibirMensagem("Erro ao executar operação.", Severity.Error);
+				Snackbar.Add("Erro na operação", Severity.Error);
 			}
 		}
 		catch (Exception ex)
 		{
-			ExibirMensagem(ex.Message, Severity.Error);
+			Snackbar.Add(ex.Message, Severity.Error);
 		}
 	}
 
@@ -550,104 +492,26 @@
 
 	private async Task OnUpdateUser()
 	{
-		if (!string.IsNullOrEmpty(user.Name))
-		{
-
-			try
-			{
-
-				var include = await _userService.EditAsync(user);
-
-				if (include)
-				{
-					ExibirMensagem("Gravado com sucesso.", Severity.Success);
-				}
-				else
-				{
-					ExibirMensagem("Error ao gravar.", Severity.Error);
-				}
-
-				user = new UserEntity();
-
-				//await gridUser.RefreshDataAsync();
-				await ReloadGrid();
-
-			}
-			catch (Exception ex)
-			{
-
-				throw;
-			}
-		}
+		await ExecuteAction(
+			() => _userService.EditAsync(user),
+			"Usuário atualizado com sucesso"
+		);
 	}
 
 	private async Task OnDeactiveUser()
 	{
-		if (!string.IsNullOrEmpty(user.Name))
-		{
-
-			try
-			{
-				var include = await _userService.DeactiveAsync(user);
-
-				Console.WriteLine(include);
-
-				if (include)
-				{
-					ExibirMensagem("Desativado com sucesso.", Severity.Success);
-				}
-				else
-				{
-					ExibirMensagem("Error ao gravar.", Severity.Error);
-				}
-
-				user = new UserEntity();
-
-				//await gridUser.RefreshDataAsync();
-				await ReloadGrid();
-			}
-			catch (Exception ex)
-			{
-
-				throw;
-			}
-
-		}
+		await ExecuteAction(
+			() => _userService.DeactiveAsync(user),
+			"Usuário desativado com sucesso"
+		);
 	}
 
 	private async Task OnReactiveUser()
 	{
-		if (!string.IsNullOrEmpty(user.Name))
-		{
-
-			try
-			{
-				var include = await _userService.ReactiveAsync(user);
-
-				Console.WriteLine(include);
-
-				if (include)
-				{
-					ExibirMensagem("Reativado com sucesso.", Severity.Success);
-				}
-				else
-				{
-					ExibirMensagem("Error ao gravar.", Severity.Error);
-				}
-
-				user = new UserEntity();
-
-				//await gridUser.RefreshDataAsync();
-
-				await ReloadGrid();
-				
-			}
-			catch (Exception ex)
-			{
-				ExibirMensagem(ex.Message, Severity.Error);
-			}
-
-		}
+		await ExecuteAction(
+			() => _userService.ReactiveAsync(user),
+			"Usuário reativado com sucesso"
+		);
 	}
 
 	private async Task ReloadGrid()
@@ -675,34 +539,10 @@
 
 	private async Task OnIncludeUser()
 	{
-		if (!string.IsNullOrEmpty(user.Name))
-		{
-
-			try
-			{
-				var include = await _userService.AddAsync(user);
-
-				Console.WriteLine(include);
-
-				if (include)
-				{
-					ExibirMensagem("Gravado com sucesso.", Severity.Success);
-				}
-				else
-				{
-					ExibirMensagem("Error ao gravar.", Severity.Error);
-				}
-
-				user = new UserEntity();
-
-				await ReloadGrid();
-			}
-			catch (Exception ex)
-			{
-				ExibirMensagem(ex.Message, Severity.Error);
-			}
-
-		}
+		await ExecuteAction(
+			() => _userService.AddAsync(user),
+			"Usuário criado com sucesso"
+		);
 	}
 
 	private async Task OnHideModalInsertClick()
