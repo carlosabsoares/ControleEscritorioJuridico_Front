@@ -20,4 +20,4 @@ EXPOSE 443
 COPY --from=build /app/publish .
 
 # Comando para iniciar a aplicação
-CMD find . -name "*.dll" -type f -not -name "*.Views.dll" | head -1 | xargs dotnet
+ENTRYPOINT ["dotnet", "CEJ_WebApp.dll"]
