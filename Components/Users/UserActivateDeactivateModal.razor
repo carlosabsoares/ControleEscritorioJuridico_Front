@@ -1,1 +1,22 @@
-﻿
+﻿@* @inject ISnackbar Snackbar
+
+<MudDialog>
+	<TitleContent>
+		<MudText Typo="Typo.h6">
+			<MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1" /> Confirma a deleção desse usuário?
+		</MudText>
+	</TitleContent>
+	<DialogContent>
+		<MudTextField Value="" Label = "Nome" ReadOnly="true"/>
+	</DialogContent>
+</MudDialog>
+
+
+@code {
+	[CascadingParameter]
+	private IMudDialogInstance MudDialog { get; set; }
+
+	[Parameter]
+	public string? Name { get; set; }
+
+} *@

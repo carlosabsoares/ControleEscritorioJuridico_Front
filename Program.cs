@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor;
 using MudBlazor.Services;
-using Radzen;
 
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -46,7 +45,7 @@ builder.Services.AddScoped(sp =>
 });
 
 
-builder.Services.AddRadzenComponents();
+//builder.Services.AddRadzenComponents();
 
 builder.Services.AddBlazorBootstrap();
 

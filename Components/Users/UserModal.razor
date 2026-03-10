@@ -66,13 +66,12 @@
 					<!-- Coluna CEP -->
 					<div class="row">
 						<div class="input-group">
-							<RadzenMask @ref="zipMask"
-										style="max-width: 180px;"
-										Mask="*****-***"
-										CharacterPattern="[0-9]"
-										Placeholder="00000-000"
-										@bind-Value="@User.Address.ZipCode"
-										class="form-control" />
+							<MudMask Label="CEP"
+									 Mask="@cepMask"
+									 Placeholder="00000-000"
+									 @bind-Value="@User.Address.ZipCode"
+									 @ref="cepField"
+									 Immediate="true" />
 
 							<button class="btn btn-primary" @onclick="OnFindCepClick">
 								🔍 Pesquisar
@@ -159,7 +158,8 @@
 @code {
 
     private Modal modal = default!;
-    private RadzenMask zipMask = default!;
+	private IMask cepMask = new PatternMask("00000-000");
+	private MudMask cepField;
 
     [Parameter]
     public UserEntity User { get; set; } = new();
@@ -211,7 +211,7 @@
         else
         {
             ExibirMensagem("Cep invalido.", Severity.Error);
-            await zipMask.FocusAsync();
+			await cepField.FocusAsync();
         }
     }
 

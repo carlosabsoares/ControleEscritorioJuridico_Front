@@ -125,7 +125,10 @@ namespace CEJ_WebApp.Core.Services
                 var _result = await Http.PutAsJsonAsync($"{url}{_object}", userEntity);
 
                 if (_result.IsSuccessStatusCode)
+                {
                     _return = true;
+                }
+
 
 
                 return _return;

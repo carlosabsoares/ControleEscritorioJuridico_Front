@@ -8,7 +8,7 @@
 @inject IUserService _userService
 @inject IExternalService _externalService
 @inject IJSRuntime JS
-@inject NotificationService NotificationService
+@* @inject NotificationService NotificationService *@
 @inject ISnackbar Snackbar
 
 <UserModal @ref="userModal"
@@ -26,12 +26,11 @@
 		<EditForm Model="@user">
 			<DataAnnotationsValidator />
 
-			<div class="row">
+			<div class="row mb-2">
 				<!-- Coluna Nome -->
 				<div class="col-md-6">
 					<div class="form-group">
-						<label>Nome</label>
-						<InputText id="txtUserName" class="form-control" @bind-Value=@user.Name />
+						<MudTextField @bind-Value="@user.Name" Label="Nome" Variant="Variant.Outlined" Margin="Margin.Dense" />
 						<ValidationMessage For="@(() => user.Name)" />
 					</div>
 				</div>
@@ -39,171 +38,189 @@
 				<!-- Coluna Perfil -->
 				<div class="col-md-6">
 					<div class="form-group">
-						<label>Perfil</label>
-						<InputSelect class="form-select" @bind-Value="user.Role">
+						<MudSelect T="UserRoleType"
+								   Label="Perfil"
+								   @bind-Value="user.Role"
+								   Variant="Variant.Outlined"
+								   Margin="Margin.Dense">
+
 							@foreach (var role in Enum.GetValues<UserRoleType>())
 							{
-								<option value="@role">@role</option>
+								<MudSelectItem Value="@role">@role</MudSelectItem>
 							}
-						</InputSelect>
+						</MudSelect>
 					</div>
 				</div>
 			</div>
 
-			<div class="row">
+			<div class="row mb-2">
 				<!-- Coluna Email -->
 				<div class="col-md-6">
 					<div class="form-group">
-						<label>Email</label>
-						<InputText id="txtUserEmail" class="form-control" @bind-Value=@user!.Email />
+						<MudTextField @bind-Value="@user.Email" InputType="InputType.Email" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense" />
 						<ValidationMessage For="@(() => user.Email)" />
 					</div>
 				</div>
 
 				<!-- Coluna Password -->
-				<div class="col-md-6">
-					<div class="form-group @(insertMode ? "" : "invisible")">
-						<label>Senha</label>
-						<PasswordInput id="txtUserPassword"
-									   class="form-control"
-									   @bind-Value="user!.Password" />
-						<ValidationMessage For="@(() => user.Password)" />
-					</div>
+				<div class="col-md-6 @(insertMode ? "" : "invisible")">
+					<MudTextField T="string"
+								  Label="Senha"
+								  @bind-Value="user!.Password"
+								  InputType="@PasswordInput"
+								  Variant="Variant.Outlined"
+								  Adornment="Adornment.End"
+								  AdornmentIcon="@PasswordInputIcon"
+								  OnAdornmentClick="ButtonShowPasswordclick"
+								  AdornmentAriaLabel="Mostrar Password"
+								  Margin="Margin.Dense"
+								  For="@(() => user.Password)" />
 				</div>
 			</div>
 
-			<div class="card">
-				<h4 class="card-header">Endereço</h4>
-				<div class="card-body">
+			<div class="row mb-2">
+				<div class="card">
+					<h4 class="card-header">Endereço</h4>
+					<div class="card-body">
+						<div class="row mb-2">
+							<!-- Coluna Email -->
+							<div class="col-md-6">
+								<div class="form-group">
 
-					<!-- Coluna CEP -->
-					<div class="row">
-						<div class="input-group">
-							<RadzenMask @ref="zipMask"
-										style="max-width: 180px;"
-										Mask="*****-***"
-										CharacterPattern="[0-9]"
-										Placeholder="00000-000"
-										@bind-Value="@user.Address.ZipCode"
-										class="form-control" />
+									<MudText Typo="Typo.body2" Class="mb-1">CEP</MudText>
 
-							<button class="btn btn-primary" @onclick="OnFindCepClick">
-								🔍 Pesquisar
-							</button>
-						</div>
-					</div>
-					<div class="row">
-						<!-- Coluna Logradouro -->
-						<div class="col-md-6">
-							<div class="form-group">
-								<label>Logradouro</label>
-								<InputText id="txtUserStreet" class="form-control" @bind-Value=@user!.Address!.Street />
-								<ValidationMessage For="@(() => user!.Address!.Street)" />
+									<MudMask T="string"
+											 Label="CEP"
+											 Mask="@cepMask"
+											 Placeholder="00000-000"
+											 @bind-Value="user.Address.ZipCode"
+											 @ref="cepField"
+											 Immediate="true"
+											 Variant="Variant.Outlined"
+											 FullWidth="true"
+											 Adornment="Adornment.End"
+											 AdornmentIcon="@Icons.Material.Filled.Search"
+											 AdornmentColor="Color.Secondary"
+											 OnAdornmentClick="OnFindCepClick"
+											 AdornmentAriaLabel="Pesquisar CEP" />
+									<ValidationMessage For="@(() => user.Address.ZipCode)" />
+								</div>
 							</div>
 						</div>
-						<!-- Coluna Numero -->
-						<div class="col-md-3">
-							<div class="form-group">
-								<label>Numero</label>
-								<InputText id="txtUserNumber" type="number"
-										   inputmode="numeric"
-										   pattern="[0-9]*" class="form-control" @bind-Value=@user!.Address!.Number />
+
+						<div class="row mb-2">
+							<div class="col-md-6">
+
+								<MudTextField @bind-Value="@user!.Address!.Street" Label="Logradouro" Variant="Variant.Outlined" Margin="Margin.Dense" />
+								<ValidationMessage For="@(() => @user!.Address!.Street)" />
+							</div>
+							<div class="col-md-2">
+								<MudTextField @bind-Value="user!.Address!.Number"
+											  InputType="InputType.Number"
+											  Label="Numero"
+											  Variant="Variant.Outlined"
+											  Margin="Margin.Dense" />
+    
 								<ValidationMessage For="@(() => user!.Address!.Number)" />
 							</div>
-						</div>
-						<!-- Coluna Complemento -->
-						<div class="col-md-3">
-							<div class="form-group">
-								<label>Complemento</label>
-								<InputText id="txtUserComplement" class="form-control" @bind-Value=@user!.Address!.Complement />
+							<div class="col-md-3">
+								<MudTextField @bind-Value="@user!.Address!.Complement" Label="Complemento" Variant="Variant.Outlined" Margin="Margin.Dense" />
 								<ValidationMessage For="@(() => user!.Address!.Complement)" />
 							</div>
 						</div>
-					</div>
-					<div class="row">
-						<!-- Coluna Bairro -->
-						<div class="col-md-5">
-							<div class="form-group">
-								<label>Bairro</label>
-								<InputText id="txtUserNeighborhood" class="form-control" @bind-Value=@user!.Address!.Neighborhood />
+
+
+						<div class="row mb-2">
+							<div class="col-md-5">
+								<MudTextField @bind-Value="@user!.Address!.Neighborhood" Label="Bairro" Variant="Variant.Outlined" Margin="Margin.Dense" />
 								<ValidationMessage For="@(() => user!.Address!.Neighborhood)" />
 							</div>
-						</div>
-						<!-- Coluna Cidade -->
-						<div class="col-md-5">
-							<div class="form-group">
-								<label>Cidade</label>
-								<InputText id="txtUserCity" class="form-control" @bind-Value=@user!.Address!.City />
+							<div class="col-md-5">
+								<MudTextField @bind-Value="@user!.Address!.City" Label="Cidade" Variant="Variant.Outlined" Margin="Margin.Dense" />
 								<ValidationMessage For="@(() => user!.Address!.City)" />
 							</div>
-						</div>
-						<!-- Coluna Estado -->
-						<div class="col-md-2">
-							<div class="form-group">
-								<label>Estado</label>
-								<InputSelect class="form-select" @bind-Value="user!.Address!.State">
-									@foreach (var uf in Enum.GetValues<UfType>())
-									{
-										<option value="@uf">@uf.ToString()</option>
-									}
-								</InputSelect>
+							<div class="col-md-2">
+								<div class="form-group">
+									<MudSelect T="string"
+											   Label="Estado"
+											   @bind-Value="user.Address.State"
+											   Variant="Variant.Outlined"
+											   Margin="Margin.Dense"
+											   FullWidth="true"
+											   AnchorOrigin="Origin.BottomCenter">
+
+										@foreach (var uf in Enum.GetValues<UfType>())
+										{
+											var text = uf.ToString();
+											<MudSelectItem Value="@text">@text</MudSelectItem>
+										}
+									</MudSelect>
+
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
 
-
+			</div>	
 		</EditForm>
 
 	</BodyTemplate>
 	<FooterTemplate>
-		<Button Color="ButtonColor.Secondary" @onclick="OnHideModalInsertClick">
-			<Icon Name="IconName.DoorClosed" /> Fechar
-		</Button>
-		<Button Color="ButtonColor.Primary" @onclick="OnPersisteModalUser">
-			<Icon Name="IconName.Save" /> Salvar
-		</Button>
+		<MudButton StartIcon="@Icons.Material.Filled.Close"
+				   Color="Color.Secondary"
+				   Variant="Variant.Filled"
+				   OnClick="OnHideModalInsertClick">
+			Fechar
+		</MudButton>
+
+		<MudButton StartIcon="@Icons.Material.Filled.Save"
+				   Color="Color.Primary"
+				   Variant="Variant.Filled"
+				   OnClick="OnPersisteModalUser">
+			Salvar
+		</MudButton>
 
 	</FooterTemplate>
 </Modal>
 
-<Modal @ref="modalDeactiveReactive" title=@modalTitle
+<Modal @ref="modalDeactiveReactive"
+	   Title="@modalTitle"
 	   UseStaticBackdrop="true"
 	   CloseOnEscape="false"
 	   IsVerticallyCentered="true"
-	   Size="ModalSize.Large">
+	   Size="ModalSize.Large"
+	   HideCloseButton="true">
+	<!-- Adicione esta linha -->
 	<BodyTemplate>
 		@* <EditForm Model="@user" OnValidSubmit="@OnIncludeUser"> *@
 		<EditForm Model="@user">
 			<DataAnnotationsValidator />
 
-			<div class="row">
-				<!-- Coluna Nome -->
+			<MudText Typo="Typo.h6">
+				@if (deactiveMode)
+				{
+					<MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1" />
+					<span>Deseja apagar esse usuário?</span>
+				}
+				else
+				{
+					<MudIcon Icon="@Icons.Material.Filled.ChangeCircle" Class="mr-3 mb-n1" />
+					<span>Deseja reativar esse usuário?</span>
+				}
+			</MudText>
+            
+			<MudTextField Value="@user.Name.ToString()"
+						  Label="Nome"
+						  ReadOnly="true"
+						  Variant="Variant.Outlined"
+						  FullWidth="true" />
 
-				<div class="col-md-6">
-					<div class="form-group">
-						@if (deactiveMode)
-						{
-							<label>Confirma a desativação do usuário abaixo? </label>
-						}
-						else
-						{
-							<label>Confirma a reativação do usuário abaixo? </label>
-						}
-						
-						<InputText id="txtUserName" class="form-control" @bind-Value=@user.Name readonly />
-						<ValidationMessage For="@(() => user.Name)" />
-					</div>
-				</div>
-			</div>
 		</EditForm>
-
 	</BodyTemplate>
 	<FooterTemplate>
 		<Button Color="ButtonColor.Secondary" @onclick="OnHideModalDeactiveClick">Não</Button>
-		<Button Color="ButtonColor.Primary" @onclick="OnPersisteDeleteModalUser"> Sim </Button>
-
+		<Button Color="ButtonColor.Primary" @onclick="OnPersisteDeleteModalUser">Sim</Button>
 	</FooterTemplate>
 </Modal>
 
@@ -341,11 +358,18 @@
 	private string searchString = "";
 	private bool loading = false;
 
+	private IMask cepMask = new PatternMask("00000-000");
+	private MudMask cepField;
+
 	//RadzenDataGrid<UserDto> gridUser;
 	private BlazorBootstrap.Button editUserButton = default!;
 	private BlazorBootstrap.Button findCepUserButton = default!;
 
-	private RadzenMask zipMask = default!;
+	private Modal modalScreen = default!;
+	private Modal modalDeactiveReactive = default!;
+
+	private UserModal userModal = default!;
+
 	private readonly UserSessionInformation _userSessionInformation;
 
 	//RadzenDataGrid<UserDto> gridUser;
@@ -354,11 +378,11 @@
 	List<UserDto> usersDto = new List<UserDto>();
 
 	bool allowRowSelectOnRowClick = true;
+	bool isPassworfShow;
+	InputType PasswordInput = InputType.Password;
+	string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
 
-	private Modal modalScreen = default!;
-	private Modal modalDeactiveReactive = default!;
 
-	private UserModal userModal = default!;
 	//private Grid<UserDto> gridUser = default!;
 
 
@@ -368,6 +392,23 @@
 	string modalTitle = string.Empty;
 
 	List<ToastMessage> messages = new List<ToastMessage>();
+
+
+	void ButtonShowPasswordclick()
+	{
+		@if (isPassworfShow)
+		{
+			isPassworfShow = false;
+			PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+			PasswordInput = InputType.Password;
+		}
+		else
+		{
+			isPassworfShow = true;
+			PasswordInputIcon = Icons.Material.Filled.Visibility;
+			PasswordInput = InputType.Text;
+		}
+	}
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -394,7 +435,6 @@
 			if (await action())
 			{
 				Snackbar.Add(successMessage, Severity.Success);
-				await ReloadGrid();
 			}
 			else
 			{
@@ -440,6 +480,9 @@
 		{
 			var address = await _externalService.GetAddressCep(user.Address.ZipCode);
 
+			if(string.IsNullOrEmpty(address.Logradouro))
+				ExibirMensagem("Cep invalido ou não localizado.", Severity.Warning);
+
 			user.Address.City = address.Localidade;
 
 			user.Address.Neighborhood = address.Bairro;
@@ -451,7 +494,7 @@
 		else
 		{
 			ExibirMensagem("Cep invalido.", Severity.Error);
-			await zipMask.FocusAsync();
+			await cepField.FocusAsync();
 		}
 	}
 
@@ -486,6 +529,8 @@
 			await OnIncludeUser();
 		else
 			await OnUpdateUser();
+
+		await ReloadGrid();
 
 		insertMode = false;
 		modalTitle = string.Empty;
@@ -591,7 +636,7 @@
 	private async Task OnShowModalDeleteClick(UserDto data)
 	{
 		deactiveMode = true;
-		modalTitle = "Desativação de usuário";
+		modalTitle = "Confirma essa ação?";
 
 		var responseUser = await _userService.GetUserByUuidAsync(data.Uuid);
 
@@ -610,7 +655,7 @@
 	private async Task OnShowModalReactiveClick(UserDto data)
 	{
 		deactiveMode = false;
-		modalTitle = "Reativação de usuário";
+		modalTitle = "Confirma essa ação?";
 
 		var responseUser = await _userService.GetUserByUuidAsync(data.Uuid);
 
