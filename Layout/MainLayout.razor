@@ -8,10 +8,10 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 <AuthorizeView>
-    <Authorized>
+	<Authorized>
 
-        <MudLayout>
-@*             <MudAppBar Elevation="0">
+		<MudLayout>
+			@*             <MudAppBar Elevation="0">
                 <MudToggleIconButton @bind-Toggled="@_isNavOpen" Edge="Edge.Start"
                                      Icon="@Icons.Material.Filled.Menu" Title="Mostrar menu" Color="Color.Surface"
                                      ToggledIcon="@Icons.Material.Filled.MenuOpen" ToggledTitle="Esconder menu" ToggledColor="Color.Surface">
@@ -33,101 +33,117 @@
                     <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Error" OnClick="@Logout">Sair </MudButton>
                 </div>
             </MudAppBar> *@
-            <MudAppBar Elevation="0">
-                <MudToggleIconButton @bind-Toggled="@_isNavOpen"
-                                     Edge="Edge.Start"
-                                     Icon="@Icons.Material.Filled.Menu"
-                                     Title="Mostrar menu"
-                                     Color="Color.Surface"
-                                     ToggledIcon="@Icons.Material.Filled.MenuOpen"
-                                     ToggledTitle="Esconder menu"
-                                     ToggledColor="Color.Surface">
-                </MudToggleIconButton>
+			<MudAppBar Elevation="0">
+				<MudToggleIconButton @bind-Toggled="@_isNavOpen"
+									 Edge="Edge.Start"
+									 Icon="@Icons.Material.Filled.Menu"
+									 Title="Mostrar menu"
+									 Color="Color.Surface"
+									 ToggledIcon="@Icons.Material.Filled.MenuOpen"
+									 ToggledTitle="Esconder menu"
+									 ToggledColor="Color.Surface">
+				</MudToggleIconButton>
 
-                <MudSpacer />
+				<MudSpacer />
 
-                <MudToggleIconButton @bind-Toggled="_isDarkMode"
-                                     Edge="Edge.Start"
-                                     Icon="@Icons.Material.Filled.DarkMode"
-                                     ToggledIcon="@Icons.Material.Filled.LightMode"
-                                     Title="Modo escuro"
-                                     ToggledTitle="Modo claro"
-                                     Color="@(_isDarkMode ? Color.Warning : Color.Surface)"
-                                     ToggledColor="@(_isDarkMode ? Color.Warning : Color.Surface)" />
+				<MudToggleIconButton @bind-Toggled="_isDarkMode"
+									 Edge="Edge.Start"
+									 Icon="@Icons.Material.Filled.DarkMode"
+									 ToggledIcon="@Icons.Material.Filled.LightMode"
+									 Title="Modo escuro"
+									 ToggledTitle="Modo claro"
+									 Color="@(_isDarkMode ? Color.Warning : Color.Surface)"
+									 ToggledColor="@(_isDarkMode ? Color.Warning : Color.Surface)" />
 
-                <!-- MENU DO USUÁRIO -->
-                <MudMenu>
-                    <ActivatorContent>
-                        <MudButton StartIcon="@Icons.Material.Filled.AccountCircle"
-                                   Variant="MudBlazor.Variant.Text"
-                                   Color="Color.Surface">
-                            @UserSessionInformation.Username
-                        </MudButton>
-                    </ActivatorContent>
+				<!-- MENU DO USUÁRIO -->
+				<div class="top-row px-4 auth">
+					<div class="ms-auto">
+						<div class="dropdown">
+							<button class="btn btn-light dropdown-toggle" 
+							        type="button" 
+									data-bs-toggle="dropdown">
+								<span class="me-2">👤</span> @UserSessionInformation.Username
+							</button>
 
-@*                     <MudMenuItem Icon="@Icons.Material.Filled.Person" Href="/perfil">
-                        Perfil
-                    </MudMenuItem>
+							<ul class="dropdown-menu dropdown-menu-end">
+								<li>
+									<a class="dropdown-item" href="/profile">Perfil</a>
+								</li>
+								<li>
+									<a class="dropdown-item" href="/settings">Configurações</a>
+								</li>
+								<li><hr class="dropdown-divider"></li>
+								<li>
+									<button class="dropdown-item" @onclick="Logout">Sair</button>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</MudAppBar>
 
-                    <MudMenuItem Icon="@Icons.Material.Filled.Settings" Href="/configuracoes">
-                        Configurações
-                    </MudMenuItem>
+			<MudDrawer @bind-Open="_isNavOpen" Elevation="1">
+				<MudDrawerHeader>
+					<MudText Typo="Typo.h6">CEJ</MudText>
+				</MudDrawerHeader>
+				<NavMenu />
+			</MudDrawer>
 
-                    <MudDivider />
+			<MudMainContent>
+				<MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="my-4 pt-4">
+					@Body
+				</MudContainer>
+			</MudMainContent>
 
-                    <MudMenuItem Icon="@Icons.Material.Filled.Logout"
-                                 Color="Color.Error"
-                                 OnClick="@Logout">
-                        Sair
-                    </MudMenuItem> *@
-                </MudMenu>
+		</MudLayout>
 
-            </MudAppBar>
-
-            <MudDrawer @bind-Open="_isNavOpen" Elevation="1">
-                <MudDrawerHeader>
-                    <MudText Typo="Typo.h6">CEJ</MudText>
-                </MudDrawerHeader>
-                <NavMenu />
-            </MudDrawer>
-
-            <MudMainContent>
-                <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="my-4 pt-4">
-                    @Body
-                </MudContainer>
-            </MudMainContent>
-
-        </MudLayout>
-
-    </Authorized>
-    <NotAuthorized>
-        @{
-            NavigationManager.NavigateTo("login");
-        }
-    </NotAuthorized>
+	</Authorized>
+	<NotAuthorized>
+		@{
+			NavigationManager.NavigateTo("login");
+		}
+	</NotAuthorized>
 </AuthorizeView>
 
 
 @code {
-    bool _isNavOpen = true;
-    bool _isDarkMode = true;
+		bool _isNavOpen = true;
+		bool _isDarkMode = true;
 
-    MudThemeProvider? _mudThemeProvider;
+		MudThemeProvider? _mudThemeProvider;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _isDarkMode = true;
-            _isDarkMode = await _mudThemeProvider!.GetSystemPreference();
-            StateHasChanged();
-        }
-    }
+	private string GetUserButtonClass()
+	{
+		return _isDarkMode ? "btn-dark-mode" : "btn-light-mode";
+	}
 
-    public async Task Logout()
-    {
-        AuthService.Logout();
-        NavigationManager.NavigateTo("/login");
+	private string GetUserButtonStyle()
+	{
+		if (_isDarkMode)
+		{
+			return "background-color: #333; color: white; border-color: #444;";
+		}
+		else
+		{
+			 return "background-color: #f8f9fa; color: #333; border-color: #ddd;";
+			//return "mud-theme-primary;";
+		}
+	}
 
-    }
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			_isDarkMode = true;
+			_isDarkMode = await _mudThemeProvider!.GetSystemPreference();
+			StateHasChanged();
+		}
+	}
+
+	public async Task Logout()
+	{
+		AuthService.Logout();
+		NavigationManager.NavigateTo("/login");
+
+	}
 }
