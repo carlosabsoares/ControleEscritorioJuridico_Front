@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copia o arquivo de projeto e restaura as dependências (cache em camadas)
-COPY ["ControleEscritorioJuridico_Front.csproj", "."]
+COPY ["CEJ_WebApp.csproj", "."]
 RUN dotnet restore
 
 # Copia o resto do código e publica a aplicação
@@ -20,4 +20,4 @@ EXPOSE 443
 COPY --from=build /app/publish .
 
 # Comando para iniciar a aplicação
-ENTRYPOINT ["dotnet", "ControleEscritorioJuridico_Front.dll"]
+ENTRYPOINT ["dotnet", "CEJ_WebApp.dll"]
