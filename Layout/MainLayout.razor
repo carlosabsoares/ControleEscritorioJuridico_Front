@@ -1,8 +1,10 @@
 ﻿@using CEJ_WebApp.Model
+@using CEJ_WebApp.Components.Users
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject IAuthService AuthService
 @inject UserSessionInformation UserSessionInformation
+@inject IDialogService DialogService
 
 <MudThemeProvider @ref="@_mudThemeProvider" IsDarkMode="@_isDarkMode" />
 <MudDialogProvider />
@@ -56,7 +58,32 @@
 									 ToggledColor="@(_isDarkMode ? Color.Warning : Color.Surface)" />
 
 				<!-- MENU DO USUÁRIO -->
-				<div class="top-row px-4 auth">
+
+				<MudMenu>
+					<ActivatorContent>
+						<MudButton StartIcon="@Icons.Material.Filled.AccountCircle"
+								   Variant="Variant.Text"
+								   Color="Color.Surface">
+							@UserSessionInformation.Username
+						</MudButton>
+					</ActivatorContent>
+					<ChildContent>
+						
+						<MudMenuItem Icon="@Icons.Material.Filled.Password" OnClick="@OpenDialogAsync">
+							Alterar Senha
+						</MudMenuItem>
+
+						<MudDivider />
+
+						<MudMenuItem Icon="@Icons.Material.Filled.Logout"
+									 Color="Color.Error"
+									 OnClick="@Logout">
+							Sair
+						</MudMenuItem>
+					</ChildContent>
+				</MudMenu>
+
+				@* 				<div class="top-row px-4 auth">
 					<div class="ms-auto">
 						<div class="dropdown">
 							<button class="btn btn-light dropdown-toggle" 
@@ -67,10 +94,7 @@
 
 							<ul class="dropdown-menu dropdown-menu-end">
 								<li>
-									<a class="dropdown-item" href="/profile">Perfil</a>
-								</li>
-								<li>
-									<a class="dropdown-item" href="/settings">Configurações</a>
+									<a class="dropdown-item" @onclick="OpenDialogAsync">Trocar a Senha</a>
 								</li>
 								<li><hr class="dropdown-divider"></li>
 								<li>
@@ -79,7 +103,7 @@
 							</ul>
 						</div>
 					</div>
-				</div>
+				</div> *@
 			</MudAppBar>
 
 			<MudDrawer @bind-Open="_isNavOpen" Elevation="1">
@@ -107,11 +131,26 @@
 
 
 @code {
-		bool _isNavOpen = true;
-		bool _isDarkMode = true;
+	bool _isNavOpen = true;
+	bool _isDarkMode = true;
 
-		MudThemeProvider? _mudThemeProvider;
+	MudThemeProvider? _mudThemeProvider;
 
+	private async Task OpenDialogAsync()
+	{
+		var parameters = new DialogParameters();
+		var options = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true };
+        
+		var dialog = await DialogService.ShowAsync<ResetUserPassword>("Redefinir Senha", parameters);
+        
+		var result = await dialog.Result;
+		if (!result.Cancelled)
+		{
+			// Sucesso!
+		}
+	}
+
+	
 	private string GetUserButtonClass()
 	{
 		return _isDarkMode ? "btn-dark-mode" : "btn-light-mode";
@@ -125,7 +164,7 @@
 		}
 		else
 		{
-			 return "background-color: #f8f9fa; color: #333; border-color: #ddd;";
+			return "background-color: #f8f9fa; color: #333; border-color: #ddd;";
 			//return "mud-theme-primary;";
 		}
 	}

@@ -1,4 +1,5 @@
 ﻿using CEJ_WebApp.Model;
+using CEJ_WebApp.Model.Dto;
 
 namespace CEJ_WebApp.Core.Services.Interface
 {
@@ -11,6 +12,7 @@ namespace CEJ_WebApp.Core.Services.Interface
 
         Task<bool> DeactiveAsync(Guid userUuid);
         Task<bool> ReactiveAsync(Guid userUuid);
+        Task<bool> ChangePasswordAsync(ChangePasswordResponseDto changePasswordResponseDto);
 
         //Task<bool> DeactiveAsync(UserEntity userEntity);
         //Task<bool> ReactiveAsync(UserEntity userEntity);
