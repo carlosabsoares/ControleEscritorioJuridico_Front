@@ -4,7 +4,7 @@ WORKDIR /src
 
 COPY . .
 
-RUN dotnet publish ./CEJ_WebApp/CEJ_WebApp.csproj -c Release -o /app/publish
+RUN dotnet publish ./CEJ_WebApp.csproj -c Release -o /app/publish
 
 # RUNTIME
 FROM nginx:alpine
