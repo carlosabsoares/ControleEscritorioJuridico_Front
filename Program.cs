@@ -64,7 +64,5 @@ builder.Services.AddScoped<Parameters>();
 
 builder.Services.AddScoped<UserSessionInformation>();
 
-app.MapGet("/health", () => Results.Ok("Healthy"));
-
 
 await builder.Build().RunAsync();
