@@ -518,20 +518,11 @@
 			Address = new AddressEntity()
 		};
 
-		//=====================================================
 		insertMode = true;
-		modalTitle = "Adicionar usuário";
-		userModal.User = user;
-		userModal.Title = "Adicionar usuário";
+		modalTitle = "Inserir usuário";
+
+		//await modalUpdate.ShowAsync();
 		await modalScreen.ShowAsync();
-		//=====================================================
-
-		// userModal.User = user;
-		// userModal.Title = "Adicionar usuário";
-		// userModal.InsertMode = true;
-
-		// await userModal.Show();
-
 	}
 
 	private async Task OnPersisteModalUser()
