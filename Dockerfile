@@ -1,23 +1,14 @@
-# Estágio 1: Build da aplicação
+# BUILD
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copia o arquivo de projeto e restaura as dependências (cache em camadas)
-COPY ["*.csproj", "."]
-RUN dotnet restore
-
-# Copia o resto do código e publica a aplicação
 COPY . .
-RUN dotnet publish -c Release -o /app/publish
 
-# Estágio 2: Imagem de runtime para execução
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
-WORKDIR /app
+RUN dotnet publish ./CEJ_WebApp/CEJ_WebApp.csproj -c Release -o /app/publish
+
+# RUNTIME
+FROM nginx:alpine
+
+COPY --from=build /app/publish/wwwroot /usr/share/nginx/html
+
 EXPOSE 80
-EXPOSE 443
-
-# Copia os arquivos publicados do estágio de build
-COPY --from=build /app/publish .
-
-# Comando para iniciar a aplicação
-ENTRYPOINT ["dotnet", "CEJ_WebApp.dll"]
