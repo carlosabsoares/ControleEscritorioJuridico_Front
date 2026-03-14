@@ -58,9 +58,11 @@ builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStatePr
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IExternalService, ExternalService>();
 
 builder.Services.AddScoped<Parameters>();
+builder.Services.AddScoped<NotificationService>();
 
 builder.Services.AddScoped<UserSessionInformation>();
 

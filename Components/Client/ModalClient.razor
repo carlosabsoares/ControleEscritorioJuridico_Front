@@ -1,0 +1,312 @@
+﻿@using CEJ_WebApp.Core.Services
+@using CEJ_WebApp.Model
+@using CEJ_WebApp.Model.Enum
+@inject IExternalService _externalService
+@inject IClientService _clientService
+@inject IJSRuntime JS
+@* @inject NotificationService NotificationService *@
+@inject ISnackbar Snackbar
+@inject NotificationService Notification
+
+<Modal @ref="modal"
+	   title=@ModalTitle
+	   UseStaticBackdrop="true"
+	   CloseOnEscape="false"
+	   IsVerticallyCentered="true"
+	   Size="ModalSize.Large">
+	<BodyTemplate>
+		<EditForm Model="@Client">
+			<DataAnnotationsValidator />
+
+			<div class="row mb-2">
+				<!-- Coluna Nome -->
+				<div class="row mb-2">
+					<div class="col-md-6">
+						<div class="form-group">
+							<MudTextField @bind-Value="@Client.Name" Label="Nome" Variant="Variant.Outlined" Margin="Margin.Dense" />
+							<ValidationMessage For="@(() => Client.Name)" />
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group">
+							<MudTextField @bind-Value="@Client.Email" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense" />
+							<ValidationMessage For="@(() => Client.Email)" />
+						</div>
+					</div>
+				</div>
+
+				<div class="row mb-2">
+					<div class="col-md-4">
+						<div class="form-group">
+							<MudSelect T="DocumentType"
+									   Label="Tipo de Documento"
+									   Value="Client.DocumentType"
+									   ValueChanged="OnDocumentTypeChanged"
+									   Variant="Variant.Outlined"
+									   Margin="Margin.Dense"
+									   FullWidth="true">
+
+
+								@foreach (var documentType in Enum.GetValues<DocumentType>())
+								{
+									<MudSelectItem Value="@documentType">@documentType</MudSelectItem>
+								}
+							</MudSelect>
+						</div>
+					</div>
+					<div class="col-md-8">
+						<MudMask T="string"
+								 @key="documentMaskKey"
+								 Label="Numero do Documento"
+								 Mask="@documentMask"
+								 @bind-Value="Client.DocumentNumber"
+								 Variant="Variant.Outlined"
+								 Margin="Margin.Dense"
+								 FullWidth="true" />
+						<ValidationMessage For="@(() => Client.DocumentNumber)" />
+					</div>
+				</div>
+
+				<div class="row mb-2">
+					<div class="col-md-4">
+						<div class="form-group">
+							<MudTextField @bind-Value="@Client.PhoneNumber" 
+							              Label="Número telefônico" 
+										  Variant="Variant.Outlined" 
+										  Mask="@phoneMask"
+										  Placeholder="(00) 0000-0000"
+										  Margin="Margin.Dense" />
+							<ValidationMessage For="@(() => Client.PhoneNumber)" />
+						</div>
+					</div>
+					<div class="col-md-4">
+						<MudTextField @bind-Value="@Client.CellPhoneNumber" 
+									  Label="Numero celular" 
+									  Variant="Variant.Outlined" 
+									  Mask="@cellphoneMask"
+									  Placeholder="(00) 00000-0000"
+									  Margin="Margin.Dense" />
+
+						<ValidationMessage For="@(() => Client.CellPhoneNumber)" />
+					</div>
+					<div class="col-md-4">
+						<MudTextField @bind-Value="@Client.ContactName" Label="Contato" Variant="Variant.Outlined" Margin="Margin.Dense" />
+						<ValidationMessage For="@(() => Client.ContactName)" />
+					</div>
+				</div>
+
+
+				<div class="row mb-2">
+					<div class="card">
+						<h4 class="card-header">Endereço</h4>
+						<div class="card-body">
+							<div class="row mb-2">
+								<!-- Coluna Email -->
+								<div class="col-md-6">
+									<div class="form-group">
+
+										<MudText Typo="Typo.body2" Class="mb-1">CEP</MudText>
+
+										<MudMask T="string"
+												 Label="CEP"
+												 Mask="@cepMask"
+												 Placeholder="00000-000"
+												 @bind-Value="Client.Address.ZipCode"
+												 @ref="cepField"
+												 Immediate="true"
+												 Variant="Variant.Outlined"
+												 FullWidth="true"
+												 Adornment="Adornment.End"
+												 AdornmentIcon="@Icons.Material.Filled.Search"
+												 AdornmentColor="Color.Secondary"
+												 OnAdornmentClick="OnFindCepClick"
+												 AdornmentAriaLabel="Pesquisar CEP" />
+										<ValidationMessage For="@(() => Client.Address.ZipCode)" />
+									</div>
+								</div>
+							</div>
+
+							<div class="row mb-2">
+								<div class="col-md-5">
+
+									<MudTextField @bind-Value="@Client!.Address!.Street" Label="Logradouro" Variant="Variant.Outlined" Margin="Margin.Dense" />
+									<ValidationMessage For="@(() => @Client!.Address!.Street)" />
+								</div>
+								<div class="col-md-2">
+									<MudTextField @bind-Value="Client!.Address!.Number"
+												  InputType="InputType.Number"
+												  Label="Numero"
+												  Variant="Variant.Outlined"
+												  Margin="Margin.Dense" />
+    
+									<ValidationMessage For="@(() => Client!.Address!.Number)" />
+								</div>
+								<div class="col-md-5">
+									<MudTextField @bind-Value="@Client!.Address!.Complement" Label="Complemento" Variant="Variant.Outlined" Margin="Margin.Dense" />
+									<ValidationMessage For="@(() => Client!.Address!.Complement)" />
+								</div>
+							</div>
+
+
+							<div class="row mb-2">
+								<div class="col-md-5">
+									<MudTextField @bind-Value="@Client!.Address!.Neighborhood" Label="Bairro" Variant="Variant.Outlined" Margin="Margin.Dense" />
+									<ValidationMessage For="@(() => Client!.Address!.Neighborhood)" />
+								</div>
+								<div class="col-md-5">
+									<MudTextField @bind-Value="@Client!.Address!.City" Label="Cidade" Variant="Variant.Outlined" Margin="Margin.Dense" />
+									<ValidationMessage For="@(() => Client!.Address!.City)" />
+								</div>
+								<div class="col-md-2">
+									<div class="form-group">
+										<MudSelect T="string"
+												   Label="Estado"
+												   @bind-Value="Client.Address.State"
+												   Variant="Variant.Outlined"
+												   Margin="Margin.Dense"
+												   FullWidth="true"
+												   AnchorOrigin="Origin.BottomCenter">
+
+											@foreach (var uf in Enum.GetValues<UfType>())
+											{
+												var text = uf.ToString();
+												<MudSelectItem Value="@text">@text</MudSelectItem>
+											}
+										</MudSelect>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</EditForm>
+	</BodyTemplate>
+	<FooterTemplate>
+		<MudButton StartIcon="@Icons.Material.Filled.Close"
+				   Color="Color.Secondary"
+				   Variant="Variant.Filled"
+				   OnClick="HideAsync">
+			Fechar
+		</MudButton>
+
+		<MudButton StartIcon="@Icons.Material.Filled.Save"
+				   Color="Color.Primary"
+				   Variant="Variant.Filled"
+				   OnClick="Salvar"
+		>
+			Salvar
+		</MudButton>
+
+	</FooterTemplate>
+</Modal>
+
+@code {
+
+	private Modal modal;
+	private IMask cepMask = new PatternMask("00000-000");
+	private IMask phoneMask = new PatternMask("(00) 0000-0000");
+	private IMask cellphoneMask = new PatternMask("(00) 00000-0000");
+	private MudMask cepField;
+	private IMask documentMask = new PatternMask("000.000.000-00");
+	private string documentMaskKey = "cpf";
+
+	[Parameter]
+	public ClientEntity Client { get; set; }
+
+	[Parameter]
+	public EventCallback OnSaved { get; set; }
+
+	[Parameter]
+	public string ModalTitle { get; set; }
+
+	[Parameter]
+	public bool InsertMode { get; set; }
+
+	private async Task Salvar()
+	{
+		bool result = false;
+
+		if (InsertMode)
+		{
+			result = await _clientService.AddAsync(Client);
+
+			if (result)
+				Notification.ExibirMensagem("Cliente cadastrado com sucesso", Severity.Success);
+			else{
+				Notification.ExibirMensagem("Erro ao cadastrar cliente", Severity.Error);
+			}
+		}
+		else
+		{
+			result = await _clientService.EditAsync(Client);
+
+			if (result)
+				Notification.ExibirMensagem("Cliente alterado com sucesso", Severity.Success);
+			else
+			{
+				Notification.ExibirMensagem("Erro ao alterar cliente", Severity.Error);
+			}
+		}
+
+		await HideAsync();
+
+		if (result)
+			await OnSaved.InvokeAsync(); // avisa o pai
+	}
+
+	private void OnDocumentTypeChanged(DocumentType type)
+	{
+		Client.DocumentType = type;
+
+		if (type == DocumentType.CNPJ)
+		{
+			documentMask = new PatternMask("00.000.000/0000-00");
+			documentMaskKey = "cnpj";
+		}
+		else
+		{
+			documentMask = new PatternMask("000.000.000-00");
+			documentMaskKey = "cpf";
+		}
+
+		Client.DocumentNumber = string.Empty;
+
+		StateHasChanged();
+	}
+
+	public async Task ShowAsync()
+	{
+		await modal.ShowAsync();
+	}
+
+	public async Task HideAsync()
+	{
+		await modal.HideAsync();
+	}
+
+	private async Task OnFindCepClick()
+	{
+		if (!string.IsNullOrEmpty(Client?.Address?.ZipCode))
+		{
+			var address = await _externalService.GetAddressCep(Client.Address.ZipCode);
+
+			if (string.IsNullOrEmpty(address.Logradouro))
+				Notification.ExibirMensagem("Cep invalido ou não localizado.", Severity.Warning);
+
+			Client.Address.City = address.Localidade;
+
+			Client.Address.Neighborhood = address.Bairro;
+			Client.Address.Complement = address.Complemento;
+			Client.Address.State = address.Uf; //Enum.Parse<UfType>(address.Uf).ToString();
+			Client.Address.Street = address.Logradouro;
+			Client.Address.ZipCode = address.Cep;
+		}
+		else
+		{
+			Notification.ExibirMensagem("Cep invalido.", Severity.Error);
+			await cepField.FocusAsync();
+		}
+	}
+}

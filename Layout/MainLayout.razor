@@ -13,28 +13,6 @@
 	<Authorized>
 
 		<MudLayout>
-			@*             <MudAppBar Elevation="0">
-                <MudToggleIconButton @bind-Toggled="@_isNavOpen" Edge="Edge.Start"
-                                     Icon="@Icons.Material.Filled.Menu" Title="Mostrar menu" Color="Color.Surface"
-                                     ToggledIcon="@Icons.Material.Filled.MenuOpen" ToggledTitle="Esconder menu" ToggledColor="Color.Surface">
-                </MudToggleIconButton>
-                <MudSpacer />
-
-                <MudToggleIconButton @bind-Toggled="_isDarkMode"
-                                     Edge="Edge.Start"
-                                     Icon="@Icons.Material.Filled.DarkMode"
-                                     ToggledIcon="@Icons.Material.Filled.LightMode"
-                                     Title="Modo escuro"
-                                     ToggledTitle="Modo claro"
-                                     Color="@(_isDarkMode ? Color.Warning : Color.Surface)"
-                                     ToggledColor="@(_isDarkMode ? Color.Warning : Color.Surface)" />
-
-
-                <div class="d-flex align-center gap-2">
-                    <MudText>@UserSessionInformation.Username</MudText>
-                    <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Error" OnClick="@Logout">Sair </MudButton>
-                </div>
-            </MudAppBar> *@
 			<MudAppBar Elevation="0">
 				<MudToggleIconButton @bind-Toggled="@_isNavOpen"
 									 Edge="Edge.Start"
@@ -58,8 +36,43 @@
 									 ToggledColor="@(_isDarkMode ? Color.Warning : Color.Surface)" />
 
 				<!-- MENU DO USUÁRIO -->
-
-				<MudMenu>
+				<MudMenu AnchorOrigin="Origin.BottomCenter"
+						 TransformOrigin="Origin.TopCenter"
+						 Size="Size.Small"
+						 Class="pa-0 mud-width-auto"
+						 FullWidth="false">
+                    
+					<ActivatorContent>
+						<MudButton Variant="Variant.Text"
+								   StartIcon="@Icons.Material.Filled.AccountCircle"
+								   Color="Color.Inherit"
+								   Class="mud-button-user-menu"
+								   EndIcon="@Icons.Material.Filled.ArrowDropDown"
+								   Style="text-transform: none;">
+							<div class="d-flex flex-column align-start mud-width-auto">
+								<small class="mud-typography mud-typography-caption">@UserSessionInformation.Username</small>
+							</div>
+						</MudButton>
+					</ActivatorContent>
+                    
+					<ChildContent>
+						<MudMenuItem OnClick="@OpenDialogAsync">
+							<div class="d-flex align-center" style="white-space: nowrap;">
+								<MudIcon Icon="@Icons.Material.Filled.Lock" Class="mr-2" Size="Size.Small" />
+								<span style="font-size: 0.875rem;">Trocar senha</span>
+							</div>
+						</MudMenuItem>
+						<MudDivider />
+						<MudMenuItem OnClick="@Logout">
+							<div class="d-flex align-center">
+								<MudIcon Icon="@Icons.Material.Filled.ExitToApp" Class="mr-2" Size="Size.Small" Color="Color.Error" />
+								<MudText Color="Color.Error">Sair</MudText>
+								</div>
+						</MudMenuItem>
+													
+					</ChildContent>
+				</MudMenu>
+				@* 				<MudMenu>
 					<ActivatorContent>
 						<MudButton StartIcon="@Icons.Material.Filled.AccountCircle"
 								   Variant="Variant.Text"
@@ -81,29 +94,7 @@
 							Sair
 						</MudMenuItem>
 					</ChildContent>
-				</MudMenu>
-
-				@* 				<div class="top-row px-4 auth">
-					<div class="ms-auto">
-						<div class="dropdown">
-							<button class="btn btn-light dropdown-toggle" 
-							        type="button" 
-									data-bs-toggle="dropdown">
-								<span class="me-2">👤</span> @UserSessionInformation.Username
-							</button>
-
-							<ul class="dropdown-menu dropdown-menu-end">
-								<li>
-									<a class="dropdown-item" @onclick="OpenDialogAsync">Trocar a Senha</a>
-								</li>
-								<li><hr class="dropdown-divider"></li>
-								<li>
-									<button class="dropdown-item" @onclick="Logout">Sair</button>
-								</li>
-							</ul>
-						</div>
-					</div>
-				</div> *@
+			    </MudMenu> *@
 			</MudAppBar>
 
 			<MudDrawer @bind-Open="_isNavOpen" Elevation="1">

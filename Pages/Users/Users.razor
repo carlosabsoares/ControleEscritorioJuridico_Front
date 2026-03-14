@@ -1,5 +1,6 @@
 ﻿@page "/users"
 @page "/users/Index"
+@using CEJ_WebApp.Core.Services
 @using CEJ_WebApp.Model
 @using CEJ_WebApp.Model.Dto
 @using CEJ_WebApp.Model.Enum
@@ -10,6 +11,7 @@
 @inject IJSRuntime JS
 @* @inject NotificationService NotificationService *@
 @inject ISnackbar Snackbar
+@inject NotificationService Notification
 
 @* <UserModal @ref="userModal"
 		   User="@user"
@@ -492,7 +494,9 @@
 			var address = await _externalService.GetAddressCep(user.Address.ZipCode);
 
 			if(string.IsNullOrEmpty(address.Logradouro))
-				ExibirMensagem("Cep invalido ou não localizado.", Severity.Warning);
+				Notification.ExibirMensagem("Cep inválido", Severity.Warning);
+				// ExibirMensagem("Cep invalido ou não localizado.", Severity.Warning);
+			
 
 			user.Address.City = address.Localidade;
 
@@ -504,7 +508,8 @@
 		}
 		else
 		{
-			ExibirMensagem("Cep invalido.", Severity.Error);
+			// ExibirMensagem("Cep invalido.", Severity.Error);
+			Notification.ExibirMensagem("Cep inválido", Severity.Error);
 			await cepField.FocusAsync();
 		}
 	}
@@ -631,7 +636,8 @@
 		var responseUser = await _userService.GetUserByUuidAsync(data.Uuid);
 
 		if (responseUser == null || string.IsNullOrEmpty(responseUser.Name))
-			ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
+			Notification.ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
+			//ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
 
 		user = responseUser;
 
@@ -647,7 +653,8 @@
 		var responseUser = await _userService.GetUserByUuidAsync(data.Uuid);
 
 		if (responseUser == null || string.IsNullOrEmpty(responseUser.Name))
-			ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
+			Notification.ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
+			//ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
 
 		user = responseUser;
 
@@ -666,7 +673,8 @@
 		var responseUser = await _userService.GetUserByUuidAsync(data.Uuid);
 
 		if (responseUser == null || string.IsNullOrEmpty(responseUser.Name))
-			ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
+			Notification.ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
+			// ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
 
 		user = responseUser;
 
@@ -681,14 +689,14 @@
 	#endregion
 
 
-	private void ExibirMensagem(string mensagem, Severity serverity = Severity.Error)
-	{
-		var config = (SnackbarOptions options) =>
-		{
-			options.DuplicatesBehavior = SnackbarDuplicatesBehavior.Prevent;
-		};
+	// private void ExibirMensagem(string mensagem, Severity serverity = Severity.Error)
+	// {
+	// 	var config = (SnackbarOptions options) =>
+	// 	{
+	// 		options.DuplicatesBehavior = SnackbarDuplicatesBehavior.Prevent;
+	// 	};
 
-		SnackbarService.Add(mensagem, serverity, configure: config, key: "User");
-	}
+	// 	SnackbarService.Add(mensagem, serverity, configure: config, key: "User");
+	// }
 
 }

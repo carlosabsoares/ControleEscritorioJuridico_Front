@@ -1,58 +1,36 @@
 ﻿using CEJ_WebApp.Core.Services.Interface;
 using CEJ_WebApp.Core.Shared;
 using CEJ_WebApp.Model;
-using CEJ_WebApp.Model.Dto;
 using System.Net.Http.Json;
+using static MudBlazor.FilterOperator;
+using Guid = System.Guid;
 
 namespace CEJ_WebApp.Core.Services
 {
-    public class UserService : IUserService
+    public class ClientService : IClientService
     {
         private readonly HttpClient Http = new();
-        private string url ;
+        private string url;
         private bool _return = false;
-        private string _object = "User";
+        private string _object = "Client";
         private readonly Parameters Parameters;
         private readonly UserSessionInformation _userSessionInformation;
 
-        public UserService(Parameters parameters, UserSessionInformation userSessionInformation)
+        public ClientService(Parameters parameters, UserSessionInformation userSessionInformation)
         {
             Parameters = parameters;
             url = Parameters.GetUrlAddress();
             _userSessionInformation = userSessionInformation;
         }
 
-        public async Task<UserEntity>? GetUserByUuidAsync(Guid uuid)
+
+        public async Task<bool> AddAsync(ClientEntity clientEntity)
         {
+            var _return = false;
+
             try
             {
-                UserEntity _user = new();
-
-                var token = await Parameters.GetTokenAsync();
-
-                if (Http.DefaultRequestHeaders.Contains("Authorization"))
-                    Http.DefaultRequestHeaders.Remove("Authorization");
-
-                Http.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-
-                string uri = $"{url}{_object}/{uuid}/ByUuid";
-
-                _user = await Http.GetFromJsonAsync<UserEntity>(uri);
-
-                return _user;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-                return new UserEntity();
-            }
-        }
-
-        public async Task<List<UserEntity>>? GetUserAllAsync()
-        {
-            try
-            {
-                List<UserEntity> _users = new();
+                clientEntity.CompanyUuid = _userSessionInformation.CompanyUuid;
 
                 var token = await Parameters.GetTokenAsync();
 
@@ -63,35 +41,7 @@ namespace CEJ_WebApp.Core.Services
 
                 string uri = $"{url}{_object}";
 
-                _users = await Http.GetFromJsonAsync<List<UserEntity>>(uri);
-
-                return _users;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-                return new List<UserEntity>();
-            }
-        }
-
-        public async Task<bool> AddAsync(UserEntity userEntity)
-        {
-            try
-            {
-                var _return = false;
-
-                userEntity.CompanyUuid = _userSessionInformation.CompanyUuid;
-
-                var token = await Parameters.GetTokenAsync();
-
-                if (Http.DefaultRequestHeaders.Contains("Authorization"))
-                    Http.DefaultRequestHeaders.Remove("Authorization");
-
-                Http.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-
-                string uri = $"{url}{_object}";
-
-                var _result = await Http.PostAsJsonAsync($"{url}{_object}", userEntity);
+                var _result = await Http.PostAsJsonAsync($"{url}{_object}", clientEntity);
 
                 if (_result.IsSuccessStatusCode)
                     _return = true;
@@ -106,13 +56,43 @@ namespace CEJ_WebApp.Core.Services
             }
         }
 
-        public async Task<bool> EditAsync(UserEntity userEntity)
+        public async Task<bool> DeactiveAsync(System.Guid clientUuid)
         {
+            var _return = false;
+
             try
             {
-                var _return = false;
+                var token = await Parameters.GetTokenAsync();
 
-                userEntity.CompanyUuid = _userSessionInformation.CompanyUuid;
+                if (Http.DefaultRequestHeaders.Contains("Authorization"))
+                    Http.DefaultRequestHeaders.Remove("Authorization");
+
+                Http.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+
+                string uri = $"{url}{_object}";
+
+                var _result = await Http.DeleteAsync($"{url}{_object}?Uuid={clientUuid}");
+
+                if (_result.IsSuccessStatusCode)
+                    _return = true;
+
+
+                return _return;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+                return _return;
+            }
+        }
+
+        public async Task<bool> EditAsync(ClientEntity clientEntity)
+        {
+            var _return = false;
+
+            try
+            {
+                clientEntity.CompanyUuid = _userSessionInformation.CompanyUuid;
 
                 var token = await Parameters.GetTokenAsync();
 
@@ -123,7 +103,7 @@ namespace CEJ_WebApp.Core.Services
 
                 string uri = $"{url}{_object}";
 
-                var _result = await Http.PutAsJsonAsync($"{url}{_object}", userEntity);
+                var _result = await Http.PutAsJsonAsync($"{url}{_object}", clientEntity);
 
                 if (_result.IsSuccessStatusCode)
                 {
@@ -138,12 +118,12 @@ namespace CEJ_WebApp.Core.Services
             }
         }
 
-        public async Task<bool> DeactiveAsync(Guid userUuid)
+        public async Task<List<ClientEntity>>? GetClientAllAsync()
         {
+            List<ClientEntity> _clients = new();
+
             try
             {
-                var _return = false;
-
                 var token = await Parameters.GetTokenAsync();
 
                 if (Http.DefaultRequestHeaders.Contains("Authorization"))
@@ -153,27 +133,23 @@ namespace CEJ_WebApp.Core.Services
 
                 string uri = $"{url}{_object}";
 
-                var _result = await Http.DeleteAsync($"{url}{_object}?Uuid={userUuid}");
+                _clients = await Http.GetFromJsonAsync<List<ClientEntity>>(uri);
 
-                if (_result.IsSuccessStatusCode)
-                    _return = true;
-
-
-                return _return;
+                return _clients ?? null;
             }
             catch (Exception ex)
             {
                 throw ex;
-                return _return;
+                return _clients;
             }
         }
 
-        public async Task<bool> ReactiveAsync(Guid userUuid)
+        public async Task<ClientEntity>? GetClientByUuidAsync(Guid uuid)
         {
+            ClientEntity _client = new();
+
             try
             {
-                var _return = false;
-
                 var token = await Parameters.GetTokenAsync();
 
                 if (Http.DefaultRequestHeaders.Contains("Authorization"))
@@ -181,29 +157,25 @@ namespace CEJ_WebApp.Core.Services
 
                 Http.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
 
-                string uri = $"{url}{_object}";
+                string uri = $"{url}{_object}/{uuid}/ByUuid";
 
-                var _result = await Http.PatchAsync($"{url}{_object}?Uuid={userUuid}", null);
+                _client = await Http.GetFromJsonAsync<ClientEntity>(uri);
 
-                if (_result.IsSuccessStatusCode)
-                    _return = true;
-
-
-                return _return;
+                return _client;
             }
             catch (Exception ex)
             {
                 throw ex;
-                return _return;
+                return _client;
             }
         }
 
-        public async Task<bool> ChangePasswordAsync(ChangePasswordResponseDto changePasswordResponseDto)
+        public async Task<bool> ReactiveAsync(Guid clientUuid)
         {
+            var _return = false;
+
             try
             {
-                var _return = false;
-
                 var token = await Parameters.GetTokenAsync();
 
                 if (Http.DefaultRequestHeaders.Contains("Authorization"))
@@ -213,7 +185,7 @@ namespace CEJ_WebApp.Core.Services
 
                 string uri = $"{url}{_object}";
 
-                var _result = await Http.PutAsJsonAsync($"{url}{_object}/ChangePassword", changePasswordResponseDto);
+                var _result = await Http.PatchAsync($"{url}{_object}?Uuid={clientUuid}", null);
 
                 if (_result.IsSuccessStatusCode)
                     _return = true;
