@@ -18,10 +18,16 @@
 <MudDialogProvider />
 
 <ModalClient @ref="clientModal"
-		   Client="@client"
-		   ModalTitle="@modalTitle"
-		   InsertMode="insertMode"
-		   OnSaved="ReloadGrid"/>
+			 Client="@client"
+			 ModalTitle="@modalTitle"
+			 InsertMode="insertMode"
+			 OnSaved="ReloadGrid" />
+
+<ClientActiveDeactiveModal @ref="clientActiveDeactiveModal"
+						   Client="@client"
+						   ModalTitle="@modalTitle"
+						   DeactiveMode="deactiveMode"
+						   OnSaved="ReloadGrid" />
 
 <div class="card">
 	<div class="card-header">
@@ -39,186 +45,104 @@
 
 		</MudStack>
 	</div>
+
+	<div class="card-body">
+		<MudTable @ref="gridClient"
+				  T="ClientDto"
+				  Items="@clientsDto"
+				  Filter="new Func<ClientDto, bool>(FilterClients)"
+				  FilterMode="FilterMode.Filterable"
+				  FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+				  Hover="true"
+				  Bordered="true"
+				  Striped="true"
+				  Loading="@loading"
+				  Breakpoint="Breakpoint.Sm"
+				  Height="400px"
+				  FixedHeader="true"
+				  HorizontalScrollbar="true">
+
+			<!-- Toolbar com filtro -->
+			<ToolBarContent>
+				<MudText Typo="Typo.subtitle1">Lista de Clientes</MudText>
+				<MudSpacer />
+				<MudTextField @bind-Value="searchString"
+							  Placeholder="Pesquisar..."
+							  Variant="MudBlazor.Variant.Outlined"
+							  Adornment="Adornment.Start"
+							  AdornmentIcon="@Icons.Material.Filled.Search"
+							  IconSize="Size.Small"
+							  DebounceInterval="300"
+							  Immediate="true"
+							  Class="mt-0" />
+			</ToolBarContent>
+
+			<!-- Cabeçalho da tabela -->
+			<HeaderContent>
+				<MudTh><MudTableSortLabel SortBy="new Func<ClientDto, object>(x => x.Name)">Nome</MudTableSortLabel></MudTh>
+				<MudTh><MudTableSortLabel SortBy="new Func<ClientDto, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
+				<MudTh><MudTableSortLabel SortBy="new Func<ClientDto, object>(x => x.Phone)">Telefone</MudTableSortLabel></MudTh>
+				<MudTh><MudTableSortLabel SortBy="new Func<ClientDto, object>(x => x.CellPhone)">Celular</MudTableSortLabel></MudTh>
+				<MudTh Style="width: 120px; text-align: center;">Ações</MudTh>
+			</HeaderContent>
+
+			<!-- Linhas da tabela -->
+			<RowTemplate>
+				<MudTd DataLabel="Nome">@context.Name</MudTd>
+				<MudTd DataLabel="Email">@context.Email</MudTd>
+				<MudTd DataLabel="Telefone">@context.Phone</MudTd>
+				<MudTd DataLabel="Celular">@context.CellPhone</MudTd>
+				<MudTd DataLabel="Ações" Style="text-align: center;">
+					<MudStack Row="true" Spacing="1" Justify="Justify.Center">
+						@if (context.Active)
+						{
+							<!-- Botão Alterar -->
+							<MudTooltip Text="Alterar">
+								<MudIconButton Icon="@Icons.Material.Filled.Edit"
+											   Color="Color.Primary"
+											   Size="Size.Small"
+											   OnClick="@(async () => await OnShowModalEditClick(context))" />
+							</MudTooltip>
+
+							<!-- Botão Desativar -->
+							<MudTooltip Text="Desativar">
+								<MudIconButton Icon="@Icons.Material.Filled.Delete"
+											   Color="Color.Error"
+											   Size="Size.Small"
+											   OnClick="@(async () => await OnShowModalDeleteClick(context))" />
+							</MudTooltip>
+						}
+						else
+						{
+							<!-- Botão Reativar -->
+							<MudTooltip Text="Reativar">
+								<MudIconButton Icon="@Icons.Material.Filled.Refresh"
+											   Color="Color.Info"
+											   Size="Size.Small"
+											   OnClick="@(async () => await OnShowModalReactiveClick(context))" />
+							</MudTooltip>
+						}
+					</MudStack>
+				</MudTd>
+			</RowTemplate>
+			<!-- Paginação -->
+			<PagerContent>
+				<MudTablePager PageSizeOptions="new int[] { 5, 10, 25, 50 }" />
+			</PagerContent>
+
+			<!-- Mensagem quando não há dados -->
+			<NoRecordsContent>
+				<MudText Align="Align.Center">Nenhum cliente encontrado</MudText>
+			</NoRecordsContent>
+
+			<!-- Loading indicator -->
+			<LoadingContent>
+				<MudText Align="Align.Center">Carregando...</MudText>
+			</LoadingContent>
+
+		</MudTable>
+	</div>
 </div>
-
-<div class="card-body">
-	<MudTable @ref="gridClient"
-			  T="ClientDto"
-			  Items="@clientsDto"
-			  Filter="new Func<ClientDto, bool>(FilterClients)"
-			  FilterMode="FilterMode.Filterable"
-			  FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-			  Hover="true"
-			  Bordered="true"
-			  Striped="true"
-			  Loading="@loading"
-			  Breakpoint="Breakpoint.Sm"
-			  Height="400px"
-			  FixedHeader="true"
-			  HorizontalScrollbar="true">
-
-		<!-- Toolbar com filtro -->
-		<ToolBarContent>
-			<MudText Typo="Typo.subtitle1">Lista de Clientes</MudText>
-			<MudSpacer />
-			<MudTextField @bind-Value="searchString"
-						  Placeholder="Pesquisar..."
-						  Variant="MudBlazor.Variant.Outlined"
-						  Adornment="Adornment.Start"
-						  AdornmentIcon="@Icons.Material.Filled.Search"
-						  IconSize="Size.Small"
-						  DebounceInterval="300"
-						  Immediate="true"
-						  Class="mt-0" />
-		</ToolBarContent>
-
-		<!-- Cabeçalho da tabela -->
-		<HeaderContent>
-			<MudTh><MudTableSortLabel SortBy="new Func<ClientDto, object>(x => x.Name)">Nome</MudTableSortLabel></MudTh>
-			<MudTh><MudTableSortLabel SortBy="new Func<ClientDto, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
-			<MudTh><MudTableSortLabel SortBy="new Func<ClientDto, object>(x => x.Phone)">Telefone</MudTableSortLabel></MudTh>
-			<MudTh><MudTableSortLabel SortBy="new Func<ClientDto, object>(x => x.CellPhone)">Celular</MudTableSortLabel></MudTh>
-			<MudTh Style="width: 120px; text-align: center;">Ações</MudTh>
-		</HeaderContent>
-
-		<!-- Linhas da tabela -->
-		<RowTemplate>
-			<MudTd DataLabel="Nome">@context.Name</MudTd>
-			<MudTd DataLabel="Email">@context.Email</MudTd>
-			<MudTd DataLabel="Telefone">@context.Phone</MudTd>
-			<MudTd DataLabel="Celular">@context.CellPhone</MudTd>
-			<MudTd DataLabel="Ações" Style="text-align: center;">
-				<MudStack Row="true" Spacing="1" Justify="Justify.Center">
-					@if (context.Active)
-					{
-						<!-- Botão Alterar -->
-						<MudTooltip Text="Alterar">
-							<MudIconButton Icon="@Icons.Material.Filled.Edit"
-										   Color="Color.Primary"
-										   Size="Size.Small"
-										   OnClick="@(async () => await OnShowModalEditClick(context))" />
-						</MudTooltip>
-
-						<!-- Botão Desativar -->
-						<MudTooltip Text="Desativar">
-							<MudIconButton Icon="@Icons.Material.Filled.Delete"
-										   Color="Color.Error"
-										   Size="Size.Small"
-										   OnClick="@(async () => await OnShowModalDeleteClick(context))" />
-						</MudTooltip>
-					}
-					else
-					{
-						<!-- Botão Reativar -->
-						<MudTooltip Text="Reativar">
-							<MudIconButton Icon="@Icons.Material.Filled.Refresh"
-										   Color="Color.Info"
-										   Size="Size.Small"
-										   OnClick="@(async () => await OnShowModalReactiveClick(context))" />
-						</MudTooltip>
-					}
-				</MudStack>
-			</MudTd>
-		</RowTemplate>
-
-
-	</MudTable>
-</div>
-
-
-
-@* <MudTable @ref="gridClient"
-		  T="UserDto"
-		  Items="@clientsDto"
-		  Filter="new Func<ClientDto, bool>(FilterClients)"
-		  FilterMode="FilterMode.Filterable"
-		  FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-		  Hover="true"
-		  Bordered="true"
-		  Striped="true"
-		  Loading="@loading"
-		  Breakpoint="Breakpoint.Sm"
-		  Height="400px"
-		  FixedHeader="true"
-		  HorizontalScrollbar="true">
-
-	<!-- Toolbar com filtro -->
-	<ToolBarContent>
-		<MudText Typo="Typo.subtitle1">Lista de Clientes</MudText>
-		<MudSpacer />
-		<MudTextField @bind-Value="searchString"
-					  Placeholder="Pesquisar..."
-					  Variant="MudBlazor.Variant.Outlined"
-					  Adornment="Adornment.Start"
-					  AdornmentIcon="@Icons.Material.Filled.Search"
-					  IconSize="Size.Small"
-					  DebounceInterval="300"
-					  Immediate="true"
-					  Class="mt-0" />
-	</ToolBarContent>
-
-	<!-- Cabeçalho da tabela -->
-	<HeaderContent>
-		<MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Name)">Nome</MudTableSortLabel></MudTh>
-		<MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
-		<MudTh Style="width: 120px; text-align: center;">Ações</MudTh>
-	</HeaderContent>
-
-	<!-- Linhas da tabela -->
-	<RowTemplate>
-		<MudTd DataLabel="Nome">@context.Name</MudTd>
-		<MudTd DataLabel="Email">@context.Email</MudTd>
-		<MudTd DataLabel="Perfil">@context.Role</MudTd>
-		<MudTd DataLabel="Ações" Style="text-align: center;">
-			<MudStack Row="true" Spacing="1" Justify="Justify.Center">
-				@if (context.Active)
-				{
-					<!-- Botão Alterar -->
-					<MudTooltip Text="Alterar">
-						<MudIconButton Icon="@Icons.Material.Filled.Edit"
-									   Color="Color.Primary"
-									   Size="Size.Small"
-									   OnClick="@(async () => await OnShowModalEditClick(context))" />
-					</MudTooltip>
-
-					<!-- Botão Desativar -->
-					<MudTooltip Text="Desativar">
-						<MudIconButton Icon="@Icons.Material.Filled.Delete"
-									   Color="Color.Error"
-									   Size="Size.Small"
-									   OnClick="@(async () => await OnShowModalDeleteClick(context))" />
-					</MudTooltip>
-				}
-				else
-				{
-					<!-- Botão Reativar -->
-					<MudTooltip Text="Reativar">
-						<MudIconButton Icon="@Icons.Material.Filled.Refresh"
-									   Color="Color.Info"
-									   Size="Size.Small"
-									   OnClick="@(async () => await OnShowModalReactiveClick(context))" />
-					</MudTooltip>
-				}
-			</MudStack>
-		</MudTd>
-	</RowTemplate>
-
-	<!-- Paginação -->
-	<PagerContent>
-		<MudTablePager PageSizeOptions="new int[] { 5, 10, 25, 50 }" />
-	</PagerContent>
-
-	<!-- Mensagem quando não há dados -->
-	<NoRecordsContent>
-		<MudText Align="Align.Center">Nenhum usuário encontrado</MudText>
-	</NoRecordsContent>
-
-	<!-- Loading indicator -->
-	<LoadingContent>
-		<MudText Align="Align.Center">Carregando...</MudText>
-	</LoadingContent>
-</MudTable>
- *@
 @code {
 	[Inject]
 	public ISnackbar SnackbarService { get; set; } = null!;
@@ -229,7 +153,9 @@
 	private bool loading = false;
 
 	private ModalClient clientModal = default!;
+	private ClientActiveDeactiveModal clientActiveDeactiveModal = default!;
 	private bool insertMode = false;
+	private bool deactiveMode = false;
 	private string modalTitle = string.Empty;
 
 
@@ -266,12 +192,19 @@
 
 		client = responseClient;
 
+		clientModal.Client = client;
+		clientModal.InsertMode = false;
+		clientModal.ModalTitle = "Alterar cliente";
+
+		await clientModal.ShowAsync();
+
 		//await modalUpdate.ShowAsync();
 		//await modalScreen.ShowAsync();
 	}
 
 	private async Task OnShowModalReactiveClick(ClientDto data)
 	{
+		deactiveMode = false;
 
 		var responseClient = await _clientService.GetClientByUuidAsync(data.Uuid);
 
@@ -280,12 +213,16 @@
 
 		client = responseClient;
 
-		//await modalUpdate.ShowAsync();
-		//await modalScreen.ShowAsync();
+		clientActiveDeactiveModal.Client = client;
+		clientActiveDeactiveModal.DeactiveMode = deactiveMode;
+		clientActiveDeactiveModal.ModalTitle = "Reativar cliente";
+
+		await clientActiveDeactiveModal.ShowAsync();
 	}
 
 	private async Task OnShowModalDeleteClick(ClientDto data)
 	{
+		deactiveMode = true;
 
 		var responseClient = await _clientService.GetClientByUuidAsync(data.Uuid);
 
@@ -293,6 +230,12 @@
 			Notification.ExibirMensagem("Error ao recuperar cliente.", Severity.Error);
 
 		client = responseClient;
+
+		clientActiveDeactiveModal.Client = client;
+		clientActiveDeactiveModal.DeactiveMode = deactiveMode;
+		clientActiveDeactiveModal.ModalTitle = "Deletar cliente";
+
+		await clientActiveDeactiveModal.ShowAsync();
 
 		//await modalUpdate.ShowAsync();
 		//await modalScreen.ShowAsync();

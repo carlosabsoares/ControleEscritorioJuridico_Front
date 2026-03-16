@@ -1,0 +1,133 @@
+﻿@using CEJ_WebApp.Core.Services
+@using CEJ_WebApp.Model
+@inject IClientService _clientService
+@inject IJSRuntime JS
+@* @inject NotificationService NotificationService *@
+@inject ISnackbar Snackbar
+@inject NotificationService Notification
+
+
+<Modal @ref="modal"
+	   Title="@ModalTitle"
+	   UseStaticBackdrop="true"
+	   CloseOnEscape="false"
+	   IsVerticallyCentered="true"
+	   Size="ModalSize.Large"
+	   HideCloseButton="true">
+	<!-- Adicione esta linha -->
+	<BodyTemplate>
+		@* <EditForm Model="@user" OnValidSubmit="@OnIncludeUser"> *@
+		<EditForm Model="@Client">
+			<DataAnnotationsValidator />
+
+			<MudText Typo="Typo.h6">
+				@if (DeactiveMode)
+				{
+					<MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1" />
+					<span>Deseja apagar esse cliente?</span>
+				}
+				else
+				{
+					<MudIcon Icon="@Icons.Material.Filled.ChangeCircle" Class="mr-3 mb-n1" />
+					<span>Deseja reativar esse cliente?</span>
+				}
+			</MudText>
+            
+			<MudTextField Value="@Client.Name.ToString()"
+						  Label="Nome"
+						  ReadOnly="true"
+						  Variant="Variant.Outlined"
+						  FullWidth="true" />
+
+		</EditForm>
+	</BodyTemplate>
+	<FooterTemplate>
+		<MudButton StartIcon="@Icons.Material.Filled.Close"
+				   Color="Color.Secondary"
+				   Variant="Variant.Filled"
+				   OnClick="HideAsync">
+			Fechar
+		</MudButton>
+
+		<MudButton StartIcon="@Icons.Material.Filled.Save"
+				   Color="Color.Primary"
+				   Variant="Variant.Filled"
+				   OnClick="Salvar">
+			Confirmar
+		</MudButton>
+	</FooterTemplate>
+</Modal>
+
+@code {
+
+
+	[Parameter]
+	public ClientEntity Client { get; set; }
+
+	[Parameter]
+	public EventCallback OnSaved { get; set; }
+
+	[Parameter]
+	public string ModalTitle { get; set; }
+
+	[Parameter]
+	public bool DeactiveMode { get; set; }
+
+	private Modal modal;
+
+	public async Task ShowAsync()
+	{
+		await modal.ShowAsync();
+	}
+
+	public async Task HideAsync()
+	{
+		await modal.HideAsync();
+	}
+
+	private async Task Salvar()
+	{
+		bool result = false;
+
+		if (DeactiveMode)
+		{
+			result = await _clientService.DeactiveAsync(Client.Uuid);
+
+			if (result)
+				Notification.ExibirMensagem("Cliente desativado com sucesso", Severity.Success);
+			else
+			{
+				Notification.ExibirMensagem("Erro ao desativar cliente", Severity.Error);
+			}
+		}
+		else
+		{
+			result = await _clientService.ReactiveAsync(Client.Uuid);
+
+			if (result)
+				Notification.ExibirMensagem("Cliente desativado com sucesso", Severity.Success);
+			else
+			{
+				Notification.ExibirMensagem("Erro ao desativar cliente", Severity.Error);
+			}
+		}
+
+		await HideAsync();
+
+		if (result)
+			await OnSaved.InvokeAsync(); // avisa o pai
+	}
+
+	// private async Task OnPersisteDeleteModalUser()
+	// {
+	// 	if (DeactiveMode)
+	// 		await OnDeactiveUser();
+	// 	else
+	// 		await OnReactiveUser();
+
+	// 	DeactiveMode = false;
+	// 	ModalTitle = string.Empty;
+
+	// 	await OnHideModalDeactiveClick();
+	// }
+}
