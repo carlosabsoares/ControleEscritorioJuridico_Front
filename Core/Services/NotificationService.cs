@@ -23,7 +23,9 @@ namespace CEJ_WebApp.Core.Services
 
         // Sobrecargas úteis
         public void Sucesso(string mensagem) => ExibirMensagem(mensagem, Severity.Success);
+
         public void Aviso(string mensagem) => ExibirMensagem(mensagem, Severity.Warning);
+
         public void Info(string mensagem) => ExibirMensagem(mensagem, Severity.Info);
     }
 }

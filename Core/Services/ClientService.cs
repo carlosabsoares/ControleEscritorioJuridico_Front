@@ -2,7 +2,6 @@
 using CEJ_WebApp.Core.Shared;
 using CEJ_WebApp.Model;
 using System.Net.Http.Json;
-using static MudBlazor.FilterOperator;
 using Guid = System.Guid;
 
 namespace CEJ_WebApp.Core.Services
@@ -22,7 +21,6 @@ namespace CEJ_WebApp.Core.Services
             url = Parameters.GetUrlAddress();
             _userSessionInformation = userSessionInformation;
         }
-
 
         public async Task<bool> AddAsync(ClientEntity clientEntity)
         {
@@ -45,7 +43,6 @@ namespace CEJ_WebApp.Core.Services
 
                 if (_result.IsSuccessStatusCode)
                     _return = true;
-
 
                 return _return;
             }
@@ -75,7 +72,6 @@ namespace CEJ_WebApp.Core.Services
 
                 if (_result.IsSuccessStatusCode)
                     _return = true;
-
 
                 return _return;
             }
@@ -189,7 +185,6 @@ namespace CEJ_WebApp.Core.Services
 
                 if (_result.IsSuccessStatusCode)
                     _return = true;
-
 
                 return _return;
             }

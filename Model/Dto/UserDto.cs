@@ -1,6 +1,4 @@
-﻿using CEJ_WebApp.Model.Enum;
-
-namespace CEJ_WebApp.Model.Dto
+﻿namespace CEJ_WebApp.Model.Dto
 {
     public class UserDto
     {

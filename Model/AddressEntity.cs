@@ -4,14 +4,12 @@ namespace CEJ_WebApp.Model
 {
     public class AddressEntity
     {
-        [Required(ErrorMessage ="Logradouro é obrigatório")]
+        [Required(ErrorMessage = "Logradouro é obrigatório")]
         [MinLength(2)]
         [MaxLength(100)]
         public string Street { get; set; } = null!;
 
-
         public string Number { get; set; } = null!;
-
 
         public string? Complement { get; set; }
 
@@ -25,7 +23,7 @@ namespace CEJ_WebApp.Model
 
         public string State { get; set; } = null!;
 
-        [MaxLength(10,ErrorMessage = "Cep deve ter no máximo 8 dígitos")]
+        [MaxLength(10, ErrorMessage = "Cep deve ter no máximo 8 dígitos")]
         public string ZipCode { get; set; } = null!;
 
         [MinLength(2)]

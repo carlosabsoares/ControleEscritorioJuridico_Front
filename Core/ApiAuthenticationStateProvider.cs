@@ -30,7 +30,6 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-
         //var savedToken = await _localStorage.GetItemAsync<string>("authToken");
         //var expirationToken = await _localStorage.GetItemAsync<string>("tokenExpiration");
 
@@ -46,7 +45,7 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
         var handler = new JwtSecurityTokenHandler();
         var jwtToken = handler.ReadJwtToken(savedToken);
 
-        _parameters.GetUserSessionInformation(savedToken); 
+        _parameters.GetUserSessionInformation(savedToken);
 
         var usurInfo = await _userService.GetUserByUuidAsync(_userSessionInformation.UserUuid);
 
@@ -79,26 +78,25 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 
     private bool TokenExpirou(string dataToken)
     {
+        if (string.IsNullOrWhiteSpace(dataToken)) return false;
 
-            if (string.IsNullOrWhiteSpace(dataToken)) return false;
+        if (!DateTime.TryParseExact(
+                dataToken,
+                "yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.RoundtripKind,
+                out var dataExpiracao))
+            return false;
 
-            if (!DateTime.TryParseExact(
-                    dataToken,
-                    "yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'",
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.RoundtripKind,
-                    out var dataExpiracao))
-                return false;
-
-            return dataExpiracao < DateTime.UtcNow;
+        return dataExpiracao < DateTime.UtcNow;
     }
+
     private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
     {
         var claims = new List<Claim>();
         var payload = jwt.Split('.')[1];
         var jsonBytes = ParseBase64WithoutPadding(payload);
         var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
-
 
         keyValuePairs.TryGetValue(ClaimTypes.Role, out object roles);
 

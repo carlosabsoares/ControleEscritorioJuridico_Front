@@ -9,7 +9,7 @@ namespace CEJ_WebApp.Model
         public string Username { get; set; } = null!;
         public Guid CompanyUuid { get; set; }
         public Guid UserUuid { get; set; }
-        public UserRoleType Role  { get; set; } = UserRoleType.Nenhum;
+        public UserRoleType Role { get; set; } = UserRoleType.Nenhum;
         public DateTime? ExpireJwt { get; set; } = null!;
     }
 }

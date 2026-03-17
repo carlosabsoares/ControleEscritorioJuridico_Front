@@ -3,7 +3,6 @@ using CEJ_WebApp.Core.Request;
 using CEJ_WebApp.Core.Response;
 using CEJ_WebApp.Core.Services.Interface;
 using CEJ_WebApp.Model;
-using CEJ_WebApp.Model.Dto;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace CEJ_WebApp.Core.Services;
@@ -49,9 +48,7 @@ public class AuthService : IAuthService
         ((ApiAuthenticationStateProvider)_authenticationStateProvider)
                             .MarkUserAsAuthenticated(result.NomeUsuario);
 
-
         UserSessionInformationLoad(result, loginRequest.Email);
-
 
         return result;
     }

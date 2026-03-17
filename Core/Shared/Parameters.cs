@@ -1,20 +1,16 @@
 ﻿using Blazored.LocalStorage;
-using CEJ_WebApp.Core.Services.Interface;
 using CEJ_WebApp.Model;
-using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using YamlDotNet.Core.Tokens;
 
 namespace CEJ_WebApp.Core.Shared
 {
     public class Parameters
     {
-        private  readonly ILocalStorageService _localStorage;
+        private readonly ILocalStorageService _localStorage;
         private UserSessionInformation _userSessionInformation;
         //private readonly IUserService _userService;
 
-        public Parameters(ILocalStorageService localStorage, 
+        public Parameters(ILocalStorageService localStorage,
                           UserSessionInformation userSessionInformation
             //              IUserService userService
             )
@@ -30,11 +26,9 @@ namespace CEJ_WebApp.Core.Shared
 
         public async Task<string> GetTokenAsync()
         {
-
             var savedToken = await _localStorage.GetItemAsync<string>("authToken");
 
             return savedToken ?? null;
-
         }
 
         public async Task<bool> GetTokenExpirationAsync()
@@ -80,7 +74,6 @@ namespace CEJ_WebApp.Core.Shared
             // Expiração
             _userSessionInformation.ExpireJwt = ExpirationDateCapture(jwt);
         }
-
 
         private DateTime ExpirationDateCapture(string token)
         {

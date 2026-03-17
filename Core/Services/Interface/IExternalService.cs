@@ -1,5 +1,4 @@
-﻿using CEJ_WebApp.Model;
-using CEJ_WebApp.Model.Dto;
+﻿using CEJ_WebApp.Model.Dto;
 
 namespace CEJ_WebApp.Core.Services.Interface
 {

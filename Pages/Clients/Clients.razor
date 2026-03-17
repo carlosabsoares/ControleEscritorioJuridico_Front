@@ -122,6 +122,21 @@
 											   OnClick="@(async () => await OnShowModalReactiveClick(context))" />
 							</MudTooltip>
 						}
+
+						<MudTooltip Text="Processos">
+							<MudIconButton Icon="@Icons.Material.Filled.Balance"
+										   Style="color:#9E9E9E"
+										   Size="Size.Small"
+										   OnClick="@(async () => await OnShowModalEditClick(context))" />
+						</MudTooltip>
+
+						<MudTooltip Text="Financeiro">
+							<MudIconButton Icon="@Icons.Material.Filled.Paid"
+										   Style="color:#43A047"
+										   Size="Size.Small"
+
+										   OnClick="@(async () => await OnShowModalEditClick(context))" />
+						</MudTooltip>
 					</MudStack>
 				</MudTd>
 			</RowTemplate>

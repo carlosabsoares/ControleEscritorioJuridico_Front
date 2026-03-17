@@ -1,7 +1,6 @@
 ﻿using CEJ_WebApp.Model;
 using CEJ_WebApp.Model.Enum;
 using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 
 public class CpfCnpjValidationAttribute : ValidationAttribute
 {

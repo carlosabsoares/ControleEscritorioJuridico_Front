@@ -9,7 +9,7 @@ namespace CEJ_WebApp.Core.Services
     public class UserService : IUserService
     {
         private readonly HttpClient Http = new();
-        private string url ;
+        private string url;
         private bool _return = false;
         private string _object = "User";
         private readonly Parameters Parameters;
@@ -96,7 +96,6 @@ namespace CEJ_WebApp.Core.Services
                 if (_result.IsSuccessStatusCode)
                     _return = true;
 
-
                 return _return;
             }
             catch (Exception ex)
@@ -158,7 +157,6 @@ namespace CEJ_WebApp.Core.Services
                 if (_result.IsSuccessStatusCode)
                     _return = true;
 
-
                 return _return;
             }
             catch (Exception ex)
@@ -188,7 +186,6 @@ namespace CEJ_WebApp.Core.Services
                 if (_result.IsSuccessStatusCode)
                     _return = true;
 
-
                 return _return;
             }
             catch (Exception ex)
@@ -217,7 +214,6 @@ namespace CEJ_WebApp.Core.Services
 
                 if (_result.IsSuccessStatusCode)
                     _return = true;
-
 
                 return _return;
             }

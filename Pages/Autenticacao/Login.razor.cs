@@ -1,22 +1,23 @@
-﻿using Microsoft.AspNetCore.Components;
-using MudBlazor;
-using CEJ_WebApp.Core.Request;
+﻿using CEJ_WebApp.Core.Request;
 using CEJ_WebApp.Core.Services.Interface;
+using Microsoft.AspNetCore.Components;
+using MudBlazor;
 
 namespace CEJ_WebApp.Pages.Autenticacao;
 
 public partial class LoginPage : ComponentBase
 {
     #region Properties
+
     public LoginRequest InputRequest { get; set; } = new();
     public bool ShowErrors { get; set; } = false;
     public bool Autenticando { get; set; } = false;
     public string Error { get; set; } = "";
 
-
-    #endregion
+    #endregion Properties
 
     #region Services
+
     [Inject]
     public IAuthService AuthService { get; set; } = null!;
 
@@ -26,9 +27,10 @@ public partial class LoginPage : ComponentBase
     [Inject]
     public ISnackbar SnackbarService { get; set; } = null!;
 
-    #endregion
+    #endregion Services
 
     #region Methods
+
     public async Task OnValidSubmitAsync()
     {
         try
@@ -72,6 +74,5 @@ public partial class LoginPage : ComponentBase
         SnackbarService.Add(mensagem, serverity, configure: config, key: "Login");
     }
 
-
-    #endregion
+    #endregion Methods
 }
