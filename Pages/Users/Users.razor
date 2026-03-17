@@ -9,15 +9,8 @@
 @inject IUserService _userService
 @inject IExternalService _externalService
 @inject IJSRuntime JS
-@* @inject NotificationService NotificationService *@
 @inject ISnackbar Snackbar
 @inject NotificationService Notification
-
-@* <UserModal @ref="userModal"
-		   User="@user"
-		   Title="@modalTitle"
-		   InsertMode="insertMode"
-		   OnSave="OnPersisteModalUser" /> *@
 
 <Modal @ref="modalScreen" title=@modalTitle
 	   UseStaticBackdrop="true"
