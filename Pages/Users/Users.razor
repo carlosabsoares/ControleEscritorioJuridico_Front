@@ -12,11 +12,19 @@
 @inject ISnackbar Snackbar
 @inject NotificationService Notification
 
-<Modal @ref="modalScreen" title=@modalTitle
+<Modal @ref="modalScreen"
 	   UseStaticBackdrop="true"
 	   CloseOnEscape="false"
 	   IsVerticallyCentered="true"
 	   Size="ModalSize.Large">
+	<HeaderTemplate>
+		<div class="d-flex align-items-center gap-2">
+			<MudIcon Icon="@(insertMode
+							? Icons.Material.Filled.PersonAdd
+		    			    : Icons.Material.Filled.Edit)" />
+			<span>@modalTitle</span>
+		</div>
+	</HeaderTemplate>
 	<BodyTemplate>
 		<EditForm Model="@user">
 			<DataAnnotationsValidator />
@@ -362,6 +370,8 @@
 
 	private IMask cepMask = new PatternMask("00000-000");
 	private MudMask cepField;
+
+	
 
 	//RadzenDataGrid<UserDto> gridUser;
 	private BlazorBootstrap.Button editUserButton = default!;

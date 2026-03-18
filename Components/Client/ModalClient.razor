@@ -10,11 +10,16 @@
 @inject NotificationService Notification
 
 <Modal @ref="modal"
-	   title=@ModalTitle
 	   UseStaticBackdrop="true"
 	   CloseOnEscape="false"
 	   IsVerticallyCentered="true"
 	   Size="ModalSize.Large">
+	<HeaderTemplate>
+		<MudIcon Icon="@(InsertMode
+							? Icons.Material.Filled.PersonAdd
+		    			    : Icons.Material.Filled.Edit)" />
+		<span>@ModalTitle</span>
+	</HeaderTemplate>
 	<BodyTemplate>
 		<EditForm Model="@Client">
 			<DataAnnotationsValidator />
