@@ -21,6 +21,8 @@ namespace CEJ_WebApp.Model
         [DataType(DataType.Password)]
         public string Password { get; set; } = null!;
 
+        public string? OABNumber { get; set; }
+
         public UserRoleType Role { get; set; } = UserRoleType.Operador;
 
         public long AddressId { get; set; } = 0;

@@ -44,10 +44,11 @@
 						<MudSelect T="UserRoleType"
 								   Label="Perfil"
 								   @bind-Value="user.Role"
+								   @bind-Value:after="OnRoleChanged"
 								   Variant="Variant.Outlined"
 								   Margin="Margin.Dense">
 
-							@foreach (var role in Enum.GetValues<UserRoleType>())
+							@foreach (var role in Enum.GetValues<UserRoleType>().OrderBy(r => r.ToString()))
 							{
 								<MudSelectItem Value="@role">@role</MudSelectItem>
 							}
@@ -58,7 +59,7 @@
 
 			<div class="row mb-2">
 				<!-- Coluna Email -->
-				<div class="col-md-6">
+				<div class="col-md-5">
 					<div class="form-group">
 						<MudTextField @bind-Value="@user.Email" InputType="InputType.Email" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense" />
 						<ValidationMessage For="@(() => user.Email)" />
@@ -66,7 +67,7 @@
 				</div>
 
 				<!-- Coluna Password -->
-				<div class="col-md-6 @(insertMode ? "" : "invisible")">
+				<div class="col-md-5 @(insertMode ? "" : "invisible")">
 					<MudTextField T="string"
 								  Label="Senha"
 								  @bind-Value="user!.Password"
@@ -78,6 +79,14 @@
 								  AdornmentAriaLabel="Mostrar Password"
 								  Margin="Margin.Dense"
 								  For="@(() => user.Password)" />
+				</div>
+
+				<!-- Oab -->
+				<div class="col-md-2 @(isLawyer ? "": "invisible" )">
+					<div class="form-group">
+						<MudTextField @bind-Value="@user.OABNumber" Label="Numero OAB" Variant="Variant.Outlined" Margin="Margin.Dense" />
+						<ValidationMessage For="@(() => user.OABNumber)" />
+					</div>
 				</div>
 			</div>
 
@@ -394,17 +403,19 @@
 	InputType PasswordInput = InputType.Password;
 	string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
 
-
 	//private Grid<UserDto> gridUser = default!;
 
-
-
 	bool insertMode = false;
+	bool isLawyer = false;
 	bool deactiveMode = false;
 	string modalTitle = string.Empty;
 
 	List<ToastMessage> messages = new List<ToastMessage>();
 
+	private void OnRoleChanged()
+	{
+		isLawyer = user.Role == UserRoleType.Advogado;
+	}
 
 	void ButtonShowPasswordclick()
 	{
