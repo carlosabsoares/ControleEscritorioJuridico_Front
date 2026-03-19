@@ -241,41 +241,74 @@
 
 	private async Task OnShowModalReactiveClick(ClientDto data)
 	{
-		deactiveMode = false;
-
 		var responseClient = await _clientService.GetClientByUuidAsync(data.Uuid);
 
 		if (responseClient == null || string.IsNullOrEmpty(responseClient.Name))
-			Notification.ExibirMensagem("Error ao recuperar cliente.", Severity.Error);
+		{
+			Notification.ExibirMensagem("Erro ao recuperar cliente.", Severity.Error);
+			return;
+		}
 
-		client = responseClient;
+		var parameters = new DialogParameters{
+			{ "Client", responseClient },
+			{ "DeactiveMode", false }
+		};
 
-		clientActiveDeactiveModal.Client = client;
-		clientActiveDeactiveModal.DeactiveMode = deactiveMode;
-		clientActiveDeactiveModal.ModalTitle = "Reativar cliente";
+		var options = new DialogOptions
+		{
+			MaxWidth = MaxWidth.Small,
+			FullWidth = true,
+			CloseOnEscapeKey = true
+		};
 
-		await clientActiveDeactiveModal.ShowAsync();
+		var dialog = await DialogService.ShowAsync<ClientActiveDeactiveDialog>(
+			"Reativar cliente",
+			parameters,
+			options
+		);
+
+		var result = await dialog.Result;
+
+		if (!result.Cancelled)
+		{
+			await ReloadGrid();
+		}
 	}
 
 	private async Task OnShowModalDeleteClick(ClientDto data)
 	{
-		deactiveMode = true;
-
 		var responseClient = await _clientService.GetClientByUuidAsync(data.Uuid);
 
 		if (responseClient == null || string.IsNullOrEmpty(responseClient.Name))
-			Notification.ExibirMensagem("Error ao recuperar cliente.", Severity.Error);
+		{
+			Notification.ExibirMensagem("Erro ao recuperar cliente.", Severity.Error);
+			return;
+		}
 
-		client = responseClient;
+		var parameters = new DialogParameters{
+			{ "Client", responseClient },
+			{ "DeactiveMode", true }
+		};
 
-		clientActiveDeactiveModal.Client = client;
-		clientActiveDeactiveModal.DeactiveMode = deactiveMode;
-		clientActiveDeactiveModal.ModalTitle = "Deletar cliente";
+		var options = new DialogOptions
+		{
+			MaxWidth = MaxWidth.Small,
+			FullWidth = true,
+			CloseOnEscapeKey = true
+		};
 
-		await clientActiveDeactiveModal.ShowAsync();
+		var dialog = await DialogService.ShowAsync<ClientActiveDeactiveDialog>(
+			"Deletar cliente",
+			parameters,
+			options
+		);
 
-		//await modalUpdate.ShowAsync();
-		//await modalScreen.ShowAsync();
+		var result = await dialog.Result;
+
+		if (!result.Cancelled)
+		{
+			await ReloadGrid();
+		}
 	}
 
 	private async Task ReloadGrid()
@@ -298,20 +331,6 @@
 			Phone = x.PhoneNumber,
 		}).ToList();
 	}
-
-	// private async Task OpenModalAsync()
-	// {
-	// 	client = new ClientEntity()
-	// 	{
-	// 		Name = string.Empty,
-	// 		Address = new AddressEntity()
-	// 	};
-
-	// 	insertMode = true;
-	// 	modalTitle = "Inserir cliente";
-
-	// 	await clientModal.ShowAsync();
-	// }
 
 	private async Task OpenModalAsync()
 	{

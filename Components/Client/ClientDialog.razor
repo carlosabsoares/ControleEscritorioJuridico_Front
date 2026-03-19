@@ -26,16 +26,9 @@
 
             <!-- Nome + Email -->
             <div class="row mb-2">
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <MudTextField @bind-Value="@Client.Name" Label="Nome" Variant="Variant.Outlined" Margin="Margin.Dense" />
                 </div>
-                <div class="col-md-6">
-                    <MudTextField @bind-Value="@Client.Email" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                </div>
-            </div>
-
-            <!-- Documento -->
-            <div class="row mb-2">
                 <div class="col-md-3">
                     <MudSelect T="DocumentType"
                                Label="Tipo de Documento"
@@ -52,7 +45,7 @@
                     </MudSelect>
                 </div>
 
-                <div class="col-md-9">
+                <div class="col-md-4">
                     <MudMask T="string"
                              @key="documentMaskKey"
                              Label="Número do Documento"
@@ -64,17 +57,21 @@
                 </div>
             </div>
 
-            @if (isNaturalPerson)
-            {
-                <div class="row mb-2">
+            <!-- Documento -->
+            <div class="row mb-2">
+                <div class="col-md-4">
+                    <MudTextField @bind-Value="@Client.Email" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </div>
+                @if (isNaturalPerson)
+                {
                     <div class="col-md-4">
                         <MudTextField @bind-Value="@Client.GeneralRegister" Label="RG" Variant="Variant.Outlined" Margin="Margin.Dense" />
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-md-4">
                         <MudTextField @bind-Value="@Client.Profession" Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" />
                     </div>
-                </div>
-            }
+                }
+            </div>
 
             <!-- Telefones -->
             <div class="row mb-2">

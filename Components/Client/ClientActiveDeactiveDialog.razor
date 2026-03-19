@@ -1,0 +1,90 @@
+﻿@using CEJ_WebApp.Core.Services
+@using CEJ_WebApp.Model
+@using MudBlazor
+@inject IClientService _clientService
+@inject NotificationService Notification
+
+<MudDialog MaxWidth="MaxWidth.Small" FullWidth="true">
+
+    <DialogContent>
+
+        <!-- HEADER -->
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+            <MudIcon Icon="@(DeactiveMode ? Icons.Material.Filled.DeleteForever
+                                            : Icons.Material.Filled.ChangeCircle)"
+                     Color="@(DeactiveMode ? Color.Error : Color.Info)"
+                     Size="Size.Large" />
+
+            <MudText Typo="Typo.h6">
+                @(DeactiveMode ? "Desativar cliente" : "Reativar cliente")
+            </MudText>
+        </MudStack>
+
+        <MudDivider Class="mb-3" />
+
+        <!-- MENSAGEM -->
+        <MudText Typo="Typo.body1" Class="mb-3">
+            @(DeactiveMode
+                ? "Deseja realmente desativar esse cliente?"
+                : "Deseja realmente reativar esse cliente?")
+        </MudText>
+
+        <!-- NOME -->
+        <MudTextField Value="@Client.Name"
+                      Label="Nome"
+                      ReadOnly="true"
+                      Variant="Variant.Outlined"
+                      FullWidth="true" />
+
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="Cancel">
+            Fechar
+        </MudButton>
+
+        <MudButton Color="@(DeactiveMode ? Color.Error : Color.Success)"
+                   OnClick="Salvar">
+            Confirmar
+        </MudButton>
+    </DialogActions>
+
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public ClientEntity Client { get; set; }
+    [Parameter] public bool DeactiveMode { get; set; }
+
+    private async Task Salvar()
+    {
+        bool result;
+
+        if (DeactiveMode)
+        {
+            result = await _clientService.DeactiveAsync(Client.Uuid);
+
+            Notification.ExibirMensagem(
+                result ? "Cliente desativado com sucesso" : "Erro ao desativar cliente",
+                result ? Severity.Success : Severity.Error);
+        }
+        else
+        {
+            result = await _clientService.ReactiveAsync(Client.Uuid);
+
+            Notification.ExibirMensagem(
+                result ? "Cliente reativado com sucesso" : "Erro ao reativar cliente",
+                result ? Severity.Success : Severity.Error);
+        }
+
+        MudDialog.Close(DialogResult.Ok(result));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}
