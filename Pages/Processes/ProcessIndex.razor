@@ -1,0 +1,174 @@
+﻿@page "/process"
+@page "/process/Index"
+@using CEJ_WebApp.Components.Users
+@using CEJ_WebApp.Core.Services
+@using CEJ_WebApp.Model
+@using CEJ_WebApp.Model.Dto
+@using CEJ_WebApp.Model.Enum
+@using CEJ_WebApp.Components.Client
+
+@inject IClientService _clientService
+@inject IExternalService _externalService
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NotificationService Notification
+@inject NavigationManager Navigation
+
+
+<div class="card">
+	<div class="card-header">
+		<MudStack Row="true"
+				  Justify="Justify.SpaceBetween"
+				  AlignItems="MudBlazor.AlignItems.Center"
+				  Class="mb-3">
+
+			<h4>Processos</h4>
+
+			<MudFab Color="Color.Tertiary"
+					StartIcon="@Icons.Material.Filled.Add"
+					Label="Processos"
+					OnClick="CallAddProcessAsync" />
+
+		</MudStack>
+	</div>
+	<div class="card-body">
+		<MudTable @ref="gridProcess"
+				  T="ProcessDto"
+				  Items="@processesDto"
+				  Filter="new Func<ProcessDto, bool>(FilterProcesses)"
+				  FilterMode="FilterMode.Filterable"
+				  FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+				  Hover="true"
+				  Bordered="true"
+				  Striped="true"
+				  Loading="@loading"
+				  Breakpoint="Breakpoint.Sm"
+				  Height="400px"
+				  FixedHeader="true"
+				  HorizontalScrollbar="true">
+
+			<!-- Toolbar com filtro -->
+			<ToolBarContent>
+				<MudText Typo="Typo.subtitle1">Lista de Processos</MudText>
+				<MudSpacer />
+				<MudTextField @bind-Value="searchString"
+							  Placeholder="Pesquisar..."
+							  Variant="MudBlazor.Variant.Outlined"
+							  Adornment="Adornment.Start"
+							  AdornmentIcon="@Icons.Material.Filled.Search"
+							  IconSize="Size.Small"
+							  DebounceInterval="300"
+							  Immediate="true"
+							  Class="mt-0" />
+			</ToolBarContent>
+
+			<!-- Cabeçalho da tabela -->
+			<HeaderContent>
+				<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.ProcessNumber)">Processo</MudTableSortLabel></MudTh>
+				<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.Status)">Status</MudTableSortLabel></MudTh>
+				<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.Client)">Cliente</MudTableSortLabel></MudTh>
+				<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.OpenDate)">Data Abertura</MudTableSortLabel></MudTh>
+				<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.OpenDate)">Última movimentação</MudTableSortLabel></MudTh>
+				<MudTh Style="width: 120px; text-align: center;">Ações</MudTh>
+			</HeaderContent>
+
+			<!-- Linhas da tabela -->
+			<RowTemplate>
+				<MudTd DataLabel="Processo">@context.ProcessNumber</MudTd>
+				<MudTd DataLabel="Status">@context.Status</MudTd>
+				<MudTd DataLabel="Cliente">@context.Client</MudTd>
+				<MudTd DataLabel="Data Abertura">@context.OpenDate</MudTd>
+				<MudTd DataLabel="Última movimentação">@context.LastMovimentationDate</MudTd>
+			</RowTemplate>
+			<!-- Paginação -->
+			<PagerContent>
+				<MudTablePager PageSizeOptions="new int[] { 5, 10, 25, 50 }" />
+			</PagerContent>
+
+			<!-- Mensagem quando não há dados -->
+			<NoRecordsContent>
+				<MudText Align="Align.Center">Nenhum cliente encontrado</MudText>
+			</NoRecordsContent>
+
+			<!-- Loading indicator -->
+			<LoadingContent>
+				<MudText Align="Align.Center">Carregando...</MudText>
+			</LoadingContent>
+
+		</MudTable>
+	</div>
+</div>
+
+@code {
+
+	[Inject]
+	public ISnackbar SnackbarService { get; set; } = null!;
+
+	private MudTable<ProcessDto> gridProcess = new();
+	private List<ProcessDto> processesDto = new();
+
+	private string searchString = "";
+	private bool loading = false;
+
+	private bool _dialogOpen = false;
+
+	private bool FilterProcesses(ProcessDto process)
+	{
+		if (string.IsNullOrWhiteSpace(searchString))
+			return true;
+
+		return true;
+
+		// return client.Name?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true ||
+		// 				client.Email?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true ||
+		// 				client.CellPhone?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true ||
+		// 				client.Phone?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true;
+	}
+
+	private async Task CallAddProcessAsync()
+	{
+
+		Navigation.NavigateTo("/process/add");
+
+		// if (_dialogOpen) return;
+
+		// _dialogOpen = true;
+
+		// try
+		// {
+		// 	var client = new ClientEntity()
+		// 	{
+		// 		Name = string.Empty,
+		// 		Address = new AddressEntity()
+		// 	};
+
+		// 	var parameters = new DialogParameters
+		// {
+		// 	{ "Client", client },
+		// 	{ "InsertMode", true }
+		// };
+
+		// 	var options = new DialogOptions
+		// 	{
+		// 		CloseOnEscapeKey = true,
+		// 		MaxWidth = MaxWidth.Large,
+		// 		FullWidth = true
+		// 	};
+
+		// 	var dialog = await DialogService.ShowAsync<ClientDialog>("", parameters, options);
+
+		// 	var result = await dialog.Result;
+
+		// 	if (!result.Cancelled)
+		// 	{
+		// 		await ReloadGrid();
+		// 	}
+		// }
+		// finally
+		// {
+		// 	_dialogOpen = false;
+		// }
+	}
+
+}
