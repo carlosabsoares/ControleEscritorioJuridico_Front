@@ -14,14 +14,6 @@
 @inject IDialogService DialogService
 @inject NotificationService Notification
 
-@* <MudDialogProvider /> *@
-
-<ModalClient @ref="clientModal"
-			 Client="@client"
-			 ModalTitle="@modalTitle"
-			 InsertMode="insertMode"
-			 OnSaved="ReloadGrid" />
-
 <ClientActiveDeactiveModal @ref="clientActiveDeactiveModal"
 						   Client="@client"
 						   ModalTitle="@modalTitle"
@@ -167,7 +159,6 @@
 
 	private bool _dialogOpen = false;
 
-	private ModalClient clientModal = default!;
 	private ClientActiveDeactiveModal clientActiveDeactiveModal = default!;
 	private bool insertMode = false;
 	private bool deactiveMode = false;

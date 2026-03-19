@@ -505,20 +505,17 @@
 
 			if(string.IsNullOrEmpty(address.Logradouro))
 				Notification.ExibirMensagem("Cep inválido", Severity.Warning);
-				// ExibirMensagem("Cep invalido ou não localizado.", Severity.Warning);
-			
 
 			user.Address.City = address.Localidade;
 
 			user.Address.Neighborhood = address.Bairro;
 			user.Address.Complement = address.Complemento;
-			user.Address.State = address.Uf; //Enum.Parse<UfType>(address.Uf).ToString();
+			user.Address.State = address.Uf;
 			user.Address.Street = address.Logradouro;
 			user.Address.ZipCode = address.Cep;
 		}
 		else
 		{
-			// ExibirMensagem("Cep invalido.", Severity.Error);
 			Notification.ExibirMensagem("Cep inválido", Severity.Error);
 			await cepField.FocusAsync();
 		}
@@ -536,7 +533,6 @@
 		insertMode = true;
 		modalTitle = "Inserir usuário";
 
-		//await modalUpdate.ShowAsync();
 		await modalScreen.ShowAsync();
 	}
 
@@ -599,16 +595,6 @@
 
 	private async Task ReloadGrid()
 	{
-		//usersDto = await GetUsersDtoAsync();
-
-		// // Limpa qualquer item em edição
-		// gridUser.SetEditingItem(null);
-            
-		// // Recarrega os dados na grid
-		// await gridUser.ReloadServerData();
-            
-		// // Força a atualização da UI
-		// StateHasChanged();
 		loading = true;
 
 		usersDto = await GetUsersDtoAsync();
@@ -647,11 +633,9 @@
 
 		if (responseUser == null || string.IsNullOrEmpty(responseUser.Name))
 			Notification.ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
-			//ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
 
 		user = responseUser;
 
-		//await modalUpdate.ShowAsync();
 		await modalScreen.ShowAsync();
 	}
 
@@ -664,13 +648,8 @@
 
 		if (responseUser == null || string.IsNullOrEmpty(responseUser.Name))
 			Notification.ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
-			//ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
 
 		user = responseUser;
-
-		//await modalUpdate.ShowAsync();
-
-
 
 		await modalDeactiveReactive.ShowAsync();
 	}
@@ -684,11 +663,9 @@
 
 		if (responseUser == null || string.IsNullOrEmpty(responseUser.Name))
 			Notification.ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
-			// ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
 
 		user = responseUser;
 
-		//await modalUpdate.ShowAsync();
 		await modalDeactiveReactive.ShowAsync();
 	}
 
@@ -697,16 +674,5 @@
 		await modalScreen.HideAsync();
 	}
 	#endregion
-
-
-	// private void ExibirMensagem(string mensagem, Severity serverity = Severity.Error)
-	// {
-	// 	var config = (SnackbarOptions options) =>
-	// 	{
-	// 		options.DuplicatesBehavior = SnackbarDuplicatesBehavior.Prevent;
-	// 	};
-
-	// 	SnackbarService.Add(mensagem, serverity, configure: config, key: "User");
-	// }
 
 }
