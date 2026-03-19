@@ -16,8 +16,8 @@
 	   Size="ModalSize.Large">
 	<HeaderTemplate>
 		<MudIcon Icon="@(InsertMode
-							? Icons.Material.Filled.PersonAdd
-		    			    : Icons.Material.Filled.Edit)" />
+											   ? Icons.Material.Filled.PersonAdd
+			    			    		   : Icons.Material.Filled.Edit)" />
 		<span>@ModalTitle</span>
 	</HeaderTemplate>
 	<BodyTemplate>
@@ -42,7 +42,7 @@
 				</div>
 
 				<div class="row mb-2">
-					<div class="col-md-4">
+					<div class="col-md-3">
 						<div class="form-group">
 							<MudSelect T="DocumentType"
 									   Label="Tipo de Documento"
@@ -60,7 +60,8 @@
 							</MudSelect>
 						</div>
 					</div>
-					<div class="col-md-8">
+
+					<div class="col-md-9">
 						<MudMask T="string"
 								 @key="documentMaskKey"
 								 Label="Numero do Documento"
@@ -71,14 +72,43 @@
 								 FullWidth="true" />
 						<ValidationMessage For="@(() => Client.DocumentNumber)" />
 					</div>
+
+@* 					@if (isNaturalPerson)
+					{
+						<div class="col-md-4">
+							<MudTextField @bind-Value="@Client.GeneralRegister"
+										  Label="RG"
+										  Variant="Variant.Outlined"
+										  Margin="Margin.Dense" />
+						</div>
+					} *@
 				</div>
+
+				@if (isNaturalPerson)
+				{
+					<div class="row mb-2">
+						<div class="col-md-4">
+							<MudTextField @bind-Value="@Client.GeneralRegister"
+										  Label="RG"
+										  Variant="Variant.Outlined"
+										  Margin="Margin.Dense" />
+						</div>
+						<div class="col-md-8">
+							<MudTextField @bind-Value="@Client.Profession"
+										  Label="Profissão"
+										  Variant="Variant.Outlined"
+										  Margin="Margin.Dense" />
+						</div>
+					</div>
+				}
+
 
 				<div class="row mb-2">
 					<div class="col-md-4">
 						<div class="form-group">
-							<MudTextField @bind-Value="@Client.PhoneNumber" 
-							              Label="Número telefônico" 
-										  Variant="Variant.Outlined" 
+							<MudTextField @bind-Value="@Client.PhoneNumber"
+										  Label="Número telefônico"
+										  Variant="Variant.Outlined"
 										  Mask="@phoneMask"
 										  Placeholder="(00) 0000-0000"
 										  Margin="Margin.Dense" />
@@ -86,9 +116,9 @@
 						</div>
 					</div>
 					<div class="col-md-4">
-						<MudTextField @bind-Value="@Client.CellPhoneNumber" 
-									  Label="Numero celular" 
-									  Variant="Variant.Outlined" 
+						<MudTextField @bind-Value="@Client.CellPhoneNumber"
+									  Label="Numero celular"
+									  Variant="Variant.Outlined"
 									  Mask="@cellphoneMask"
 									  Placeholder="(00) 00000-0000"
 									  Margin="Margin.Dense" />
@@ -200,8 +230,7 @@
 		<MudButton StartIcon="@Icons.Material.Filled.Save"
 				   Color="Color.Primary"
 				   Variant="Variant.Filled"
-				   OnClick="Salvar"
-		>
+				   OnClick="Salvar">
 			Salvar
 		</MudButton>
 
@@ -217,6 +246,7 @@
 	private MudMask cepField;
 	private IMask documentMask = new PatternMask("000.000.000-00");
 	private string documentMaskKey = "cpf";
+	private bool isNaturalPerson = false;
 
 	[Parameter]
 	public ClientEntity Client { get; set; }
@@ -240,7 +270,8 @@
 
 			if (result)
 				Notification.ExibirMensagem("Cliente cadastrado com sucesso", Severity.Success);
-			else{
+			else
+			{
 				Notification.ExibirMensagem("Erro ao cadastrar cliente", Severity.Error);
 			}
 		}
@@ -270,11 +301,13 @@
 		{
 			documentMask = new PatternMask("00.000.000/0000-00");
 			documentMaskKey = "cnpj";
+			isNaturalPerson = false;
 		}
 		else
 		{
 			documentMask = new PatternMask("000.000.000-00");
 			documentMaskKey = "cpf";
+			isNaturalPerson = true;
 		}
 
 		Client.DocumentNumber = string.Empty;

@@ -1,0 +1,235 @@
+﻿@using CEJ_WebApp.Core.Services
+@using CEJ_WebApp.Model
+@using CEJ_WebApp.Model.Enum
+@using MudBlazor
+@inject IExternalService _externalService
+@inject IClientService _clientService
+@inject NotificationService Notification
+
+<MudDialog MaxWidth="MaxWidth.Large" FullWidth="true">
+    
+    <DialogContent>
+
+        <MudPaper Class="pa-3 mb-3" Elevation="0" Style="background-color: #f5f5f5;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@(InsertMode ? Icons.Material.Filled.PersonAdd : Icons.Material.Filled.Edit)" />
+                <MudText Typo="Typo.h6">
+                    @(InsertMode ? "Novo Cliente" : "Editar Cliente")
+                </MudText>
+            </MudStack>
+        </MudPaper>
+
+        <MudDivider Class="mb-3" />
+
+        <EditForm Model="@Client">
+            <DataAnnotationsValidator />
+
+            <!-- Nome + Email -->
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <MudTextField @bind-Value="@Client.Name" Label="Nome" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </div>
+                <div class="col-md-6">
+                    <MudTextField @bind-Value="@Client.Email" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </div>
+            </div>
+
+            <!-- Documento -->
+            <div class="row mb-2">
+                <div class="col-md-3">
+                    <MudSelect T="DocumentType"
+                               Label="Tipo de Documento"
+                               Value="Client.DocumentType"
+                               ValueChanged="OnDocumentTypeChanged"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               FullWidth="true">
+
+                        @foreach (var documentType in Enum.GetValues<DocumentType>())
+                        {
+                            <MudSelectItem Value="@documentType">@documentType</MudSelectItem>
+                        }
+                    </MudSelect>
+                </div>
+
+                <div class="col-md-9">
+                    <MudMask T="string"
+                             @key="documentMaskKey"
+                             Label="Número do Documento"
+                             Mask="@documentMask"
+                             @bind-Value="Client.DocumentNumber"
+                             Variant="Variant.Outlined"
+                             Margin="Margin.Dense"
+                             FullWidth="true" />
+                </div>
+            </div>
+
+            @if (isNaturalPerson)
+            {
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <MudTextField @bind-Value="@Client.GeneralRegister" Label="RG" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </div>
+                    <div class="col-md-8">
+                        <MudTextField @bind-Value="@Client.Profession" Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </div>
+                </div>
+            }
+
+            <!-- Telefones -->
+            <div class="row mb-2">
+                <div class="col-md-4">
+                    <MudTextField @bind-Value="@Client.PhoneNumber"
+                                  Label="Telefone"
+                                  Mask="@(new PatternMask("(00) 0000-0000"))"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense" />
+                </div>
+
+                <div class="col-md-4">
+                    <MudTextField @bind-Value="@Client.CellPhoneNumber"
+                                  Label="Celular"
+                                  Mask="@(new PatternMask("(00) 00000-0000"))"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense" />
+                </div>
+
+                <div class="col-md-4">
+                    <MudTextField @bind-Value="@Client.ContactName"
+                                  Label="Contato"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense" />
+                </div>
+            </div>
+
+            <!-- Endereço -->
+            <MudPaper Class="pa-4 mt-2" Elevation="1">
+                <MudText Typo="Typo.h6">Endereço</MudText>
+
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <MudMask T="string"
+                                 Label="CEP"
+                                 Mask="@(new PatternMask("00000-000"))"
+                                 @bind-Value="Client.Address.ZipCode"
+                                 Variant="Variant.Outlined"
+                                 FullWidth="true"
+                                 Adornment="Adornment.End"
+                                 AdornmentIcon="@Icons.Material.Filled.Search"
+                                 OnAdornmentClick="OnFindCepClick" />
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-md-5">
+                        <MudTextField @bind-Value="@Client.Address.Street" Label="Logradouro" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </div>
+                    <div class="col-md-2">
+                        <MudTextField @bind-Value="@Client.Address.Number" Label="Número" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </div>
+                    <div class="col-md-5">
+                        <MudTextField @bind-Value="@Client.Address.Complement" Label="Complemento" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-md-5">
+                        <MudTextField @bind-Value="@Client.Address.Neighborhood" Label="Bairro" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </div>
+                    <div class="col-md-5">
+                        <MudTextField @bind-Value="@Client.Address.City" Label="Cidade" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </div>
+                    <div class="col-md-2">
+                        <MudSelect T="string"
+                                   Label="Estado"
+                                   @bind-Value="Client.Address.State" Variant="Variant.Outlined" Margin="Margin.Dense">
+
+                            @foreach (var uf in Enum.GetValues<UfType>())
+                            {
+                                <MudSelectItem Value="@uf.ToString()">@uf</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </div>
+                </div>
+            </MudPaper>
+
+        </EditForm>
+
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="Cancel">
+            Fechar
+        </MudButton>
+
+        <MudButton Color="Color.Primary" OnClick="Salvar">
+            Salvar
+        </MudButton>
+    </DialogActions>
+
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public ClientEntity Client { get; set; }
+    [Parameter] public bool InsertMode { get; set; }
+
+    private IMask documentMask = new PatternMask("000.000.000-00");
+    private string documentMaskKey = "cpf";
+    private bool isNaturalPerson = false;
+
+    private async Task Salvar()
+    {
+        bool result;
+
+        if (InsertMode)
+            result = await _clientService.AddAsync(Client);
+        else
+            result = await _clientService.EditAsync(Client);
+
+        if (result)
+            Notification.ExibirMensagem("Sucesso!", Severity.Success);
+        else
+            Notification.ExibirMensagem("Erro!", Severity.Error);
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void OnDocumentTypeChanged(DocumentType type)
+    {
+        Client.DocumentType = type;
+
+        if (type == DocumentType.CNPJ)
+        {
+            documentMask = new PatternMask("00.000.000/0000-00");
+            documentMaskKey = "cnpj";
+            isNaturalPerson = false;
+        }
+        else
+        {
+            documentMask = new PatternMask("000.000.000-00");
+            documentMaskKey = "cpf";
+            isNaturalPerson = true;
+        }
+
+        Client.DocumentNumber = string.Empty;
+    }
+
+    private async Task OnFindCepClick()
+    {
+        var address = await _externalService.GetAddressCep(Client.Address.ZipCode);
+
+        Client.Address.City = address.Localidade;
+        Client.Address.Neighborhood = address.Bairro;
+        Client.Address.State = address.Uf;
+        Client.Address.Street = address.Logradouro;
+    }
+}

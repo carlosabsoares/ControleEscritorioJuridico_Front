@@ -21,6 +21,7 @@ namespace CEJ_WebApp.Model
         [DataType(DataType.Password)]
         public string Password { get; set; } = null!;
 
+        [MaxLength(20, ErrorMessage = "Numero OAB deve ter no máximo 10 dígitos")]
         public string? OABNumber { get; set; }
 
         public UserRoleType Role { get; set; } = UserRoleType.Operador;

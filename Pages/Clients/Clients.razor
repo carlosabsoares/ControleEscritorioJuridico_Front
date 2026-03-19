@@ -14,7 +14,7 @@
 @inject IDialogService DialogService
 @inject NotificationService Notification
 
-<MudDialogProvider />
+@* <MudDialogProvider /> *@
 
 <ModalClient @ref="clientModal"
 			 Client="@client"
@@ -133,7 +133,6 @@
 							<MudIconButton Icon="@Icons.Material.Filled.Paid"
 										   Style="color:#43A047"
 										   Size="Size.Small"
-
 										   OnClick="@(async () => await OnShowModalEditClick(context))" />
 						</MudTooltip>
 					</MudStack>
@@ -165,6 +164,8 @@
 	private List<ClientDto> clientsDto = new();
 	private string searchString = "";
 	private bool loading = false;
+
+	private bool _dialogOpen = false;
 
 	private ModalClient clientModal = default!;
 	private ClientActiveDeactiveModal clientActiveDeactiveModal = default!;
@@ -198,19 +199,44 @@
 
 	private async Task OnShowModalEditClick(ClientDto data)
 	{
+		if (_dialogOpen) return;
 
-		var responseClient = await _clientService.GetClientByUuidAsync(data.Uuid);
+		_dialogOpen = true;
 
-		if (responseClient == null || string.IsNullOrEmpty(responseClient.Name))
-			Notification.ExibirMensagem("Error ao recuperar cliente.", Severity.Error);
+		try
+		{
+			var client = await _clientService.GetClientByUuidAsync(data.Uuid);
 
-		client = responseClient;
+			if (client == null || string.IsNullOrEmpty(client.Name))
+				Notification.ExibirMensagem("Error ao recuperar cliente.", Severity.Error);
 
-		clientModal.Client = client;
-		clientModal.InsertMode = false;
-		clientModal.ModalTitle = "Alterar cliente";
+			var parameters = new DialogParameters
+		{
+			{ "Client", client },
+			{ "InsertMode", false }
+		};
 
-		await clientModal.ShowAsync();
+			var options = new DialogOptions
+			{
+				CloseOnEscapeKey = true,
+				MaxWidth = MaxWidth.Large,
+				FullWidth = true
+			};
+
+			var dialog = await DialogService.ShowAsync<ClientDialog>("", parameters, options);
+
+			var result = await dialog.Result;
+
+			if (!result.Cancelled)
+			{
+				await ReloadGrid();
+			}
+		}
+		finally
+		{
+			_dialogOpen = false;
+		}
+
 	}
 
 	private async Task OnShowModalReactiveClick(ClientDto data)
@@ -273,17 +299,59 @@
 		}).ToList();
 	}
 
+	// private async Task OpenModalAsync()
+	// {
+	// 	client = new ClientEntity()
+	// 	{
+	// 		Name = string.Empty,
+	// 		Address = new AddressEntity()
+	// 	};
+
+	// 	insertMode = true;
+	// 	modalTitle = "Inserir cliente";
+
+	// 	await clientModal.ShowAsync();
+	// }
+
 	private async Task OpenModalAsync()
 	{
-		client = new ClientEntity()
+		if (_dialogOpen) return;
+
+		_dialogOpen = true;
+
+		try
 		{
-			Name = string.Empty,
-			Address = new AddressEntity()
+			var client = new ClientEntity()
+			{
+				Name = string.Empty,
+				Address = new AddressEntity()
+			};
+
+			var parameters = new DialogParameters
+		{
+			{ "Client", client },
+			{ "InsertMode", true }
 		};
 
-		insertMode = true;
-		modalTitle = "Inserir cliente";
+			var options = new DialogOptions
+			{
+				CloseOnEscapeKey = true,
+				MaxWidth = MaxWidth.Large,
+				FullWidth = true
+			};
 
-		await clientModal.ShowAsync();
+			var dialog = await DialogService.ShowAsync<ClientDialog>("",parameters, options);
+
+			var result = await dialog.Result;
+
+			if (!result.Cancelled)
+			{
+				await ReloadGrid();
+			}
+		}
+		finally
+		{
+			_dialogOpen = false;
+		}
 	}
 }
