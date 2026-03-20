@@ -114,29 +114,26 @@ namespace CEJ_WebApp.Core.Services
             }
         }
 
-        public async Task<List<ClientEntity>>? GetClientAllAsync()
+        public async Task<List<ClientEntity>> GetClientAllAsync()
         {
-            List<ClientEntity> _clients = new();
-
             try
             {
                 var token = await Parameters.GetTokenAsync();
 
-                if (Http.DefaultRequestHeaders.Contains("Authorization"))
-                    Http.DefaultRequestHeaders.Remove("Authorization");
+                var request = new HttpRequestMessage(HttpMethod.Get, $"{url}{_object}");
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-                Http.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+                var response = await Http.SendAsync(request);
 
-                string uri = $"{url}{_object}";
+                response.EnsureSuccessStatusCode();
 
-                _clients = await Http.GetFromJsonAsync<List<ClientEntity>>(uri);
+                var clients = await response.Content.ReadFromJsonAsync<List<ClientEntity>>();
 
-                return _clients ?? null;
+                return clients ?? new List<ClientEntity>();
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
-                return _clients;
+                throw;
             }
         }
 

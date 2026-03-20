@@ -137,7 +137,10 @@
 
 			<!-- Loading indicator -->
 			<LoadingContent>
-				<MudText Align="Align.Center">Carregando...</MudText>
+				<div class="d-flex justify-center align-center pa-6">
+					<MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+					<MudText Class="ml-2">Carregando clientes...</MudText>
+				</div>
 			</LoadingContent>
 
 		</MudTable>
@@ -169,7 +172,20 @@
 
 	async Task LoadManufactures()
 	{
-		clientsDto = await GetClientsDtoAsync();
+		try
+		{
+			loading = true;
+
+			var task = GetClientsDtoAsync();
+
+			await Task.WhenAll(task, Task.Delay(300));
+
+			clientsDto = task.Result;
+		}
+		finally
+		{
+			loading = false;
+		}
 	}
 
 	private bool FilterClients(ClientDto client)
@@ -299,8 +315,17 @@
 
 	private async Task ReloadGrid()
 	{
-		await LoadManufactures();
-		await gridClient.ReloadServerData();
+		try
+		{
+			loading = true;
+
+			await LoadManufactures();
+			await gridClient.ReloadServerData();
+		}
+		finally
+		{
+			loading = false;
+		}
 	}
 
 	private async Task OnShowOffClick()

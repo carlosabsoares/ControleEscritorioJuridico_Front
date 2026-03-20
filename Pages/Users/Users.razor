@@ -356,7 +356,10 @@
 
 			<!-- Loading indicator -->
 			<LoadingContent>
-				<MudText Align="Align.Center">Carregando...</MudText>
+				<div class="d-flex justify-center align-center pa-6">
+					<MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+					<MudText Class="ml-2">Carregando clientes...</MudText>
+				</div>
 			</LoadingContent>
 		</MudTable>
 
@@ -440,7 +443,21 @@
 
 	async Task LoadManufactures()
 	{
-		usersDto = await GetUsersDtoAsync();
+		try
+		{
+			loading = true;
+
+			var task = GetUsersDtoAsync();
+
+			await Task.WhenAll(task, Task.Delay(300));
+
+			usersDto = task.Result;
+
+		}
+		finally
+		{
+			loading = false;
+		}
 	}
 
 
