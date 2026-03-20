@@ -383,9 +383,6 @@
 	private IMask cepMask = new PatternMask("00000-000");
 	private MudMask cepField;
 
-	
-
-	//RadzenDataGrid<UserDto> gridUser;
 	private BlazorBootstrap.Button editUserButton = default!;
 	private BlazorBootstrap.Button findCepUserButton = default!;
 
@@ -396,8 +393,6 @@
 
 	private readonly UserSessionInformation _userSessionInformation;
 
-	//RadzenDataGrid<UserDto> gridUser;
-
 	UserEntity user = new UserEntity();
 	List<UserDto> usersDto = new List<UserDto>();
 
@@ -405,8 +400,6 @@
 	bool isPassworfShow;
 	InputType PasswordInput = InputType.Password;
 	string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-
-	//private Grid<UserDto> gridUser = default!;
 
 	bool insertMode = false;
 	bool isLawyer = false;

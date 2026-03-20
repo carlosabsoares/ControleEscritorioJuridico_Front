@@ -8,16 +8,13 @@ namespace CEJ_WebApp.Core.Shared
     {
         private readonly ILocalStorageService _localStorage;
         private UserSessionInformation _userSessionInformation;
-        //private readonly IUserService _userService;
-
+        
         public Parameters(ILocalStorageService localStorage,
                           UserSessionInformation userSessionInformation
-            //              IUserService userService
             )
         {
             _localStorage = localStorage;
             _userSessionInformation = userSessionInformation;
-            //_userService = userService;
         }
 
         //public string GetUrlAddress() => "https://localhost:1602/v1/";
