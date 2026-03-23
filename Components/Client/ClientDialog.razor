@@ -7,7 +7,7 @@
 @inject NotificationService Notification
 
 <MudDialog MaxWidth="MaxWidth.Large" FullWidth="true">
-    
+
     <DialogContent>
 
         <MudPaper Class="pa-3 mb-3" Elevation="0" Style="background-color: #f5f5f5;">
@@ -24,12 +24,13 @@
         <EditForm Model="@Client">
             <DataAnnotationsValidator />
 
-            <!-- Nome + Email -->
-            <div class="row mb-2">
-                <div class="col-md-5">
-                    <MudTextField @bind-Value="@Client.Name" Label="Nome" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                </div>
-                <div class="col-md-3">
+            <!-- Nome + Documento -->
+            <MudGrid>
+                <MudItem xs="12" md="5">
+                    <MudTextField @bind-Value="@Client.Name" Label="Nome" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                </MudItem>
+
+                <MudItem xs="12" md="3">
                     <MudSelect T="DocumentType"
                                Label="Tipo de Documento"
                                Value="Client.DocumentType"
@@ -37,15 +38,14 @@
                                Variant="Variant.Outlined"
                                Margin="Margin.Dense"
                                FullWidth="true">
-
                         @foreach (var documentType in Enum.GetValues<DocumentType>())
                         {
                             <MudSelectItem Value="@documentType">@documentType</MudSelectItem>
                         }
                     </MudSelect>
-                </div>
+                </MudItem>
 
-                <div class="col-md-4">
+                <MudItem xs="12" md="4">
                     <MudMask T="string"
                              @key="documentMaskKey"
                              Label="Número do Documento"
@@ -54,54 +54,62 @@
                              Variant="Variant.Outlined"
                              Margin="Margin.Dense"
                              FullWidth="true" />
-                </div>
-            </div>
+                </MudItem>
+            </MudGrid>
 
-            <div class="row mb-2">
-                <div class="col-md-4">
-                    <MudTextField @bind-Value="@Client.Email" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                </div>
+            <!-- Email + extras -->
+            <MudGrid Class="mt-2">
+                <MudItem xs="12" md="4">
+                    <MudTextField @bind-Value="@Client.Email" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                </MudItem>
+
                 @if (isNaturalPerson)
                 {
-                    <div class="col-md-4">
-                        <MudTextField @bind-Value="@Client.GeneralRegister" Label="RG" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                    </div>
-                    <div class="col-md-4">
-                        <MudTextField @bind-Value="@Client.Profession" Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                    </div>
-                }
-            </div>
+                    <MudItem xs="12" md="4">
+                        <MudTextField @bind-Value="@Client.GeneralRegister" Label="RG" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                    </MudItem>
 
-            <div class="row mb-2">
-                <div class="col-md-4">
+                    <MudItem xs="12" md="4">
+                        <MudTextField @bind-Value="@Client.Profession" Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                    </MudItem>
+                }
+            </MudGrid>
+
+            <!-- Telefones -->
+            <MudGrid Class="mt-2">
+                <MudItem xs="12" md="4">
                     <MudTextField @bind-Value="@Client.PhoneNumber"
                                   Label="Telefone"
                                   Mask="@(new PatternMask("(00) 0000-0000"))"
                                   Variant="Variant.Outlined"
-                                  Margin="Margin.Dense" />
-                </div>
+                                  Margin="Margin.Dense"
+                                  FullWidth="true" />
+                </MudItem>
 
-                <div class="col-md-4">
+                <MudItem xs="12" md="4">
                     <MudTextField @bind-Value="@Client.CellPhoneNumber"
                                   Label="Celular"
                                   Mask="@(new PatternMask("(00) 00000-0000"))"
                                   Variant="Variant.Outlined"
-                                  Margin="Margin.Dense" />
-                </div>
+                                  Margin="Margin.Dense"
+                                  FullWidth="true" />
+                </MudItem>
 
-                <div class="col-md-4">
+                <MudItem xs="12" md="4">
                     <MudTextField @bind-Value="@Client.ContactName"
                                   Label="Contato"
                                   Variant="Variant.Outlined"
-                                  Margin="Margin.Dense" />
-                </div>
-            </div>
+                                  Margin="Margin.Dense"
+                                  FullWidth="true" />
+                </MudItem>
+            </MudGrid>
 
-            <MudPaper Class="pa-4 mt-2" Elevation="1">
+            <!-- Endereço -->
+            <MudPaper Class="pa-4 mt-4" Elevation="1">
                 <MudText Typo="Typo.h6">Endereço</MudText>
 
-                <div class="row mt-2">
-                    <div class="col-md-6">
+                <MudGrid Class="mt-2">
+                    <MudItem xs="12" md="6">
                         <MudMask T="string"
                                  Label="CEP"
                                  Mask="@(new PatternMask("00000-000"))"
@@ -111,40 +119,47 @@
                                  Adornment="Adornment.End"
                                  AdornmentIcon="@Icons.Material.Filled.Search"
                                  OnAdornmentClick="OnFindCepClick" />
-                    </div>
-                </div>
+                    </MudItem>
+                </MudGrid>
 
-                <div class="row mt-2">
-                    <div class="col-md-5">
-                        <MudTextField @bind-Value="@Client.Address.Street" Label="Logradouro" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                    </div>
-                    <div class="col-md-2">
-                        <MudTextField @bind-Value="@Client.Address.Number" Label="Número" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                    </div>
-                    <div class="col-md-5">
-                        <MudTextField @bind-Value="@Client.Address.Complement" Label="Complemento" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                    </div>
-                </div>
+                <MudGrid Class="mt-2">
+                    <MudItem xs="12" md="5">
+                        <MudTextField @bind-Value="@Client.Address.Street" Label="Logradouro" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                    </MudItem>
 
-                <div class="row mt-2">
-                    <div class="col-md-5">
-                        <MudTextField @bind-Value="@Client.Address.Neighborhood" Label="Bairro" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                    </div>
-                    <div class="col-md-5">
-                        <MudTextField @bind-Value="@Client.Address.City" Label="Cidade" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                    </div>
-                    <div class="col-md-2">
+                    <MudItem xs="12" md="2">
+                        <MudTextField @bind-Value="@Client.Address.Number" Label="Número" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="5">
+                        <MudTextField @bind-Value="@Client.Address.Complement" Label="Complemento" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                    </MudItem>
+                </MudGrid>
+
+                <MudGrid Class="mt-2">
+                    <MudItem xs="12" md="5">
+                        <MudTextField @bind-Value="@Client.Address.Neighborhood" Label="Bairro" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="5">
+                        <MudTextField @bind-Value="@Client.Address.City" Label="Cidade" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="2">
                         <MudSelect T="string"
                                    Label="Estado"
-                                   @bind-Value="Client.Address.State" Variant="Variant.Outlined" Margin="Margin.Dense">
-
+                                   @bind-Value="Client.Address.State"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   FullWidth="true">
                             @foreach (var uf in Enum.GetValues<UfType>())
                             {
                                 <MudSelectItem Value="@uf.ToString()">@uf</MudSelectItem>
                             }
                         </MudSelect>
-                    </div>
-                </div>
+                    </MudItem>
+                </MudGrid>
+
             </MudPaper>
 
         </EditForm>

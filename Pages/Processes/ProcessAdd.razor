@@ -1,7 +1,192 @@
 ﻿@page "/process/add"
 
-<h3>ProcessAdd</h3>
+@using System.ComponentModel.DataAnnotations
+@using CEJ_WebApp.Model.Enum
+@using CEJ_WebApp.Model.Exemplo
+@using MudExRichTextEditor
+
+<h4>Processos</h4>
+
+<MudPaper Class="pa-4">
+
+    <MudText Typo="Typo.h6">Dados Gerais</MudText>
+
+    <EditForm Model="@model" OnValidSubmit="Salvar">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <!-- GRID MAIS COMPACTO -->
+        <MudGrid Class="mt-1" GutterSize="3">
+            <!-- Linha 1 -->
+            <MudItem xs="12" md="3">
+                <MudTextField Label="Número do Processo"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              FullWidth="true"
+                              @bind-Value="model.NumeroProcesso"
+                              Placeholder="0000000-00.0000.0.00.0000" />
+            </MudItem>
+
+            <MudItem xs="12" md="3">
+                <MudSelect T="string"
+                           Label="Tipo de Ação"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           @bind-Value="model.TipoAcao">
+
+                    @foreach (var tipo in TiposAcao)
+                    {
+                        <MudSelectItem Value="@tipo">@tipo</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12" md="3">
+                <MudDatePicker Label="Data de Abertura"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               @bind-Date="model.DataAbertura" />
+            </MudItem>
+
+            <MudItem xs="12" md="3">
+                    <MudSelect T="PriorityType"
+                               Label="Prioridade"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               @bind-Value="model.Prioridade">
+
+                    <MudSelectItem Value="PriorityType.Alta">
+                        <span style="color:#D32F2F;">Alta</span>
+                    </MudSelectItem>
+
+                    <MudSelectItem Value="PriorityType.Media">
+                        <span style="color:#F57C00;">Média</span>
+                    </MudSelectItem>
+
+                    <MudSelectItem Value="PriorityType.Baixa">
+                        <span style="color:#2E7D32;">Baixa</span>
+                    </MudSelectItem>
+
+                </MudSelect>
+            </MudItem>
+            <!--Linha 1 Fim-->
+
+            <!-- Linha 2 -->
+            <MudItem xs="12" md="3">
+                <MudTextField Label="Vara/Comarca"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              FullWidth="true"
+                              @bind-Value="model.VaraComarca" />
+            </MudItem>
+
+            <MudItem xs="12" md="3">
+                <MudTextField Label="Vara/Comarca"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              FullWidth="true"
+                              @bind-Value="model.VaraComarca2" />
+            </MudItem>
+
+            <MudItem xs="12" md="2">
+                <MudSelect T="string"
+                           Label="Status"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           @bind-Value="model.Status">
+
+                    @foreach (var status in StatusList)
+                    {
+                        <MudSelectItem Value="@status">@status</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12" md="2">
+                <MudDatePicker Label="Prazo Processual"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               @bind-Date="model.PrazoProcessual" />
+            </MudItem>
+
+            <MudItem xs="12" md="2" Class="d-flex align-center pt-4">
+                <MudCheckBox T="bool"
+                             @bind-Checked="model.AtivarAlerta"
+                             Label="Ativar alerta de prazo" />
+            </MudItem>
+
+
+            <!-- Linha 2 Final -->
+
+            <!-- DESCRIÇÃO (AJUSTADA) -->
+            <MudItem xs="12" Class="mt-0">
+
+                <MudPaper Class="pa-3">
+
+                    <MudText Typo="Typo.subtitle1">Descrição</MudText>
+
+                    <div style="height:220px; overflow:auto; border:1px solid #ddd; border-radius:6px; padding:6px;">
+
+                        <MudExRichTextEdit Value="@model.TipoAcaoDescricao"
+                                           ValueChanged="@(v => model.TipoAcaoDescricao = v)"
+                                           Style="min-height:100%; min-width:600px;" />
+
+                    </div>
+
+                </MudPaper>
+
+            </MudItem>
+
+            <MudItem xs="12" md="12">
+                <MudTabs Outlined="true">
+                    <MudTabPanel Text="Partes Envolvidas" Icon="@Icons.Material.Filled.Api" />
+                    <MudTabPanel Text="Documentos" Icon="@Icons.Material.Filled.Build" />
+                    <MudTabPanel Text="Movimentação" Icon="@Icons.Material.Filled.BugReport" />
+                    <MudTabPanel Text="Financeiro" Icon="@Icons.Material.Filled.BugReport" />
+                </MudTabs>
+            </MudItem>
+
+            <!-- BOTÃO -->
+            <MudItem xs="12" Class="d-flex justify-end mt-2">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Type="Submit">
+                    Salvar
+                </MudButton>
+            </MudItem>
+
+        </MudGrid>
+    </EditForm>
+
+</MudPaper>
 
 @code {
+    private ProcessoModel model = new();
+    public int Radio_Size { get; set; } = 3;
 
+    private List<string> TiposAcao = new()
+    {
+        "Civil",
+        "Trabalhista",
+        "Criminal"
+    };
+
+    private List<string> StatusList = new()
+    {
+        "Em andamento",
+        "Suspenso",
+        "Finalizado"
+    };
+
+    private List<string> PrioritList = new()
+    {
+        "Alta",
+        "Média",
+        "Baixa"
+    };
+
+    private void Salvar()
+    {
+        Console.WriteLine("Salvo com sucesso!");
+    }
 }

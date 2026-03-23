@@ -11,6 +11,7 @@
 <MudThemeProvider @ref="@_mudThemeProvider" IsDarkMode="@_isDarkMode" />
 <MudDialogProvider />
 <MudSnackbarProvider />
+<MudPopoverProvider />
 <AuthorizeView>
 	<Authorized>
 
@@ -145,7 +146,7 @@
 		var dialog = await DialogService.ShowAsync<ResetUserPassword>("Redefinir Senha", parameters);
         
 		var result = await dialog.Result;
-		if (!result.Cancelled)
+		if (!result.Canceled)
 		{
 			// Sucesso!
 		}
