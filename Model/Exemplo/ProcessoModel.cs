@@ -1,4 +1,5 @@
-﻿using CEJ_WebApp.Model.Enum;
+﻿using CEJ_WebApp.Model.Dto;
+using CEJ_WebApp.Model.Enum;
 using System.ComponentModel.DataAnnotations;
 
 namespace CEJ_WebApp.Model.Exemplo
@@ -10,6 +11,7 @@ namespace CEJ_WebApp.Model.Exemplo
 
         public string TipoAcao { get; set; }
         public PriorityType Prioridade { get; set; } = PriorityType.Baixa;
+        public virtual ClientDto Client { get; set; } = null!;
         public string TipoAcaoDescricao { get; set; }
         public string Status { get; set; }
         public DateTime? DataAbertura { get; set; }
