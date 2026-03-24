@@ -223,7 +223,7 @@
 							{
 								<MudSelectItem Value="@client">
 									<MudStack Direction="Direction.Row" AlignItems="AlignItems.Start" Spacing="2">
-@* 										<MudAvatar Size="Size.Small" Variant="Variant.Outlined" Class="bg-primary-light">
+										@* 										<MudAvatar Size="Size.Small" Variant="Variant.Outlined" Class="bg-primary-light">
 											<MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" />
 										</MudAvatar> *@
 										<div>
@@ -234,13 +234,19 @@
 							}
 						</MudSelect>
 
-						<MudTooltip Text="Adicionar novo cliente">
+						<MudFab Color="Color.Primary" 
+						        StartIcon="@Icons.Material.Filled.Add" 
+								Size="Size.Medium"
+								title="Adicionar um cliente"
+								OnClick="OpenAddClient" />
+						
+						@* 						<MudTooltip Text="Adicionar novo cliente">
 							<MudFab Icon="@Icons.Material.Filled.Add"
 									Color="Color.Primary"
 									Size="Size.Small"
 									OnClick="OpenAddClient"
 									Class="mt-1" />
-						</MudTooltip>
+						</MudTooltip> *@
 					</MudStack>
 				</MudItem>
 

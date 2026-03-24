@@ -14,6 +14,459 @@
 @inject IDialogService DialogService
 @inject NotificationService Notification
 
+<MudPaper Class="pa-6" Elevation="2" Style="border-radius: 12px;">
+
+	<MudStack Row="true"
+			  Justify="Justify.SpaceBetween"
+			  AlignItems="AlignItems.Center"
+			  Class="mb-4">
+
+		<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+			<MudIcon Icon="@Icons.Material.Filled.People"
+					 Size="Size.Large"
+					 Color="Color.Primary" />
+			<MudText Typo="Typo.h5" Style="font-weight: 500;">Clientes</MudText>
+		</MudStack>
+
+
+		<MudFab Color="Color.Primary"
+				StartIcon="@Icons.Material.Filled.Add"
+				Size="Size.Medium"
+				title="Adicionar um cliente"
+				OnClick="OpenModalAsync" />
+	</MudStack>
+
+	<MudTable @ref="gridClient"
+			  T="ClientDto"
+			  Items="@clientsDto"
+			  Filter="new Func<ClientDto, bool>(FilterClients)"
+			  FilterMode="FilterMode.Filterable"
+			  FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+			  Hover="true"
+			  Bordered="true"
+			  Striped="true"
+			  Dense="true"
+			  Loading="@loading"
+			  Breakpoint="Breakpoint.Xs"
+			  Height="auto"
+			  FixedHeader="false"
+			  HorizontalScrollbar="true"
+			  Style="width:100%; overflow-x:auto; border-radius: 8px;">
+
+		<!-- Toolbar -->
+		<ToolBarContent>
+			<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="pa-2">
+				<MudIcon Icon="@Icons.Material.Filled.FormatListBulleted"
+						 Size="Size.Small"
+						 Color="Color.Default" />
+				<MudText Typo="Typo.subtitle2" Color="Color.Default">Lista de Clientes</MudText>
+				<MudSpacer />
+        
+				<MudTextField @bind-Value="searchString"
+							  Placeholder="Pesquisar por nome, email ou telefone..."
+							  Variant="Variant.Outlined"
+							  Adornment="Adornment.Start"
+							  AdornmentIcon="@Icons.Material.Filled.Search"
+							  IconSize="Size.Small"
+							  DebounceInterval="300"
+							  Immediate="true"
+							  Style="min-width: 300px; max-width: 600px; width: 100%;" />
+			</MudStack>
+		</ToolBarContent>
+
+		<!-- Header -->
+		<HeaderContent>
+			<MudTh><MudTableSortLabel SortBy="new Func<ClientDto, object>(x => x.Name)">Nome</MudTableSortLabel></MudTh>
+			<MudTh><MudTableSortLabel SortBy="new Func<ClientDto, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
+			<MudTh><MudTableSortLabel SortBy="new Func<ClientDto, object>(x => x.Phone)">Telefone</MudTableSortLabel></MudTh>
+			<MudTh><MudTableSortLabel SortBy="new Func<ClientDto, object>(x => x.CellPhone)">Celular</MudTableSortLabel></MudTh>
+			<MudTh Style="width: 160px; text-align: center;">Ações</MudTh>
+		</HeaderContent>
+
+		<!-- Rows -->
+		<RowTemplate>
+			<MudTd DataLabel="Nome">
+				<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+					<MudIcon Icon="@Icons.Material.Filled.Person"
+							 Size="Size.Small"
+							 Color="Color.Primary" />
+					<MudText>@context.Name</MudText>
+				</MudStack>
+			</MudTd>
+			<MudTd DataLabel="Email">
+				<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+					<MudIcon Icon="@Icons.Material.Filled.Email"
+							 Size="Size.Small"
+							 Color="Color.Default" />
+					<MudText>@context.Email</MudText>
+				</MudStack>
+			</MudTd>
+			<MudTd DataLabel="Telefone">
+				@if (!string.IsNullOrEmpty(context.Phone))
+				{
+					<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+						<MudIcon Icon="@Icons.Material.Filled.Phone"
+								 Size="Size.Small"
+								 Color="Color.Default" />
+						<MudText>@context.Phone</MudText>
+					</MudStack>
+				}
+				else
+				{
+					<MudText Color="Color.Error">—</MudText>
+				}
+			</MudTd>
+			<MudTd DataLabel="Celular">
+				@if (!string.IsNullOrEmpty(context.CellPhone))
+				{
+					<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+						<MudIcon Icon="@Icons.Material.Filled.Smartphone"
+								 Size="Size.Small"
+								 Color="Color.Default" />
+						<MudText>@context.CellPhone</MudText>
+					</MudStack>
+				}
+				else
+				{
+					<MudText Color="Color.Error">—</MudText>
+				}
+			</MudTd>
+			<MudTd DataLabel="Ações" Style="text-align: center;">
+				<MudStack Row="true" Spacing="1" Justify="Justify.Center">
+
+					@if (context.Active)
+					{
+						<MudTooltip Text="Editar cliente" Placement="MudBlazor.Placement.Top">
+							<MudIconButton Icon="@Icons.Material.Filled.Edit"
+										   Color="Color.Primary"
+										   Size="Size.Small"
+										   OnClick="@(async () => await OnShowModalEditClick(context))" />
+						</MudTooltip>
+
+						<MudTooltip Text="Desativar cliente" Placement="MudBlazor.Placement.Top">
+							<MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
+										   Color="Color.Error"
+										   Size="Size.Small"
+										   OnClick="@(async () => await OnShowModalDeleteClick(context))" />
+						</MudTooltip>
+					}
+					else
+					{
+						<MudTooltip Text="Reativar cliente" Placement="MudBlazor.Placement.Top">
+							<MudIconButton Icon="@Icons.Material.Filled.Restore"
+										   Color="Color.Success"
+										   Size="Size.Small"
+										   OnClick="@(async () => await OnShowModalReactiveClick(context))" />
+						</MudTooltip>
+					}
+
+					<MudTooltip Text="Ver processos do cliente" Placement="MudBlazor.Placement.Top">
+						<MudIconButton Icon="@Icons.Material.Filled.Gavel"
+									   Color="Color.Info"
+									   Size="Size.Small"
+									   OnClick="@(async () => await OnShowOffClick())" />
+					</MudTooltip>
+
+					<MudTooltip Text="Ver informações financeiras" Placement="MudBlazor.Placement.Top">
+						<MudIconButton Icon="@Icons.Material.Filled.AttachMoney"
+									   Color="Color.Warning"
+									   Size="Size.Small"
+									   OnClick="@(async () => await OnShowOffClick())" />
+					</MudTooltip>
+
+				</MudStack>
+			</MudTd>
+		</RowTemplate>
+
+		<!-- Pager -->
+		<PagerContent>
+			<div class="pa-2">
+				<MudTooltip Text="Alterar quantidade de itens por página" Placement="MudBlazor.Placement.Top">
+					<MudTablePager PageSizeOptions="new int[] { 5, 10, 25, 50, 100 }" />
+				</MudTooltip>
+			</div>
+		</PagerContent>
+
+		<!-- Empty -->
+		<NoRecordsContent>
+			<MudPaper Class="pa-8 text-center" Elevation="0">
+				<MudIcon Icon="@Icons.Material.Filled.PeopleOutline"
+						 Size="Size.Large"
+						 Color="Color.Default"
+						 Style="opacity: 0.5;" />
+				<MudText Typo="Typo.body1" Class="mt-2" Color="Color.Default">
+					Nenhum cliente encontrado
+				</MudText>
+				<MudText Typo="Typo.body2" Color="Color.Default" Style="opacity: 0.7;">
+					Clique no botão + para adicionar um novo cliente
+				</MudText>
+			</MudPaper>
+		</NoRecordsContent>
+
+		<!-- Loading -->
+		<LoadingContent>
+			<div class="d-flex justify-center align-center pa-6">
+				<MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Medium" />
+				<MudText Class="ml-3" Color="Color.Default">Carregando clientes...</MudText>
+			</div>
+		</LoadingContent>
+
+	</MudTable>
+
+</MudPaper>
+
+@code {
+	[Inject]
+	public ISnackbar SnackbarService { get; set; } = null!;
+
+	private MudTable<ClientDto> gridClient = new();
+	private List<ClientDto> clientsDto = new();
+	private string searchString = "";
+	private bool loading = false;
+
+	private bool _dialogOpen = false;
+
+	private ClientActiveDeactiveModal clientActiveDeactiveModal = default!;
+	private bool insertMode = false;
+	private bool deactiveMode = false;
+	private string modalTitle = string.Empty;
+
+	ClientEntity client = new ClientEntity();
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadManufactures();
+	}
+
+	async Task LoadManufactures()
+	{
+		try
+		{
+			loading = true;
+
+			var task = GetClientsDtoAsync();
+
+			await Task.WhenAll(task, Task.Delay(300));
+
+			clientsDto = task.Result;
+		}
+		finally
+		{
+			loading = false;
+		}
+	}
+
+	private bool FilterClients(ClientDto client)
+	{
+		if (string.IsNullOrWhiteSpace(searchString))
+			return true;
+
+		return client.Name?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true ||
+			   client.Email?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true ||
+			   client.CellPhone?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true ||
+			   client.Phone?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true;
+	}
+
+	private async Task OnShowModalEditClick(ClientDto data)
+	{
+		if (_dialogOpen) return;
+
+		_dialogOpen = true;
+
+		try
+		{
+			var client = await _clientService.GetClientByUuidAsync(data.Uuid);
+
+			if (client == null || string.IsNullOrEmpty(client.Name))
+				Notification.ExibirMensagem("Erro ao recuperar cliente.", Severity.Error);
+
+			var parameters = new DialogParameters
+			{
+				{ "Client", client },
+				{ "InsertMode", false }
+			};
+
+			var options = new DialogOptions
+			{
+				CloseOnEscapeKey = true,
+				MaxWidth = MaxWidth.Large,
+				FullWidth = true,
+				CloseButton = true
+			};
+
+			var dialog = await DialogService.ShowAsync<ClientDialog>("Editar Cliente", parameters, options);
+			var result = await dialog.Result;
+
+			if (!result.Canceled)
+				await ReloadGrid();
+		}
+		finally
+		{
+			_dialogOpen = false;
+		}
+	}
+
+	private async Task OnShowModalReactiveClick(ClientDto data)
+	{
+		var responseClient = await _clientService.GetClientByUuidAsync(data.Uuid);
+
+		if (responseClient == null || string.IsNullOrEmpty(responseClient.Name))
+		{
+			Notification.ExibirMensagem("Erro ao recuperar cliente.", Severity.Error);
+			return;
+		}
+
+		var parameters = new DialogParameters{
+			{ "Client", responseClient },
+			{ "DeactiveMode", false }
+		};
+
+		var options = new DialogOptions
+		{
+			MaxWidth = MaxWidth.Small,
+			FullWidth = true,
+			CloseOnEscapeKey = true,
+			CloseButton = true
+		};
+
+		var dialog = await DialogService.ShowAsync<ClientActiveDeactiveDialog>(
+			"Reativar Cliente",
+			parameters,
+			options
+		);
+
+		var result = await dialog.Result;
+
+		if (!result.Canceled)
+			await ReloadGrid();
+	}
+
+	private async Task OnShowModalDeleteClick(ClientDto data)
+	{
+		var responseClient = await _clientService.GetClientByUuidAsync(data.Uuid);
+
+		if (responseClient == null || string.IsNullOrEmpty(responseClient.Name))
+		{
+			Notification.ExibirMensagem("Erro ao recuperar cliente.", Severity.Error);
+			return;
+		}
+
+		var parameters = new DialogParameters{
+			{ "Client", responseClient },
+			{ "DeactiveMode", true }
+		};
+
+		var options = new DialogOptions
+		{
+			MaxWidth = MaxWidth.Small,
+			FullWidth = true,
+			CloseOnEscapeKey = true,
+			CloseButton = true
+		};
+
+		var dialog = await DialogService.ShowAsync<ClientActiveDeactiveDialog>(
+			"Desativar Cliente",
+			parameters,
+			options
+		);
+
+		var result = await dialog.Result;
+
+		if (!result.Canceled)
+			await ReloadGrid();
+	}
+
+	private async Task ReloadGrid()
+	{
+		try
+		{
+			loading = true;
+
+			await LoadManufactures();
+			await gridClient.ReloadServerData();
+		}
+		finally
+		{
+			loading = false;
+		}
+	}
+
+	private async Task OnShowOffClick()
+	{
+		Notification.ExibirMensagem("Funcionalidade em desenvolvimento", Severity.Info);
+	}
+
+	private async Task<List<ClientDto>> GetClientsDtoAsync()
+	{
+		var clientsEntity = await _clientService.GetClientAllAsync();
+
+		return clientsEntity.Select(x => new ClientDto()
+		{
+			Uuid = x.Uuid,
+			Name = x.Name,
+			Email = x.Email,
+			Active = x.Active,
+			CellPhone = x.CellPhoneNumber,
+			Phone = x.PhoneNumber,
+		}).ToList();
+	}
+
+	private async Task OpenModalAsync()
+	{
+		if (_dialogOpen) return;
+
+		_dialogOpen = true;
+
+		try
+		{
+			var client = new ClientEntity()
+			{
+				Name = string.Empty,
+				Address = new AddressEntity()
+			};
+
+			var parameters = new DialogParameters
+			{
+				{ "Client", client },
+				{ "InsertMode", true }
+			};
+
+			var options = new DialogOptions
+			{
+				CloseOnEscapeKey = true,
+				MaxWidth = MaxWidth.Large,
+				FullWidth = true,
+				CloseButton = true
+			};
+
+			var dialog = await DialogService.ShowAsync<ClientDialog>("Novo Cliente", parameters, options);
+			var result = await dialog.Result;
+
+			if (!result.Canceled)
+				await ReloadGrid();
+		}
+		finally
+		{
+			_dialogOpen = false;
+		}
+	}
+}
+@* @page "/clients"
+@page "/clients/Index"
+@using CEJ_WebApp.Components.Users
+@using CEJ_WebApp.Core.Services
+@using CEJ_WebApp.Model
+@using CEJ_WebApp.Model.Dto
+@using CEJ_WebApp.Model.Enum
+@using CEJ_WebApp.Components.Client
+
+@inject IClientService _clientService
+@inject IExternalService _externalService
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NotificationService Notification
+
 <MudPaper Class="pa-4" Elevation="1">
 
     <MudStack Row="true"
@@ -376,4 +829,4 @@
             _dialogOpen = false;
         }
     }
-}
+} *@
