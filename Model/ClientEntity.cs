@@ -15,7 +15,7 @@ namespace CEJ_WebApp.Model
         public DocumentType DocumentType { get; set; }
 
         [CpfCnpjValidation]
-        public string DocumentNumber { get; set; } = null!;
+        public string DocumentNumber { get; set; } = string.Empty;
 
         [EmailAddress]
         public string Email { get; set; } = null!;

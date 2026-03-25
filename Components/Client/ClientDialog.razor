@@ -1,7 +1,8 @@
-﻿@* @using CEJ_WebApp.Core.Services
+﻿@using CEJ_WebApp.Core.Services
 @using CEJ_WebApp.Model
 @using CEJ_WebApp.Model.Enum
 @using MudBlazor
+
 @inject IExternalService _externalService
 @inject IClientService _clientService
 @inject NotificationService Notification
@@ -12,9 +13,9 @@
 
         <MudPaper Class="pa-4 mb-4" Elevation="0" Style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                <MudIcon Icon="@(InsertMode ? Icons.Material.Filled.PersonAdd : Icons.Material.Filled.Edit)" 
-                         Size="Size.Large" 
-                         Color="Color.Inherit" 
+                <MudIcon Icon="@(InsertMode ? Icons.Material.Filled.PersonAdd : Icons.Material.Filled.Edit)"
+                         Size="Size.Large"
+                         Color="Color.Inherit"
                          Style="color: white;" />
                 <MudText Typo="Typo.h5" Style="color: white; font-weight: 500;">
                     @(InsertMode ? "Novo Cliente" : "Editar Cliente")
@@ -25,362 +26,16 @@
         <EditForm Model="@Client">
             <DataAnnotationsValidator />
 
-            <!-- Nome + Documento -->
             <MudGrid>
+
                 <MudItem xs="12" md="5">
-                    <MudTooltip Text="Nome completo do cliente" Placement="MudBlazor.Placement.Top">
-                        <MudTextField @bind-Value="@Client.Name" 
-                                      Label="Nome" 
-                                      Variant="Variant.Outlined" 
-                                      Margin="Margin.Dense" 
-                                      FullWidth="true" 
-                                      AdornmentIcon="@Icons.Material.Filled.Person"
-                                      Adornment="Adornment.Start" />
-                    </MudTooltip>
-                </MudItem>
-
-                <MudItem xs="12" md="3">
-                    <MudTooltip Text="Selecione o tipo de documento" Placement="MudBlazor.Placement.Top">
-                        <MudSelect T="DocumentType"
-                                   Label="Tipo de Documento"
-                                   Value="Client.DocumentType"
-                                   ValueChanged="OnDocumentTypeChanged"
-                                   Variant="Variant.Outlined"
-                                   Margin="Margin.Dense"
-                                   FullWidth="true"
-                                   AdornmentIcon="@Icons.Material.Filled.Description"
-                                   Adornment="Adornment.Start">
-                            @foreach (var documentType in Enum.GetValues<DocumentType>())
-                            {
-                                <MudSelectItem Value="@documentType">@documentType</MudSelectItem>
-                            }
-                        </MudSelect>
-                    </MudTooltip>
-                </MudItem>
-
-                <MudItem xs="12" md="4">
-                    <MudTooltip Text="Digite o número do documento conforme o tipo selecionado" Placement="MudBlazor.Placement.Top">
-                        <MudMask T="string"
-                                 @key="documentMaskKey"
-                                 Label="Número do Documento"
-                                 Mask="@documentMask"
-                                 @bind-Value="Client.DocumentNumber"
-                                 Variant="Variant.Outlined"
-                                 Margin="Margin.Dense"
-                                 FullWidth="true"
-                                 AdornmentIcon="@Icons.Material.Filled.Badge"
-                                 Adornment="Adornment.Start" />
-                    </MudTooltip>
-                </MudItem>
-            </MudGrid>
-
-            <!-- Email + extras -->
-            <MudGrid Class="mt-2">
-                <MudItem xs="12" md="4">
-                    <MudTooltip Text="E-mail para contato" Placement="MudBlazor.Placement.Top">
-                        <MudTextField @bind-Value="@Client.Email" 
-                                      Label="Email" 
-                                      Variant="Variant.Outlined" 
-                                      Margin="Margin.Dense" 
-                                      FullWidth="true"
-                                      AdornmentIcon="@Icons.Material.Filled.Email"
-                                      Adornment="Adornment.Start" />
-                    </MudTooltip>
-                </MudItem>
-
-                @if (isNaturalPerson)
-                {
-                    <MudItem xs="12" md="4">
-                        <MudTooltip Text="Registro Geral (RG)" Placement="MudBlazor.Placement.Top">
-                            <MudTextField @bind-Value="@Client.GeneralRegister" 
-                                          Label="RG" 
-                                          Variant="Variant.Outlined" 
-                                          Margin="Margin.Dense" 
-                                          FullWidth="true"
-                                          AdornmentIcon="@Icons.Material.Filled.CreditCard"
-                                          Adornment="Adornment.Start" />
-                        </MudTooltip>
-                    </MudItem>
-
-                    <MudItem xs="12" md="4">
-                        <MudTooltip Text="Profissão do cliente" Placement="MudBlazor.Placement.Top">
-                            <MudTextField @bind-Value="@Client.Profession" 
-                                          Label="Profissão" 
-                                          Variant="Variant.Outlined" 
-                                          Margin="Margin.Dense" 
-                                          FullWidth="true"
-                                          AdornmentIcon="@Icons.Material.Filled.Work"
-                                          Adornment="Adornment.Start" />
-                        </MudTooltip>
-                    </MudItem>
-                }
-            </MudGrid>
-
-            <!-- Telefones -->
-            <MudGrid Class="mt-2">
-                <MudItem xs="12" md="4">
-                    <MudTooltip Text="Telefone fixo para contato" Placement="MudBlazor.Placement.Top">
-                        <MudTextField @bind-Value="@Client.PhoneNumber"
-                                      Label="Telefone"
-                                      Mask="@(new PatternMask("(00) 0000-0000"))"
-                                      Variant="Variant.Outlined"
-                                      Margin="Margin.Dense"
-                                      FullWidth="true"
-                                      AdornmentIcon="@Icons.Material.Filled.Phone"
-                                      Adornment="Adornment.Start" />
-                    </MudTooltip>
-                </MudItem>
-
-                <MudItem xs="12" md="4">
-                    <MudTooltip Text="Celular para contato (WhatsApp)" Placement="MudBlazor.Placement.Top">
-                        <MudTextField @bind-Value="@Client.CellPhoneNumber"
-                                      Label="Celular"
-                                      Mask="@(new PatternMask("(00) 00000-0000"))"
-                                      Variant="Variant.Outlined"
-                                      Margin="Margin.Dense"
-                                      FullWidth="true"
-                                      AdornmentIcon="@Icons.Material.Filled.Smartphone"
-                                      Adornment="Adornment.Start" />
-                    </MudTooltip>
-                </MudItem>
-
-                <MudItem xs="12" md="4">
-                    <MudTooltip Text="Nome do contato de referência" Placement="MudBlazor.Placement.Top">
-                        <MudTextField @bind-Value="@Client.ContactName"
-                                      Label="Contato"
-                                      Variant="Variant.Outlined"
-                                      Margin="Margin.Dense"
-                                      FullWidth="true"
-                                      AdornmentIcon="@Icons.Material.Filled.ContactMail"
-                                      Adornment="Adornment.Start" />
-                    </MudTooltip>
-                </MudItem>
-            </MudGrid>
-
-            <!-- Endereço -->
-            <MudPaper Class="pa-4 mt-4" Elevation="1" Style="border-radius: 8px; border: 1px solid #e0e0e0;">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mb-3">
-                    <MudIcon Icon="@Icons.Material.Filled.LocationOn" Color="Color.Primary" Size="Size.Small" />
-                    <MudText Typo="Typo.h6">Endereço</MudText>
-                </MudStack>
-
-                <MudGrid>
-                    <MudItem xs="12" md="6">
-                        <MudTooltip Text="Digite o CEP e clique na lupa para buscar automaticamente" Placement="MudBlazor.Placement.Top">
-                            <MudMask T="string"
-                                     Label="CEP"
-                                     Mask="@(new PatternMask("00000-000"))"
-                                     @bind-Value="Client.Address.ZipCode"
-                                     Variant="Variant.Outlined"
-                                     FullWidth="true"
-                                     Adornment="Adornment.End"
-                                     AdornmentIcon="@Icons.Material.Filled.Search"
-                                     OnAdornmentClick="OnFindCepClick"
-                                     AdornmentColor="Color.Primary" />
-                        </MudTooltip>
-                    </MudItem>
-                </MudGrid>
-
-                <MudGrid Class="mt-2">
-                    <MudItem xs="12" md="5">
-                        <MudTooltip Text="Logradouro / Rua" Placement="MudBlazor.Placement.Top">
-                            <MudTextField @bind-Value="@Client.Address.Street" 
-                                          Label="Logradouro" 
-                                          Variant="Variant.Outlined" 
-                                          Margin="Margin.Dense" 
-                                          FullWidth="true"
-                                          AdornmentIcon="@Icons.Material.Filled.Home"
-                                          Adornment="Adornment.Start" />
-                        </MudTooltip>
-                    </MudItem>
-
-                    <MudItem xs="12" md="2">
-                        <MudTooltip Text="Número do endereço" Placement="MudBlazor.Placement.Top">
-                            <MudTextField @bind-Value="@Client.Address.Number" 
-                                          Label="Número" 
-                                          Variant="Variant.Outlined" 
-                                          Margin="Margin.Dense" 
-                                          FullWidth="true" />
-                        </MudTooltip>
-                    </MudItem>
-
-                    <MudItem xs="12" md="5">
-                        <MudTooltip Text="Complemento (apto, sala, bloco, etc)" Placement="MudBlazor.Placement.Top">
-                            <MudTextField @bind-Value="@Client.Address.Complement" 
-                                          Label="Complemento" 
-                                          Variant="Variant.Outlined" 
-                                          Margin="Margin.Dense" 
-                                          FullWidth="true" />
-                        </MudTooltip>
-                    </MudItem>
-                </MudGrid>
-
-                <MudGrid Class="mt-2">
-                    <MudItem xs="12" md="5">
-                        <MudTooltip Text="Bairro" Placement="MudBlazor.Placement.Top">
-                            <MudTextField @bind-Value="@Client.Address.Neighborhood" 
-                                          Label="Bairro" 
-                                          Variant="Variant.Outlined" 
-                                          Margin="Margin.Dense" 
-                                          FullWidth="true"
-                                          AdornmentIcon="@Icons.Material.Filled.Apartment"
-                                          Adornment="Adornment.Start" />
-                        </MudTooltip>
-                    </MudItem>
-
-                    <MudItem xs="12" md="5">
-                        <MudTooltip Text="Cidade" Placement="MudBlazor.Placement.Top">
-                            <MudTextField @bind-Value="@Client.Address.City" 
-                                          Label="Cidade" 
-                                          Variant="Variant.Outlined" 
-                                          Margin="Margin.Dense" 
-                                          FullWidth="true"
-                                          AdornmentIcon="@Icons.Material.Filled.LocationCity"
-                                          Adornment="Adornment.Start" />
-                        </MudTooltip>
-                    </MudItem>
-
-                    <MudItem xs="12" md="2">
-                        <MudTooltip Text="Estado (UF)" Placement="MudBlazor.Placement.Top">
-                            <MudSelect T="string"
-                                       Label="Estado"
-                                       @bind-Value="Client.Address.State"
-                                       Variant="Variant.Outlined"
-                                       Margin="Margin.Dense"
-                                       FullWidth="true"
-                                       AdornmentIcon="@Icons.Material.Filled.Map"
-                                       Adornment="Adornment.Start">
-                                @foreach (var uf in Enum.GetValues<UfType>())
-                                {
-                                    <MudSelectItem Value="@uf.ToString()">@uf</MudSelectItem>
-                                }
-                            </MudSelect>
-                        </MudTooltip>
-                    </MudItem>
-                </MudGrid>
-
-            </MudPaper>
-
-        </EditForm>
-
-    </DialogContent>
-
-    <DialogActions>
-        <MudTooltip Text="Fechar sem salvar" Placement="MudBlazor.Placement.Top">
-            <MudButton Color="Color.Secondary" 
-                       OnClick="Cancel"
-                       Variant="Variant.Outlined">
-                Fechar
-            </MudButton>
-        </MudTooltip>
-
-        <MudTooltip Text="@(InsertMode ? "Adicionar novo cliente" : "Salvar alterações")" Placement="MudBlazor.Placement.Top">
-            <MudButton Color="Color.Primary" 
-                       OnClick="Salvar"
-                       Variant="Variant.Filled"
-                       StartIcon="@Icons.Material.Filled.Save">
-                Salvar
-            </MudButton>
-        </MudTooltip>
-    </DialogActions>
-
-</MudDialog>
-
-@code {
-
-    [CascadingParameter]
-    MudDialogInstance MudDialog { get; set; }
-
-    [Parameter] public ClientEntity Client { get; set; }
-    [Parameter] public bool InsertMode { get; set; }
-
-    private IMask documentMask = new PatternMask("000.000.000-00");
-    private string documentMaskKey = "cpf";
-    private bool isNaturalPerson = false;
-
-    private async Task Salvar()
-    {
-        bool result;
-
-        if (InsertMode)
-            result = await _clientService.AddAsync(Client);
-        else
-            result = await _clientService.EditAsync(Client);
-
-        if (result)
-            Notification.ExibirMensagem("Sucesso!", Severity.Success);
-        else
-            Notification.ExibirMensagem("Erro!", Severity.Error);
-
-        MudDialog.Close(DialogResult.Ok(true));
-    }
-
-    private void Cancel()
-    {
-        MudDialog.Cancel();
-    }
-
-    private void OnDocumentTypeChanged(DocumentType type)
-    {
-        Client.DocumentType = type;
-
-        if (type == DocumentType.CNPJ)
-        {
-            documentMask = new PatternMask("00.000.000/0000-00");
-            documentMaskKey = "cnpj";
-            isNaturalPerson = false;
-        }
-        else
-        {
-            documentMask = new PatternMask("000.000.000-00");
-            documentMaskKey = "cpf";
-            isNaturalPerson = true;
-        }
-
-        Client.DocumentNumber = string.Empty;
-    }
-
-    private async Task OnFindCepClick()
-    {
-        var address = await _externalService.GetAddressCep(Client.Address.ZipCode);
-
-        Client.Address.City = address.Localidade;
-        Client.Address.Neighborhood = address.Bairro;
-        Client.Address.State = address.Uf;
-        Client.Address.Street = address.Logradouro;
-    }
-} *@
-
-@using CEJ_WebApp.Core.Services
-@using CEJ_WebApp.Model
-@using CEJ_WebApp.Model.Enum
-@using MudBlazor
-@inject IExternalService _externalService
-@inject IClientService _clientService
-@inject NotificationService Notification
-
-<MudDialog MaxWidth="MaxWidth.Large" FullWidth="true">
-
-    <DialogContent>
-
-        <MudPaper Class="pa-3 mb-3" Elevation="0" Style="background-color: #f5f5f5;">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                <MudIcon Icon="@(InsertMode ? Icons.Material.Filled.PersonAdd : Icons.Material.Filled.Edit)" />
-                <MudText Typo="Typo.h6">
-                    @(InsertMode ? "Novo Cliente" : "Editar Cliente")
-                </MudText>
-            </MudStack>
-        </MudPaper>
-
-        <MudDivider Class="mb-3" />
-
-        <EditForm Model="@Client">
-            <DataAnnotationsValidator />
-
-            <!-- Nome + Documento -->
-            <MudGrid>
-                <MudItem xs="12" md="5">
-                    <MudTextField @bind-Value="@Client.Name" Label="Nome" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                    <MudTextField @bind-Value="@Client.Name"
+                                  Label="Nome"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  FullWidth="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Person"
+                                  Adornment="Adornment.Start" />
                 </MudItem>
 
                 <MudItem xs="12" md="3">
@@ -390,7 +45,10 @@
                                ValueChanged="OnDocumentTypeChanged"
                                Variant="Variant.Outlined"
                                Margin="Margin.Dense"
-                               FullWidth="true">
+                               FullWidth="true"
+                               AdornmentIcon="@Icons.Material.Filled.Description"
+                               title="Selecione o tipo de documento"
+                               Adornment="Adornment.Start">
                         @foreach (var documentType in Enum.GetValues<DocumentType>())
                         {
                             <MudSelectItem Value="@documentType">@documentType</MudSelectItem>
@@ -399,53 +57,88 @@
                 </MudItem>
 
                 <MudItem xs="12" md="4">
-                    <MudMask T="string"
-                             @key="documentMaskKey"
-                             Label="Número do Documento"
-                             Mask="@documentMask"
-                             @bind-Value="Client.DocumentNumber"
-                             Variant="Variant.Outlined"
-                             Margin="Margin.Dense"
-                             FullWidth="true" />
+                    <MudTextField T="string"
+                                  Label="Documento"
+                                  Value="_displayDocumentNumber"
+                                  ValueChanged="OnDocumentDisplayChanged"
+                                  FullWidth="true"
+                                  Immediate="true"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  TextUpdateSuppression="false"
+                                  AdornmentIcon="@Icons.Material.Filled.Description"
+                                  Adornment="Adornment.Start" />
                 </MudItem>
+
             </MudGrid>
 
-            <!-- Email + extras -->
             <MudGrid Class="mt-2">
+
                 <MudItem xs="12" md="4">
-                    <MudTextField @bind-Value="@Client.Email" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                    <MudTextField @bind-Value="@Client.Email"
+                                  Label="Email"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  FullWidth="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Email"
+                                  Adornment="Adornment.Start" />
                 </MudItem>
 
                 @if (isNaturalPerson)
                 {
                     <MudItem xs="12" md="4">
-                        <MudTextField @bind-Value="@Client.GeneralRegister" Label="RG" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                        <MudTextField @bind-Value="@Client.GeneralRegister"
+                                      Label="RG"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true"
+                                      title="Registro Geral (RG)"
+                                      AdornmentIcon="@Icons.Material.Filled.CreditCard"
+                                      Adornment="Adornment.Start" />
                     </MudItem>
 
                     <MudItem xs="12" md="4">
-                        <MudTextField @bind-Value="@Client.Profession" Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                        <MudTextField @bind-Value="@Client.Profession"
+                                      Label="Profissão"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true"
+                                      title="Profissão do cliente"
+                                      AdornmentIcon="@Icons.Material.Filled.Work"
+                                      Adornment="Adornment.Start" />
                     </MudItem>
                 }
+
             </MudGrid>
 
-            <!-- Telefones -->
             <MudGrid Class="mt-2">
+
                 <MudItem xs="12" md="4">
-                    <MudTextField @bind-Value="@Client.PhoneNumber"
+                    <MudTextField Value="@Client.PhoneNumber"
+                                  ValueChanged="@((string v) => Client.PhoneNumber = ApplyPhoneMask(v))"
                                   Label="Telefone"
-                                  Mask="@(new PatternMask("(00) 0000-0000"))"
+                                  FullWidth="true"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
-                                  FullWidth="true" />
+                                  AdornmentIcon="@Icons.Material.Filled.Phone"
+                                  Adornment="Adornment.Start"
+                                  title="Telefone fixo para contato"
+                                  MaxLength="14"
+                                  Immediate="true" />
                 </MudItem>
 
                 <MudItem xs="12" md="4">
-                    <MudTextField @bind-Value="@Client.CellPhoneNumber"
+                    <MudTextField Value="@Client.CellPhoneNumber"
+                                  ValueChanged="@((string v) => Client.CellPhoneNumber = ApplyCellPhoneMask(v))"
                                   Label="Celular"
-                                  Mask="@(new PatternMask("(00) 00000-0000"))"
+                                  FullWidth="true"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
-                                  FullWidth="true" />
+                                  Immediate="true" 
+                                  title="Celular para contato (WhatsApp)"
+                                  AdornmentIcon="@Icons.Material.Filled.Smartphone"
+                                  MaxLength="15"
+                                  Adornment="Adornment.Start" />
                 </MudItem>
 
                 <MudItem xs="12" md="4">
@@ -453,49 +146,102 @@
                                   Label="Contato"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
-                                  FullWidth="true" />
+                                  FullWidth="true"
+                                  title="Nome do contato de referência"
+                                  AdornmentIcon="@Icons.Material.Filled.ContactMail"
+                                  Adornment="Adornment.Start" />
                 </MudItem>
+
             </MudGrid>
 
-            <!-- Endereço -->
-            <MudPaper Class="pa-4 mt-4" Elevation="1">
-                <MudText Typo="Typo.h6">Endereço</MudText>
+            <MudDivider Class="my-3" />
 
-                <MudGrid Class="mt-2">
-                    <MudItem xs="12" md="6">
-                        <MudMask T="string"
-                                 Label="CEP"
-                                 Mask="@(new PatternMask("00000-000"))"
-                                 @bind-Value="Client.Address.ZipCode"
-                                 Variant="Variant.Outlined"
-                                 FullWidth="true"
-                                 Adornment="Adornment.End"
-                                 AdornmentIcon="@Icons.Material.Filled.Search"
-                                 OnAdornmentClick="OnFindCepClick" />
+            <!-- Endereço -->
+            <MudPaper Class="pa-4 mt-4" Elevation="1" Style="border-radius: 8px; border: 1px solid #e0e0e0;">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mb-3">
+                    <MudIcon Icon="@Icons.Material.Filled.LocationOn" Color="Color.Primary" Size="Size.Small" />
+                    <MudText Typo="Typo.h6">Endereço</MudText>
+                </MudStack>
+
+                <MudGrid>
+
+                    <MudItem xs="12" md="5">
+                        <MudTextField T="string"
+                                      Label="CEP"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true"
+                                      title="Digite o cep e clique na lupa para buscar automáticamente"
+                                      Value="@Client.Address.ZipCode"
+                                      ValueChanged="OnZipChanged"
+                                      Adornment="Adornment.End"
+                                      AdornmentColor="Color.Primary"
+                                      AdornmentIcon="@Icons.Material.Filled.Search"
+                                      OnAdornmentClick="OnFindCepClick"
+                                      Immediate="true" />
                     </MudItem>
+
                 </MudGrid>
 
                 <MudGrid Class="mt-2">
+
                     <MudItem xs="12" md="5">
-                        <MudTextField @bind-Value="@Client.Address.Street" Label="Logradouro" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                        <MudTextField @bind-Value="@Client.Address.Street"
+                                      Label="Logradouro"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true"
+                                      title="Logradouro / Rua"
+                                      AdornmentIcon="@Icons.Material.Filled.Home"
+                                      Adornment="Adornment.Start" />
                     </MudItem>
 
                     <MudItem xs="12" md="2">
-                        <MudTextField @bind-Value="@Client.Address.Number" Label="Número" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                        <MudTextField @bind-Value="@Client.Address.Number"
+                                      Label="Número"
+                                      title="Número do endereço"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true"
+                                      AdornmentIcon="@Icons.Material.Filled.Numbers"
+                                      Adornment="Adornment.Start" />
                     </MudItem>
 
                     <MudItem xs="12" md="5">
-                        <MudTextField @bind-Value="@Client.Address.Complement" Label="Complemento" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                        <MudTextField @bind-Value="@Client.Address.Complement"
+                                      Label="Complemento"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      title="Complemento (apto, sala, bloco, etc)"
+                                      FullWidth="true"
+                                      AdornmentIcon="@Icons.Material.Filled.EditNote"
+                                      Adornment="Adornment.Start" />
                     </MudItem>
+
                 </MudGrid>
 
                 <MudGrid Class="mt-2">
+
                     <MudItem xs="12" md="5">
-                        <MudTextField @bind-Value="@Client.Address.Neighborhood" Label="Bairro" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                        <MudTextField @bind-Value="@Client.Address.Neighborhood"
+                                      Label="Bairro"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true"
+                                      title="Bairro"
+                                      AdornmentIcon="@Icons.Material.Filled.Apartment"
+                                      Adornment="Adornment.Start" />
                     </MudItem>
 
                     <MudItem xs="12" md="5">
-                        <MudTextField @bind-Value="@Client.Address.City" Label="Cidade" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                        <MudTextField @bind-Value="@Client.Address.City"
+                                      Label="Cidade"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true"
+                                      title="Cidade"
+                                      AdornmentIcon="@Icons.Material.Filled.LocationCity"
+                                      Adornment="Adornment.Start" />
                     </MudItem>
 
                     <MudItem xs="12" md="2">
@@ -504,27 +250,33 @@
                                    @bind-Value="Client.Address.State"
                                    Variant="Variant.Outlined"
                                    Margin="Margin.Dense"
-                                   FullWidth="true">
+                                   FullWidth="true"
+                                   title="Estado (UF)"
+                                   AdornmentIcon="@Icons.Material.Filled.Map"
+                                   Adornment="Adornment.Start">
                             @foreach (var uf in Enum.GetValues<UfType>())
                             {
                                 <MudSelectItem Value="@uf.ToString()">@uf</MudSelectItem>
                             }
                         </MudSelect>
                     </MudItem>
+
                 </MudGrid>
-
             </MudPaper>
-
         </EditForm>
 
     </DialogContent>
 
     <DialogActions>
-        <MudButton Color="Color.Secondary" OnClick="Cancel">
+        <MudButton Color="Color.Secondary"
+                   OnClick="Cancel"
+                   Variant="Variant.Outlined">
             Fechar
         </MudButton>
-
-        <MudButton Color="Color.Primary" OnClick="Salvar">
+        <MudButton Color="Color.Primary"
+                   OnClick="Salvar"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Save">
             Salvar
         </MudButton>
     </DialogActions>
@@ -533,65 +285,312 @@
 
 @code {
 
-    [CascadingParameter]
-    MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
     [Parameter] public ClientEntity Client { get; set; }
     [Parameter] public bool InsertMode { get; set; }
 
-    private IMask documentMask = new PatternMask("000.000.000-00");
-    private string documentMaskKey = "cpf";
-    private bool isNaturalPerson = false;
+    private bool isNaturalPerson = true;
+    private string _displayDocumentNumber = string.Empty;
 
-    private async Task Salvar()
+    protected override void OnInitialized()
     {
-        bool result;
+        if (Client == null)
+            Client = new ClientEntity();
 
-        if (InsertMode)
-            result = await _clientService.AddAsync(Client);
-        else
-            result = await _clientService.EditAsync(Client);
+        if (Client.Address == null)
+            Client.Address = new AddressEntity();
 
-        if (result)
-            Notification.ExibirMensagem("Sucesso!", Severity.Success);
-        else
-            Notification.ExibirMensagem("Erro!", Severity.Error);
-
-        MudDialog.Close(DialogResult.Ok(true));
+        // Inicializa o campo de exibição com o documento já formatado
+        _displayDocumentNumber = FormatDocumentForDisplay(Client.DocumentNumber, Client.DocumentType);
     }
 
-    private void Cancel()
+    private void OnDocumentDisplayChanged(string value)
     {
-        MudDialog.Cancel();
+        if (string.IsNullOrEmpty(value))
+        {
+            _displayDocumentNumber = string.Empty;
+            Client.DocumentNumber = string.Empty;
+            return;
+        }
+
+        // Remove caracteres não numéricos para armazenamento
+        var cleanValue = new string(value.Where(char.IsDigit).ToArray());
+        
+        // Aplica a máscara de acordo com o tipo de documento
+        _displayDocumentNumber = ApplyDocumentMask(cleanValue, Client.DocumentType);
+        
+        // Armazena apenas os números no modelo
+        Client.DocumentNumber = cleanValue;
     }
 
     private void OnDocumentTypeChanged(DocumentType type)
     {
         Client.DocumentType = type;
-
-        if (type == DocumentType.CNPJ)
-        {
-            documentMask = new PatternMask("00.000.000/0000-00");
-            documentMaskKey = "cnpj";
-            isNaturalPerson = false;
-        }
-        else
-        {
-            documentMask = new PatternMask("000.000.000-00");
-            documentMaskKey = "cpf";
-            isNaturalPerson = true;
-        }
-
         Client.DocumentNumber = string.Empty;
+        _displayDocumentNumber = string.Empty;
+        isNaturalPerson = type != DocumentType.CNPJ;
     }
 
     private async Task OnFindCepClick()
     {
-        var address = await _externalService.GetAddressCep(Client.Address.ZipCode);
+        if (string.IsNullOrEmpty(Client.Address.ZipCode)) return;
 
-        Client.Address.City = address.Localidade;
-        Client.Address.Neighborhood = address.Bairro;
-        Client.Address.State = address.Uf;
-        Client.Address.Street = address.Logradouro;
+        try
+        {
+            var address = await _externalService.GetAddressCep(Client.Address.ZipCode);
+            Client.Address.City = address.Localidade;
+            Client.Address.Neighborhood = address.Bairro;
+            Client.Address.State = address.Uf;
+            Client.Address.Street = address.Logradouro;
+        }
+        catch (Exception ex)
+        {
+            Notification.ExibirMensagem($"Erro ao buscar CEP: {ex.Message}", Severity.Error);
+        }
     }
+
+    private void OnZipChanged(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            Client.Address.ZipCode = string.Empty;
+            return;
+        }
+
+        var cleanValue = new string(value.Where(char.IsDigit).ToArray());
+        Client.Address.ZipCode = ApplyCepMask(cleanValue);
+    }
+
+    private string ApplyDocumentMask(string value, DocumentType documentType)
+    {
+        if (string.IsNullOrEmpty(value))
+            return string.Empty;
+
+        switch (documentType)
+        {
+            case DocumentType.CPF:
+                return ApplyCpfMask(value);
+            case DocumentType.CNPJ:
+                return ApplyCnpjMask(value);
+            default:
+                return value;
+        }
+    }
+
+    private string ApplyCpfMask(string cpf)
+    {
+        if (string.IsNullOrEmpty(cpf))
+            return string.Empty;
+
+        cpf = new string(cpf.Where(char.IsDigit).ToArray());
+
+        if (cpf.Length > 11)
+            cpf = cpf.Substring(0, 11);
+
+        if (cpf.Length <= 3)
+            return cpf;
+        else if (cpf.Length <= 6)
+            return $"{cpf.Substring(0, 3)}.{cpf.Substring(3)}";
+        else if (cpf.Length <= 9)
+            return $"{cpf.Substring(0, 3)}.{cpf.Substring(3, 3)}.{cpf.Substring(6)}";
+        else
+            return $"{cpf.Substring(0, 3)}.{cpf.Substring(3, 3)}.{cpf.Substring(6, 3)}-{cpf.Substring(9)}";
+    }
+
+    private string ApplyCnpjMask(string cnpj)
+    {
+        if (string.IsNullOrEmpty(cnpj))
+            return string.Empty;
+
+        cnpj = new string(cnpj.Where(char.IsDigit).ToArray());
+
+        if (cnpj.Length > 14)
+            cnpj = cnpj.Substring(0, 14);
+
+        if (cnpj.Length <= 2)
+            return cnpj;
+        else if (cnpj.Length <= 5)
+            return $"{cnpj.Substring(0, 2)}.{cnpj.Substring(2)}";
+        else if (cnpj.Length <= 8)
+            return $"{cnpj.Substring(0, 2)}.{cnpj.Substring(2, 3)}.{cnpj.Substring(5)}";
+        else if (cnpj.Length <= 12)
+            return $"{cnpj.Substring(0, 2)}.{cnpj.Substring(2, 3)}.{cnpj.Substring(5, 3)}/{cnpj.Substring(8)}";
+        else
+            return $"{cnpj.Substring(0, 2)}.{cnpj.Substring(2, 3)}.{cnpj.Substring(5, 3)}/{cnpj.Substring(8, 4)}-{cnpj.Substring(12)}";
+    }
+
+    private string ApplyPhoneMask(string phone)
+    {
+        if (string.IsNullOrEmpty(phone))
+            return string.Empty;
+
+        var cleanValue = new string(phone.Where(char.IsDigit).ToArray());
+        
+        if (cleanValue.Length <= 2)
+            return cleanValue;
+        else if (cleanValue.Length <= 6)
+            return $"({cleanValue.Substring(0, 2)}) {cleanValue.Substring(2)}";
+        else if (cleanValue.Length <= 10)
+            return $"({cleanValue.Substring(0, 2)}) {cleanValue.Substring(2, 4)}-{cleanValue.Substring(6)}";
+        else
+            return $"({cleanValue.Substring(0, 2)}) {cleanValue.Substring(2, 5)}-{cleanValue.Substring(7)}";
+    }
+
+    private string ApplyCellPhoneMask(string cellphone)
+    {
+        if (string.IsNullOrEmpty(cellphone))
+            return string.Empty;
+
+        var cleanValue = new string(cellphone.Where(char.IsDigit).ToArray());
+        
+        if (cleanValue.Length <= 2)
+            return cleanValue;
+        else if (cleanValue.Length <= 7)
+            return $"({cleanValue.Substring(0, 2)}) {cleanValue.Substring(2)}";
+        else if (cleanValue.Length <= 11)
+            return $"({cleanValue.Substring(0, 2)}) {cleanValue.Substring(2, 5)}-{cleanValue.Substring(7)}";
+        else
+            return $"({cleanValue.Substring(0, 2)}) {cleanValue.Substring(2, 5)}-{cleanValue.Substring(7)}";
+    }
+
+    private string ApplyCepMask(string cep)
+    {
+        if (string.IsNullOrEmpty(cep))
+            return string.Empty;
+
+        cep = new string(cep.Where(char.IsDigit).ToArray());
+
+        if (cep.Length > 8)
+            cep = cep.Substring(0, 8);
+
+        if (cep.Length <= 5)
+            return cep;
+        else
+            return $"{cep.Substring(0, 5)}-{cep.Substring(5)}";
+    }
+
+    private string FormatDocumentForDisplay(string documentNumber, DocumentType documentType)
+    {
+        if (string.IsNullOrEmpty(documentNumber))
+            return string.Empty;
+
+        return ApplyDocumentMask(documentNumber, documentType);
+    }
+
+    private async Task Salvar()
+    {
+        // Validação adicional do documento antes de salvar
+        if (!string.IsNullOrEmpty(Client.DocumentNumber))
+        {
+            bool isValid = Client.DocumentType switch
+            {
+                DocumentType.CPF => IsValidCpf(Client.DocumentNumber),
+                DocumentType.CNPJ => IsValidCnpj(Client.DocumentNumber),
+                _ => true
+            };
+
+            if (!isValid)
+            {
+                Notification.ExibirMensagem(
+                    $"{(Client.DocumentType == DocumentType.CPF ? "CPF" : "CNPJ")} inválido!",
+                    Severity.Error);
+                return;
+            }
+        }
+
+        bool result = InsertMode
+            ? await _clientService.AddAsync(Client)
+            : await _clientService.EditAsync(Client);
+
+        Notification.ExibirMensagem(
+            result ? "Sucesso!" : "Erro!",
+            result ? Severity.Success : Severity.Error);
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private bool IsValidCpf(string cpf)
+    {
+        if (string.IsNullOrEmpty(cpf) || cpf.Length != 11)
+            return false;
+
+        // Remove caracteres não numéricos
+        cpf = new string(cpf.Where(char.IsDigit).ToArray());
+
+        if (cpf.Length != 11)
+            return false;
+
+        // Verifica se todos os dígitos são iguais
+        if (cpf.All(c => c == cpf[0]))
+            return false;
+
+        // Validação do primeiro dígito verificador
+        int[] multiplicador1 = { 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+        int soma = 0;
+
+        for (int i = 0; i < 9; i++)
+            soma += int.Parse(cpf[i].ToString()) * multiplicador1[i];
+
+        int resto = soma % 11;
+        int digito1 = resto < 2 ? 0 : 11 - resto;
+
+        if (int.Parse(cpf[9].ToString()) != digito1)
+            return false;
+
+        // Validação do segundo dígito verificador
+        int[] multiplicador2 = { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+        soma = 0;
+
+        for (int i = 0; i < 10; i++)
+            soma += int.Parse(cpf[i].ToString()) * multiplicador2[i];
+
+        resto = soma % 11;
+        int digito2 = resto < 2 ? 0 : 11 - resto;
+
+        return int.Parse(cpf[10].ToString()) == digito2;
+    }
+
+    private bool IsValidCnpj(string cnpj)
+    {
+        if (string.IsNullOrEmpty(cnpj) || cnpj.Length != 14)
+            return false;
+
+        // Remove caracteres não numéricos
+        cnpj = new string(cnpj.Where(char.IsDigit).ToArray());
+
+        if (cnpj.Length != 14)
+            return false;
+
+        // Verifica se todos os dígitos são iguais
+        if (cnpj.All(c => c == cnpj[0]))
+            return false;
+
+        // Validação do primeiro dígito verificador
+        int[] multiplicador1 = { 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+        int soma = 0;
+
+        for (int i = 0; i < 12; i++)
+            soma += int.Parse(cnpj[i].ToString()) * multiplicador1[i];
+
+        int resto = soma % 11;
+        int digito1 = resto < 2 ? 0 : 11 - resto;
+
+        if (int.Parse(cnpj[12].ToString()) != digito1)
+            return false;
+
+        // Validação do segundo dígito verificador
+        int[] multiplicador2 = { 6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+        soma = 0;
+
+        for (int i = 0; i < 13; i++)
+            soma += int.Parse(cnpj[i].ToString()) * multiplicador2[i];
+
+        resto = soma % 11;
+        int digito2 = resto < 2 ? 0 : 11 - resto;
+
+        return int.Parse(cnpj[13].ToString()) == digito2;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
 }
