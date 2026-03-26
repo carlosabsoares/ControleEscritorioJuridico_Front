@@ -15,90 +15,156 @@
 @inject NotificationService Notification
 @inject NavigationManager Navigation
 
+<MudPaper Class="pa-6" Elevation="2" Style="border-radius: 12px;">
 
-<div class="card">
-	<div class="card-header">
-		<MudStack Row="true"
-				  Justify="Justify.SpaceBetween"
-				  AlignItems="MudBlazor.AlignItems.Center"
-				  Class="mb-3">
+	<MudStack Row="true"
+			  Justify="Justify.SpaceBetween"
+			  AlignItems="AlignItems.Center"
+			  Class="mb-4">
 
-			<h4>Processos</h4>
-
-			<MudFab Color="Color.Tertiary"
-					StartIcon="@Icons.Material.Filled.Add"
-					Label="Processos"
-					OnClick="CallAddProcessAsync" />
-
+		<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+			<MudIcon Icon="@Icons.Material.Filled.Balance"
+					 Size="Size.Large"
+					 Color="Color.Primary" />
+			<MudText Typo="Typo.h5" Style="font-weight: 500;">Processos</MudText>
 		</MudStack>
-	</div>
-	<div class="card-body">
-		<MudTable @ref="gridProcess"
-				  T="ProcessDto"
-				  Items="@processesDto"
-				  Filter="new Func<ProcessDto, bool>(FilterProcesses)"
-				  FilterMode="FilterMode.Filterable"
-				  FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-				  Hover="true"
-				  Bordered="true"
-				  Striped="true"
-				  Loading="@loading"
-				  Breakpoint="Breakpoint.Sm"
-				  Height="400px"
-				  FixedHeader="true"
-				  HorizontalScrollbar="true">
 
-			<!-- Toolbar com filtro -->
-			<ToolBarContent>
-				<MudText Typo="Typo.subtitle1">Lista de Processos</MudText>
+
+		<MudFab Color="Color.Primary"
+				StartIcon="@Icons.Material.Filled.Add"
+				Size="Size.Medium"
+				title="Adicionar um Processo"
+				OnClick="CallAddProcessAsync" />
+	</MudStack>
+
+	<MudTable @ref="gridProcess"
+			  T="ProcessDto"
+			  Items="@processesDto"
+			  Filter="new Func<ProcessDto, bool>(FilterProcesses)"
+			  FilterMode="FilterMode.Filterable"
+			  FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+			  Hover="true"
+			  Bordered="true"
+			  Striped="true"
+			  Dense="true"
+			  Loading="@loading"
+			  Breakpoint="Breakpoint.Xs"
+			  Height="auto"
+			  FixedHeader="false"
+			  HorizontalScrollbar="true"
+			  Style="width:100%; overflow-x:auto; border-radius: 8px;">
+
+		<!-- Toolbar -->
+		<ToolBarContent>
+			<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="pa-2">
+				<MudIcon Icon="@Icons.Material.Filled.FormatListBulleted"
+						 Size="Size.Small"
+						 Color="Color.Default" />
+				<MudText Typo="Typo.subtitle2" Color="Color.Default">Lista de Processos</MudText>
 				<MudSpacer />
+        
 				<MudTextField @bind-Value="searchString"
 							  Placeholder="Pesquisar..."
-							  Variant="MudBlazor.Variant.Outlined"
+							  Variant="Variant.Outlined"
 							  Adornment="Adornment.Start"
 							  AdornmentIcon="@Icons.Material.Filled.Search"
 							  IconSize="Size.Small"
 							  DebounceInterval="300"
 							  Immediate="true"
-							  Class="mt-0" />
-			</ToolBarContent>
+							  Style="min-width: 300px; max-width: 600px; width: 100%;" />
+			</MudStack>
+		</ToolBarContent>
 
-			<!-- Cabeçalho da tabela -->
-			<HeaderContent>
-				<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.ProcessNumber)">Processo</MudTableSortLabel></MudTh>
-				<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.Status)">Status</MudTableSortLabel></MudTh>
-				<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.Client)">Cliente</MudTableSortLabel></MudTh>
-				<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.OpenDate)">Data Abertura</MudTableSortLabel></MudTh>
-				<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.OpenDate)">Última movimentação</MudTableSortLabel></MudTh>
-				<MudTh Style="width: 120px; text-align: center;">Ações</MudTh>
-			</HeaderContent>
+		<!-- Header -->
+		<HeaderContent>
+			<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.ProcessNumber)">Processo</MudTableSortLabel></MudTh>
+			<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.Status)">Status</MudTableSortLabel></MudTh>
+			<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.Client)">Cliente</MudTableSortLabel></MudTh>
+			<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.OpenDate)">Data Abertura</MudTableSortLabel></MudTh>
+			<MudTh><MudTableSortLabel SortBy="new Func<ProcessDto, object>(x => x.OpenDate)">Última movimentação</MudTableSortLabel></MudTh>
+			<MudTh Style="width: 120px; text-align: center;">Ações</MudTh>
+		</HeaderContent>
 
-			<!-- Linhas da tabela -->
-			<RowTemplate>
-				<MudTd DataLabel="Processo">@context.ProcessNumber</MudTd>
-				<MudTd DataLabel="Status">@context.Status</MudTd>
-				<MudTd DataLabel="Cliente">@context.Client</MudTd>
-				<MudTd DataLabel="Data Abertura">@context.OpenDate</MudTd>
-				<MudTd DataLabel="Última movimentação">@context.LastMovimentationDate</MudTd>
-			</RowTemplate>
-			<!-- Paginação -->
-			<PagerContent>
-				<MudTablePager PageSizeOptions="new int[] { 5, 10, 25, 50 }" />
-			</PagerContent>
+		<!-- Rows -->
+		<RowTemplate>
+			<MudTd DataLabel="Processo">
+				<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+					<MudIcon Icon="@Icons.Material.Filled.Balance"
+							 Size="Size.Small"
+							 Color="Color.Primary" />
+					<MudText>@context.ProcessNumber</MudText>
+				</MudStack>
+			</MudTd>
+			<MudTd DataLabel="Status">
+				<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+					<MudIcon Icon="@Icons.Material.Filled.Abc"
+							 Size="Size.Small"
+							 Color="Color.Default" />
+					<MudText>@context.Status</MudText>
+				</MudStack>
+			</MudTd>
+			<MudTd DataLabel="Cliente">
+				<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+					<MudIcon Icon="@Icons.Material.Filled.Person2"
+							 Size="Size.Small"
+							 Color="Color.Default" />
+					<MudText>@context.Client</MudText>
+				</MudStack>
+			</MudTd>
+			<MudTd DataLabel="Data Abertura">
+				<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+					<MudIcon Icon="@Icons.Material.Filled.DateRange"
+							 Size="Size.Small"
+							 Color="Color.Default" />
+					<MudText>@context.OpenDate</MudText>
+				</MudStack>
+			</MudTd>
+			<MudTd DataLabel="Última Movimentação">
+				<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+					<MudIcon Icon="@Icons.Material.Filled.DataExploration"
+							 Size="Size.Small"
+							 Color="Color.Default" />
+					<MudText>@context.LastMovimentationDate</MudText>
+				</MudStack>
+			</MudTd>
+		</RowTemplate>
 
-			<!-- Mensagem quando não há dados -->
-			<NoRecordsContent>
-				<MudText Align="Align.Center">Nenhum cliente encontrado</MudText>
-			</NoRecordsContent>
+		<!-- Pager -->
+		<PagerContent>
+			<div class="pa-2">
+				<MudTooltip Text="Alterar quantidade de itens por página" Placement="MudBlazor.Placement.Top">
+					<MudTablePager PageSizeOptions="new int[] { 5, 10, 25, 50, 100 }" />
+				</MudTooltip>
+			</div>
+		</PagerContent>
 
-			<!-- Loading indicator -->
-			<LoadingContent>
-				<MudText Align="Align.Center">Carregando...</MudText>
-			</LoadingContent>
+		<!-- Empty -->
+		<NoRecordsContent>
+			<MudPaper Class="pa-8 text-center" Elevation="0">
+				<MudIcon Icon="@Icons.Material.Filled.PeopleOutline"
+						 Size="Size.Large"
+						 Color="Color.Default"
+						 Style="opacity: 0.5;" />
+				<MudText Typo="Typo.body1" Class="mt-2" Color="Color.Default">
+					Nenhum cliente encontrado
+				</MudText>
+				<MudText Typo="Typo.body2" Color="Color.Default" Style="opacity: 0.7;">
+					Clique no botão + para adicionar um novo cliente
+				</MudText>
+			</MudPaper>
+		</NoRecordsContent>
 
-		</MudTable>
-	</div>
-</div>
+		<!-- Loading -->
+		<LoadingContent>
+			<div class="d-flex justify-center align-center pa-6">
+				<MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Medium" />
+				<MudText Class="ml-3" Color="Color.Default">Carregando processos...</MudText>
+			</div>
+		</LoadingContent>
+
+	</MudTable>
+
+</MudPaper>
 
 @code {
 
