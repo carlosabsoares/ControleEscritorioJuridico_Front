@@ -27,7 +27,7 @@ namespace CEJ_WebApp.Model
         public string? PhoneNumber { get; set; } = null!;
 
         [MaxLength(50, ErrorMessage = "O nome deve ter no máximo 50 caracteres.")]
-        public string? ContactName { get; set; }
+        public string? ContactName { get; set; } = null!;
 
         public long AddressId { get; set; } = 0;
 
@@ -35,7 +35,7 @@ namespace CEJ_WebApp.Model
         public string? GeneralRegister { get; set; }
 
         [MaxLength(20, ErrorMessage = "A profissao deve ter no máximo 20 caracteres.")]
-        public string? Profession { get; set; }
+        public string Profession { get; set; } =  string.Empty;
 
         public AddressEntity Address { get; set; } = new AddressEntity();
         public bool Active { get; set; } = false;
