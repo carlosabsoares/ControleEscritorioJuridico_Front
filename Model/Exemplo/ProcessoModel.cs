@@ -19,6 +19,5 @@ namespace CEJ_WebApp.Model.Exemplo
         public string VaraComarca2 { get; set; }
         public DateTime? PrazoProcessual { get; set; }
         public bool AtivarAlerta { get; set; }
-
     }
 }

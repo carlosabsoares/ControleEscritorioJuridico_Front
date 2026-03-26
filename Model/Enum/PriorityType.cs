@@ -2,8 +2,8 @@
 {
     public enum PriorityType
     {
-        Alta =1,
-        Media =2,
-        Baixa=3
+        Alta = 1,
+        Media = 2,
+        Baixa = 3
     }
 }

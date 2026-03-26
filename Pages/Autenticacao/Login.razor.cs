@@ -17,7 +17,7 @@ public partial class LoginPage : ComponentBase
     // 🔥 CONTROLE DE LOADING
     protected bool isLoading = false;
 
-    #endregion
+    #endregion Properties
 
     #region Services
 
@@ -25,7 +25,7 @@ public partial class LoginPage : ComponentBase
     [Inject] public NavigationManager NavigationManager { get; set; } = null!;
     [Inject] public ISnackbar SnackbarService { get; set; } = null!;
 
-    #endregion
+    #endregion Services
 
     #region Methods
 
@@ -87,5 +87,5 @@ public partial class LoginPage : ComponentBase
         SnackbarService.Add(mensagem, severity, configure: config, key: "Login");
     }
 
-    #endregion
+    #endregion Methods
 }

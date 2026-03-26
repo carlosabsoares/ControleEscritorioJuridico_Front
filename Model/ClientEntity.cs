@@ -35,7 +35,7 @@ namespace CEJ_WebApp.Model
         public string? GeneralRegister { get; set; }
 
         [MaxLength(20, ErrorMessage = "A profissao deve ter no máximo 20 caracteres.")]
-        public string Profession { get; set; } =  string.Empty;
+        public string Profession { get; set; } = string.Empty;
 
         public AddressEntity Address { get; set; } = new AddressEntity();
         public bool Active { get; set; } = false;

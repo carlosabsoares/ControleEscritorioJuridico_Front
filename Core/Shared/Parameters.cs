@@ -8,7 +8,7 @@ namespace CEJ_WebApp.Core.Shared
     {
         private readonly ILocalStorageService _localStorage;
         private UserSessionInformation _userSessionInformation;
-        
+
         public Parameters(ILocalStorageService localStorage,
                           UserSessionInformation userSessionInformation
             )
