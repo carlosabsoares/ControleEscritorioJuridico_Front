@@ -1,6 +1,7 @@
 ﻿@page "/process/add"
 
 @using CEJ_WebApp.Components.Client
+@using CEJ_WebApp.Components.LegalProcess
 @using CEJ_WebApp.Core.Services
 @using System.ComponentModel.DataAnnotations
 @using CEJ_WebApp.Model
@@ -234,8 +235,8 @@
 							}
 						</MudSelect>
 
-						<MudFab Color="Color.Primary" 
-						        StartIcon="@Icons.Material.Filled.Add" 
+						<MudFab Color="Color.Primary"
+								StartIcon="@Icons.Material.Filled.Add"
 								Size="Size.Medium"
 								title="Adicionar um cliente"
 								OnClick="OpenAddClient" />
@@ -284,7 +285,52 @@
 							 Elevation="0"
 							 Style="border-radius: 12px; overflow: hidden;">
                         
-						<MudTabPanel Text="Partes Envolvidas"
+						<MudTabPanel Text="Partes Envolvidas" Icon="@Icons.Material.Filled.PeopleAlt">
+							<MudContainer Class="pa-4">
+								<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+									<MudText Typo="Typo.subtitle1" Class="font-weight-bold">Partes Adicionadas</MudText>
+									<MudButton Variant="Variant.Filled"
+											   Color="Color.Primary"
+											   StartIcon="@Icons.Material.Filled.Add"
+											   OnClick="OpenAddParteDialog">
+										Nova Parte
+									</MudButton>
+								</MudStack>
+
+								@if (listaPartes.Any())
+								{
+									<MudTable Items="@listaPartes" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0" Dense="true">
+										<HeaderContent>
+											<MudTh>Tipo</MudTh>
+											<MudTh>Nome</MudTh>
+											<MudTh>Documento</MudTh>
+											<MudTh>Ações</MudTh>
+										</HeaderContent>
+@* 										<RowTemplate>
+											<MudTd DataLabel="Tipo">
+												<MudChip T="string" Size="Size.Small" Color="@(context.Tipo == "Autor" ? Color.Info : Color.Error)" Variant="Variant.Text">
+													@context.Tipo
+												</MudChip>
+											</MudTd>
+											<MudTd DataLabel="Nome">@context.Nome</MudTd>
+											<MudTd DataLabel="Documento">@context.Documento</MudTd>
+											<MudTd>
+												<MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+												<MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => listaPartes.Remove(context))" />
+											</MudTd>
+										</RowTemplate> *@
+									</MudTable>
+								}
+								else
+								{
+									<MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+										Nenhuma parte adicionada. Clique em "Nova Parte" para começar.
+									</MudAlert>
+								}
+							</MudContainer>
+						</MudTabPanel>
+
+						@* 						<MudTabPanel Text="Partes Envolvidas"
 									 Icon="@Icons.Material.Filled.PeopleAlt">
 							<MudContainer Class="pa-4">
 								<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4">
@@ -298,7 +344,7 @@
 									Adicionar Parte Envolvida
 								</MudButton>
 							</MudContainer>
-						</MudTabPanel>
+						</MudTabPanel> *@
                         
 						<MudTabPanel Text="Documentos"
 									 Icon="@Icons.Material.Filled.UploadFile">
@@ -391,6 +437,22 @@
 	protected override async Task OnInitializedAsync()
 	{
 		await LoadManufactures();
+	}
+
+	// Adicione esta lista às suas variáveis
+	private List<PartyLegalProcessEntity> listaPartes = new();
+
+	private async Task OpenAddParteDialog()
+	{
+		var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+		var dialog = await DialogService.ShowAsync<PartiesLegalProcessDialog>("", options);
+		var result = await dialog.Result;
+
+		if (!result.Canceled && result.Data is PartyLegalProcessEntity novaParte)
+		{
+			listaPartes.Add(novaParte);
+			StateHasChanged();
+		}
 	}
 
 	async Task LoadManufactures()

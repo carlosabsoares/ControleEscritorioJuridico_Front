@@ -290,7 +290,7 @@
 				CloseButton = true
 			};
 
-			var dialog = await DialogService.ShowAsync<ClientDialog>("Editar Cliente", parameters, options);
+			var dialog = await DialogService.ShowAsync<ClientDialog>("", parameters, options);
 			var result = await dialog.Result;
 
 			if (!result.Canceled)
