@@ -11,5 +11,8 @@
         public string RG { get; set; }
         public bool Desconhecido { get; set; }
         public bool ExistenciaUniaoEstavel { get; set; }
+
+        public long AddressId { get; set; } = 0;
+        public AddressEntity Address { get; set; } = new AddressEntity();
     }
 }

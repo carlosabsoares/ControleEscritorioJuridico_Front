@@ -1,0 +1,162 @@
+﻿@using CEJ_WebApp.Core.Services
+@using CEJ_WebApp.Model
+@using CEJ_WebApp.Model.Enum
+@using MudBlazor
+
+@inject IExternalService ExternalService
+@inject NotificationService Notification
+
+<MudPaper Class="pa-4 mt-4" Elevation="1" Style="border-radius: 8px; border: 1px solid #e0e0e0;">
+    
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mb-3">
+        <MudIcon Icon="@Icons.Material.Filled.LocationOn" Color="Color.Primary" Size="Size.Small" />
+        <MudText Typo="Typo.h6">Endereço</MudText>
+    </MudStack>
+
+    <MudGrid>
+
+        <MudItem xs="12" md="5">
+            <MudTextField T="string"
+                          Label="CEP"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          FullWidth="true"
+                          title="Digite o cep e clique na lupa para buscar automáticamente"
+                          Value="@Address.ZipCode"
+                          ValueChanged="OnZipChanged"
+                          Adornment="Adornment.End"
+                          AdornmentColor="Color.Primary"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          OnAdornmentClick="OnFindCepClick"
+                          Immediate="true" />
+        </MudItem>
+
+    </MudGrid>
+
+    <MudGrid Class="mt-2">
+
+        <MudItem xs="12" md="5">
+            <MudTextField @bind-Value="Address.Street"
+                          Label="Logradouro"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          FullWidth="true"
+                          AdornmentIcon="@Icons.Material.Filled.Home"
+                          Adornment="Adornment.Start" />
+        </MudItem>
+
+        <MudItem xs="12" md="2">
+            <MudTextField @bind-Value="Address.Number"
+                          Label="Número"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          FullWidth="true"
+                          AdornmentIcon="@Icons.Material.Filled.Numbers"
+                          Adornment="Adornment.Start" />
+        </MudItem>
+
+        <MudItem xs="12" md="5">
+            <MudTextField @bind-Value="Address.Complement"
+                          Label="Complemento"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          FullWidth="true"
+                          AdornmentIcon="@Icons.Material.Filled.EditNote"
+                          Adornment="Adornment.Start" />
+        </MudItem>
+
+    </MudGrid>
+
+    <MudGrid Class="mt-2">
+
+        <MudItem xs="12" md="5">
+            <MudTextField @bind-Value="Address.Neighborhood"
+                          Label="Bairro"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          FullWidth="true"
+                          AdornmentIcon="@Icons.Material.Filled.Apartment"
+                          Adornment="Adornment.Start" />
+        </MudItem>
+
+        <MudItem xs="12" md="5">
+            <MudTextField @bind-Value="Address.City"
+                          Label="Cidade"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          FullWidth="true"
+                          AdornmentIcon="@Icons.Material.Filled.LocationCity"
+                          Adornment="Adornment.Start" />
+        </MudItem>
+
+        <MudItem xs="12" md="2">
+            <MudSelect T="string"
+                       Label="Estado"
+                       @bind-Value="Address.State"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       FullWidth="true"
+                       AdornmentIcon="@Icons.Material.Filled.Map"
+                       Adornment="Adornment.Start">
+                @foreach (var uf in Enum.GetValues<UfType>())
+                {
+                    <MudSelectItem Value="@uf.ToString()">@uf</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+
+    </MudGrid>
+
+</MudPaper>
+
+@code {
+
+    [Parameter] public AddressEntity Address { get; set; }
+
+    private async Task OnFindCepClick()
+    {
+        if (string.IsNullOrEmpty(Address.ZipCode)) return;
+
+        try
+        {
+            var address = await ExternalService.GetAddressCep(Address.ZipCode);
+
+            Address.City = address.Localidade;
+            Address.Neighborhood = address.Bairro;
+            Address.State = address.Uf;
+            Address.Street = address.Logradouro;
+        }
+        catch (Exception ex)
+        {
+            Notification.ExibirMensagem($"Erro ao buscar CEP: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void OnZipChanged(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            Address.ZipCode = string.Empty;
+            return;
+        }
+
+        var cleanValue = new string(value.Where(char.IsDigit).ToArray());
+        Address.ZipCode = ApplyCepMask(cleanValue);
+    }
+
+    private string ApplyCepMask(string cep)
+    {
+        if (string.IsNullOrEmpty(cep))
+            return string.Empty;
+
+        cep = new string(cep.Where(char.IsDigit).ToArray());
+
+        if (cep.Length > 8)
+            cep = cep.Substring(0, 8);
+
+        if (cep.Length <= 5)
+            return cep;
+        else
+            return $"{cep.Substring(0, 5)}-{cep.Substring(5)}";
+    }
+}

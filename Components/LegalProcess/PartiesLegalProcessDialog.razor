@@ -2,76 +2,83 @@
 @using System.ComponentModel.DataAnnotations
 @using CEJ_WebApp.Model
 
-<MudDialog>
-    <TitleContent>
-        <MudText Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Class="mr-3 mb-n1" />
-            Adicionar Nova Parte Envolvida
-        </MudText>
-    </TitleContent>
-    <DialogContent>
-        <EditForm Model="@partiesModel">
-            <DataAnnotationsValidator />
-            <MudGrid Spacing="2">
-                <MudItem xs="12" md="6">
-                    <MudSelect T="string" Label="Tipo de Participação" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Tipo">
-                        <MudSelectItem Value="@("Autor")">Autor</MudSelectItem>
-                        <MudSelectItem Value="@("Réu")">Réu</MudSelectItem>
-                        <MudSelectItem Value="@("Advogado")">Advogado</MudSelectItem>
-                        <MudSelectItem Value="@("Testemunha")">Testemunha</MudSelectItem>
-                    </MudSelect>
-                </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudTextField Label="CPF / CNPJ" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Documento" />
-                </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudTextField Label="Nome Completo / Razão Social" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Nome" Required="true" />
-                </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudCheckBox T="bool"
-                                 @bind-Checked="partiesModel.ExistenciaUniaoEstavel"
-                                 Label="Existência de União Estável"
-                                 Color="Color.Primary"
-                                 Class="mt-2" />
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudTextField Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Profissao" />
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudTextField Label="E-mail" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Email" />
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudTextField Label="Telefone" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Telefone" />
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudTextField Label="RG"
-                                  Variant="Variant.Outlined"
-                                  Margin="Margin.Dense"
-                                  @bind-Value="partiesModel.RG" />
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudTextField Label="Representante Legal" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.RG" />
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudTextField Label="Cargo" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.RG" />
-                </MudItem>
-                <MudItem xs="12">
-                    <MudCheckBox T="string" @bind-Checked="partiesModel.Desconhecido" Label="Declaro desconhecer informações sobre o Réu" Color="Color.Primary" Dense="true" />
-                </MudItem>
-            </MudGrid>
-        </EditForm>
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel">Cancelar</MudButton>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Salvar Parte</MudButton>
-    </DialogActions>
+<MudDialog MaxWidth="MaxWidth.False" Style="width: 95%; max-width: 700px;">
+	<TitleContent>
+		<MudText Typo="Typo.h6">
+			<MudIcon Icon="@Icons.Material.Filled.PersonAdd" Class="mr-3 mb-n1" />
+			Adicionar Nova Parte Envolvida
+		</MudText>
+	</TitleContent>
+	<DialogContent>
+		<EditForm Model="@partiesModel">
+			<DataAnnotationsValidator />
+			<MudGrid Spacing="2">
+				<MudItem xs="12" md="6">
+					<MudSelect T="string" Label="Tipo de Participação" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Tipo">
+						<MudSelectItem Value="@("Autor")">Autor</MudSelectItem>
+						<MudSelectItem Value="@("Réu")">Réu</MudSelectItem>
+						<MudSelectItem Value="@("Advogado")">Advogado</MudSelectItem>
+						<MudSelectItem Value="@("Testemunha")">Testemunha</MudSelectItem>
+					</MudSelect>
+				</MudItem>
+				<MudItem xs="12" md="6">
+					<MudTextField Label="CPF / CNPJ" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Documento" />
+				</MudItem>
+				<MudItem xs="12" md="6">
+					<MudTextField Label="Nome Completo / Razão Social" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Nome" Required="true" />
+				</MudItem>
+				<MudItem xs="12" md="6">
+					<MudCheckBox T="bool"
+								 @bind-Checked="partiesModel.ExistenciaUniaoEstavel"
+								 Label="Existência de União Estável"
+								 Color="Color.Primary"
+								 Class="mt-2" />
+				</MudItem>
+				<MudItem xs="12" md="4">
+					<MudTextField Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Profissao" />
+				</MudItem>
+				<MudItem xs="12" md="4">
+					<MudTextField Label="E-mail" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Email" />
+				</MudItem>
+				<MudItem xs="12" md="4">
+					<MudTextField Label="Telefone" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Telefone" />
+				</MudItem>
+				<MudItem xs="12" md="4">
+					<MudTextField Label="RG"
+								  Variant="Variant.Outlined"
+								  Margin="Margin.Dense"
+								  @bind-Value="partiesModel.RG" />
+				</MudItem>
+				<MudItem xs="12" md="4">
+					<MudTextField Label="Representante Legal" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.RG" />
+				</MudItem>
+				<MudItem xs="12" md="4">
+					<MudTextField Label="Cargo" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.RG" />
+				</MudItem>
+
+				<MudDivider Class="my-3" />
+
+				<!-- ✅ NOVO COMPONENTE -->
+				<AddressForm Address="partiesModel.Address" />
+
+
+				<MudItem xs="12">
+					<MudCheckBox T="string" @bind-Checked="partiesModel.Desconhecido" Label="Declaro desconhecer informações sobre o Réu" Color="Color.Primary" Dense="true" />
+				</MudItem>
+			</MudGrid>
+		</EditForm>
+	</DialogContent>
+	<DialogActions>
+		<MudButton OnClick="Cancel">Cancelar</MudButton>
+		<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Salvar Parte</MudButton>
+	</DialogActions>
 </MudDialog>
 
 @code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+	[CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    private PartyLegalProcessEntity partiesModel = new();
+	private PartyLegalProcessEntity partiesModel = new();
 
-    private void Submit() => MudDialog.Close(DialogResult.Ok(partiesModel));
-    private void Cancel() => MudDialog.Cancel();
+	private void Submit() => MudDialog.Close(DialogResult.Ok(partiesModel));
+	private void Cancel() => MudDialog.Cancel();
 }
