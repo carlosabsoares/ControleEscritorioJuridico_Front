@@ -31,15 +31,6 @@
 							Preencha as informações abaixo para registrar um novo processo jurídico
 						</MudText>
 					</MudItem>
-					@*                     <MudItem xs="12" md="4" Class="d-flex justify-end align-center">
-                        <MudChip T="string"
-                                 Color="Color.Secondary"
-                                 Variant="Variant.Outlined"
-                                 Style="border-color: rgba(255,255,255,0.3); color: white;">
-                            <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small" Class="mr-1" />
-                            Processo #Novo
-                        </MudChip>
-                    </MudItem> *@
 				</MudGrid>
 			</MudPaper>
 		</MudItem>
@@ -224,9 +215,6 @@
 							{
 								<MudSelectItem Value="@client">
 									<MudStack Direction="Direction.Row" AlignItems="AlignItems.Start" Spacing="2">
-										@* 										<MudAvatar Size="Size.Small" Variant="Variant.Outlined" Class="bg-primary-light">
-											<MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" />
-										</MudAvatar> *@
 										<div>
 											<div>@client.Name</div>
 										</div>
@@ -285,6 +273,7 @@
 							 Elevation="0"
 							 Style="border-radius: 12px; overflow: hidden;">
                         
+						<!-- Substitua o conteúdo do MudTabPanel "Partes Envolvidas" por: -->
 						<MudTabPanel Text="Partes Envolvidas" Icon="@Icons.Material.Filled.PeopleAlt">
 							<MudContainer Class="pa-4">
 								<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
@@ -299,52 +288,59 @@
 
 								@if (listaPartes.Any())
 								{
-									<MudTable Items="@listaPartes" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0" Dense="true">
+									<MudTable Items="@listaPartes"
+											  Hover="true"
+											  Breakpoint="Breakpoint.Sm"
+											  Elevation="0"
+											  Dense="true">
 										<HeaderContent>
 											<MudTh>Tipo</MudTh>
-											<MudTh>Nome</MudTh>
-											<MudTh>Documento</MudTh>
+											<MudTh>Nome/Razão Social</MudTh>
+											<MudTh>CPF/CNPJ</MudTh>
+											<MudTh>Email</MudTh>
+											<MudTh>Telefone</MudTh>
 											<MudTh>Ações</MudTh>
 										</HeaderContent>
-@* 										<RowTemplate>
+										<RowTemplate Context="item">
 											<MudTd DataLabel="Tipo">
-												<MudChip T="string" Size="Size.Small" Color="@(context.Tipo == "Autor" ? Color.Info : Color.Error)" Variant="Variant.Text">
-													@context.Tipo
+												<MudChip T="string" Size="Size.Small" Color="@GetTipoColor(item.Tipo)" Variant="MudBlazor.Variant.Outlined">
+													<MudText>@item.Tipo</MudText>
 												</MudChip>
 											</MudTd>
-											<MudTd DataLabel="Nome">@context.Nome</MudTd>
-											<MudTd DataLabel="Documento">@context.Documento</MudTd>
-											<MudTd>
-												<MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
-												<MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => listaPartes.Remove(context))" />
+											<MudTd DataLabel="Nome/Razão Social">
+												<MudText>@item.Nome</MudText>
 											</MudTd>
-										</RowTemplate> *@
+											<MudTd DataLabel="CPF/CNPJ">
+												<MudText>@item.Documento</MudText>
+											</MudTd>
+											<MudTd DataLabel="Email">
+												<MudText>@item.Email</MudText>
+											</MudTd>
+											<MudTd DataLabel="Telefone">
+												<MudText>@item.Telefone</MudText>
+											</MudTd>
+											<MudTd DataLabel="Ações">
+												<MudText>
+													<MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary" OnClick="() => EditParte(item)" />
+													<MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="() => RemoveParte(item)" />
+												</MudText>
+											</MudTd>
+										</RowTemplate>
 									</MudTable>
+			
+									<MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
+										Total de partes: @listaPartes.Count
+									</MudText>
 								}
 								else
 								{
 									<MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+										<MudIcon Icon="@Icons.Material.Filled.Info" Class="mr-2" />
 										Nenhuma parte adicionada. Clique em "Nova Parte" para começar.
 									</MudAlert>
 								}
 							</MudContainer>
 						</MudTabPanel>
-
-						@* 						<MudTabPanel Text="Partes Envolvidas"
-									 Icon="@Icons.Material.Filled.PeopleAlt">
-							<MudContainer Class="pa-4">
-								<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4">
-									<MudText>Adicione as partes envolvidas no processo, incluindo autor, réu, advogados e testemunhas.</MudText>
-								</MudAlert>
-                                
-								<MudButton Variant="Variant.Outlined"
-										   Color="Color.Primary"
-										   StartIcon="@Icons.Material.Filled.Add"
-										   Class="mt-2">
-									Adicionar Parte Envolvida
-								</MudButton>
-							</MudContainer>
-						</MudTabPanel> *@
                         
 						<MudTabPanel Text="Documentos"
 									 Icon="@Icons.Material.Filled.UploadFile">
@@ -441,18 +437,48 @@
 
 	// Adicione esta lista às suas variáveis
 	private List<PartyLegalProcessEntity> listaPartes = new();
+	private PartyLegalProcessEntity parte = new();
 
 	private async Task OpenAddParteDialog()
 	{
+
+		var partyLegalProcess = new PartyLegalProcessEntity()
+		{
+			Address = new AddressEntity()
+		};
+
+		var parameters = new DialogParameters
+			{
+				{ "partiesModel", partyLegalProcess },
+				{ "InsertMode", true}
+			};
+
+
+
 		var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-		var dialog = await DialogService.ShowAsync<PartiesLegalProcessDialog>("", options);
+		var dialog = await DialogService.ShowAsync<PartiesLegalProcessDialog>("",parameters, options);
 		var result = await dialog.Result;
 
 		if (!result.Canceled && result.Data is PartyLegalProcessEntity novaParte)
 		{
 			listaPartes.Add(novaParte);
+			listaPartes.OrderBy(z => z.Tipo);
 			StateHasChanged();
 		}
+	}
+
+	private Color GetTipoColor(string tipo)
+	{
+		return tipo switch
+		{
+			"Autor" => Color.Info,
+			"Réu" => Color.Error,
+			"Advogado" => Color.Success,
+			"Testemunha" => Color.Warning,
+			"Assistente" => Color.Secondary,
+			"Perito" => Color.Primary,
+			_ => Color.Default
+		};
 	}
 
 	async Task LoadManufactures()
@@ -470,33 +496,41 @@
 		}
 	}
 
-	// private RenderFragment RenderPriorityOption(PriorityType priority) => builder =>
-	// {
-	// 	var (icon, color, text) = priority switch
-	// 	{
-	// 		PriorityType.Alta => (Icons.Material.Filled.Error, Color.Error, "Alta"),
-	// 		PriorityType.Media => (Icons.Material.Filled.Warning, Color.Warning, "Média"),
-	// 		PriorityType.Baixa => (Icons.Material.Filled.CheckCircle, Color.Success, "Baixa"),
-	// 		_ => (Icons.Material.Filled.Help, Color.Default, "")
-	// 	};
+	private async Task EditParte(PartyLegalProcessEntity parte)
+	{
+		var parameters = new DialogParameters
+			{
+				{ "partiesModel", parte },
+				{ "InsertMode", false }
+			};
 
-	// 	builder.OpenComponent<MudStack>(0);
-	// 	builder.AddAttribute(1, "Direction", MudBlazor.Direction.Row);
-	// 	builder.AddAttribute(2, "AlignItems", AlignItems.Center);
-	// 	builder.AddAttribute(3, "Spacing", 1);
-        
-	// 	builder.OpenComponent<MudIcon>(4);
-	// 	builder.AddAttribute(5, "Icon", icon);
-	// 	builder.AddAttribute(6, "Color", color);
-	// 	builder.AddAttribute(7, "Size", Size.Small);
-	// 	builder.CloseComponent();
-        
-	// 	builder.OpenComponent<MudText>(8);
-	// 	builder.AddAttribute(9, "ChildContent", new RenderFragment(b => b.AddContent(10, text)));
-	// 	builder.CloseComponent();
-        
-	// 	builder.CloseComponent();
-	// };
+		var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+		var dialog = await DialogService.ShowAsync<PartiesLegalProcessDialog>("", parameters, options);
+		var result = await dialog.Result;
+
+		if (!result.Canceled && result.Data is PartyLegalProcessEntity novaParte)
+		{
+			StateHasChanged();
+		}
+		
+	}
+
+	private async Task RemoveParte(PartyLegalProcessEntity parte)
+	{
+		// Opcional: Confirmar antes de remover
+		var confirm = await DialogService.ShowMessageBox(
+			"Confirmar",
+			"Tem certeza que deseja remover esta parte?",
+			yesText: "Sim",
+			cancelText: "Não");
+    
+		if (confirm == true)
+		{
+			// Remove da lista
+			listaPartes.RemoveAll(p => p.Nome == parte.Nome);
+			StateHasChanged();
+		}
+	}
 
 	private async Task OpenAddClient()
 	{

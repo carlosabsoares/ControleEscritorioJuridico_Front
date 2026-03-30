@@ -2,13 +2,15 @@
 @using System.ComponentModel.DataAnnotations
 @using CEJ_WebApp.Model
 
-<MudDialog MaxWidth="MaxWidth.False" Style="width: 95%; max-width: 700px;">
+<MudDialog MaxWidth="MaxWidth.False" Style="width: 95%; max-width: 750px;">
 	<TitleContent>
-		<MudText Typo="Typo.h6">
-			<MudIcon Icon="@Icons.Material.Filled.PersonAdd" Class="mr-3 mb-n1" />
-			Adicionar Nova Parte Envolvida
+		<MudText Typo="Typo.h6" 
+		         Style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">
+			<MudIcon Icon="@(InsertMode ? Icons.Material.Filled.PersonAdd : Icons.Material.Filled.Edit)" Class="mr-3 mb-n1" />
+			@(InsertMode ? "Nova Parte Envolvida" : "Editar Parte Envolvida")
 		</MudText>
 	</TitleContent>
+
 	<DialogContent>
 		<EditForm Model="@partiesModel">
 			<DataAnnotationsValidator />
@@ -22,7 +24,13 @@
 					</MudSelect>
 				</MudItem>
 				<MudItem xs="12" md="6">
-					<MudTextField Label="CPF / CNPJ" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Documento" />
+					<MudTextField Label="CPF / CNPJ" 
+					              Variant="Variant.Outlined" 
+								  Margin="Margin.Dense" 
+								  @bind-Value="partiesModel.Documento" 
+								  MaxLength="17"
+								  OnBlur="OnDocumentoBlur"
+								  />
 				</MudItem>
 				<MudItem xs="12" md="6">
 					<MudTextField Label="Nome Completo / Razão Social" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Nome" Required="true" />
@@ -35,13 +43,19 @@
 								 Class="mt-2" />
 				</MudItem>
 				<MudItem xs="12" md="4">
-					<MudTextField Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Profissao" />
+					<MudTextField Label="Representante Legal" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.RG" />
 				</MudItem>
 				<MudItem xs="12" md="4">
 					<MudTextField Label="E-mail" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Email" />
 				</MudItem>
 				<MudItem xs="12" md="4">
-					<MudTextField Label="Telefone" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Telefone" />
+					<MudTextField Label="Telefone"
+								  Variant="Variant.Outlined"
+								  Margin="Margin.Dense"
+								  @bind-Value="partiesModel.Telefone"
+								  OnBlur="OnTelefoneBlur"
+								  OnKeyUp="OnTelefoneKeyUp"
+								  HelperText="Digite apenas números" />
 				</MudItem>
 				<MudItem xs="12" md="4">
 					<MudTextField Label="RG"
@@ -49,11 +63,12 @@
 								  Margin="Margin.Dense"
 								  @bind-Value="partiesModel.RG" />
 				</MudItem>
+
 				<MudItem xs="12" md="4">
-					<MudTextField Label="Representante Legal" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.RG" />
+					<MudTextField Label="Cargo" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Cargo" />
 				</MudItem>
 				<MudItem xs="12" md="4">
-					<MudTextField Label="Cargo" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.RG" />
+					<MudTextField Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Profissao" />
 				</MudItem>
 
 				<MudDivider Class="my-3" />
@@ -77,8 +92,284 @@
 @code {
 	[CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-	private PartyLegalProcessEntity partiesModel = new();
+	[Parameter] public PartyLegalProcessEntity partiesModel { get; set; }
+	[Parameter] public bool InsertMode { get; set; }
 
-	private void Submit() => MudDialog.Close(DialogResult.Ok(partiesModel));
+	private string ultimoTelefone = "";
+
+
+	// Formata em tempo real enquanto digita
+	private void OnTelefoneKeyUp(KeyboardEventArgs e)
+	{
+		if (!string.IsNullOrWhiteSpace(partiesModel.Telefone))
+		{
+			var apenasNumeros = new string(partiesModel.Telefone.Where(char.IsDigit).ToArray());
+		
+			if (apenasNumeros != ultimoTelefone)
+			{
+				ultimoTelefone = apenasNumeros;
+				partiesModel.Telefone = FormatTelefoneDinamico(apenasNumeros);
+				StateHasChanged();
+			}
+		}
+	}
+
+	// Formata ao perder o foco
+	private void OnTelefoneBlur(FocusEventArgs e)
+	{
+		if (!string.IsNullOrWhiteSpace(partiesModel.Telefone))
+		{
+			var apenasNumeros = new string(partiesModel.Telefone.Where(char.IsDigit).ToArray());
+			partiesModel.Telefone = FormatTelefoneDinamico(apenasNumeros);
+		}
+	}
+
+	// Formata telefone dinamicamente (fixo ou celular)
+	private string FormatTelefoneDinamico(string telefone)
+	{
+		if (string.IsNullOrEmpty(telefone))
+			return string.Empty;
+
+		// Remove tudo que não é número
+		var apenasNumeros = new string(telefone.Where(char.IsDigit).ToArray());
+	
+		if (apenasNumeros.Length == 0)
+			return string.Empty;
+
+		// Caso tenha apenas o DDD
+		if (apenasNumeros.Length <= 2)
+			return apenasNumeros;
+	
+		// Telefone com 10 dígitos (fixo): (00) 0000-0000
+		if (apenasNumeros.Length == 10)
+		{
+			return $"({apenasNumeros[..2]}) {apenasNumeros.Substring(2, 4)}-{apenasNumeros[6..]}";
+		}
+	
+		// Telefone com 11 dígitos (celular): (00) 00000-0000
+		if (apenasNumeros.Length == 11)
+		{
+			return $"({apenasNumeros[..2]}) {apenasNumeros.Substring(2, 5)}-{apenasNumeros[7..]}";
+		}
+	
+		// Telefone com mais de 11 dígitos (casos especiais)
+		if (apenasNumeros.Length > 11)
+		{
+			// Pega os últimos 11 dígitos para celular
+			var ultimosDigitos = apenasNumeros[^11..];
+			return $"({ultimosDigitos[..2]}) {ultimosDigitos.Substring(2, 5)}-{ultimosDigitos[7..]}";
+		}
+	
+		// Telefone com menos de 10 dígitos (ainda digitando)
+		if (apenasNumeros.Length <= 6)
+		{
+			if (apenasNumeros.Length <= 2)
+				return apenasNumeros;
+			return $"({apenasNumeros[..2]}) {apenasNumeros[2..]}";
+		}
+	
+		if (apenasNumeros.Length <= 10)
+		{
+			return $"({apenasNumeros[..2]}) {apenasNumeros.Substring(2, apenasNumeros.Length - 6)}-{apenasNumeros[^4..]}";
+		}
+	
+		return apenasNumeros;
+	}
+
+	private void Submit()
+	{
+		if (string.IsNullOrWhiteSpace(partiesModel.Nome))
+		{
+			return;
+		}
+		MudDialog.Close(DialogResult.Ok(partiesModel));
+	}
+
+	// Método para formatar CPF/CNPJ
+	private void OnDocumentoBlur(FocusEventArgs e)
+	{
+		if (!string.IsNullOrWhiteSpace(partiesModel.Documento))
+		{
+			partiesModel.Documento = FormatDocumento(partiesModel.Documento);
+		}
+	}
+
+	private string FormatDocumento(string documento)
+	{
+		if (string.IsNullOrEmpty(documento))
+			return string.Empty;
+
+		// Remove tudo que não é número ou letra (para casos de CNPJ alfanumérico)
+		var apenasNumeros = new string(documento.Where(char.IsDigit).ToArray());
+		var apenasLetras = new string(documento.Where(char.IsLetter).ToArray());
+
+		// Verifica se é um CNPJ alfanumérico (como para MEI ou casos especiais)
+		if (!string.IsNullOrEmpty(apenasLetras) && apenasNumeros.Length >= 8)
+		{
+			// Mantém o formato original com letras
+			return documento.ToUpper();
+		}
+
+		// Se for apenas números, formata normalmente
+		if (apenasNumeros.Length <= 11)
+		{
+			// Formata CPF: 000.000.000-00
+			if (apenasNumeros.Length <= 3)
+				return apenasNumeros;
+			if (apenasNumeros.Length <= 6)
+				return $"{apenasNumeros[..3]}.{apenasNumeros[3..]}";
+			if (apenasNumeros.Length <= 9)
+				return $"{apenasNumeros[..3]}.{apenasNumeros.Substring(3, 3)}.{apenasNumeros[6..]}";
+			return $"{apenasNumeros[..3]}.{apenasNumeros.Substring(3, 3)}.{apenasNumeros.Substring(6, 3)}-{apenasNumeros[9..]}";
+		}
+		else
+		{
+			// Formata CNPJ: 00.000.000/0000-00
+			if (apenasNumeros.Length <= 2)
+				return apenasNumeros;
+			if (apenasNumeros.Length <= 5)
+				return $"{apenasNumeros[..2]}.{apenasNumeros[2..]}";
+			if (apenasNumeros.Length <= 8)
+				return $"{apenasNumeros[..2]}.{apenasNumeros.Substring(2, 3)}.{apenasNumeros[5..]}";
+			if (apenasNumeros.Length <= 12)
+				return $"{apenasNumeros[..2]}.{apenasNumeros.Substring(2, 3)}.{apenasNumeros.Substring(5, 3)}/{apenasNumeros[8..]}";
+			return $"{apenasNumeros[..2]}.{apenasNumeros.Substring(2, 3)}.{apenasNumeros.Substring(5, 3)}/{apenasNumeros.Substring(8, 4)}-{apenasNumeros[12..]}";
+		}
+	}
+
+	// Método para validar se é CPF ou CNPJ válido
+	private (bool IsValid, string Tipo, string Mensagem) ValidarDocumento(string documento)
+	{
+		if (string.IsNullOrWhiteSpace(documento))
+			return (false, "Vazio", "Documento não informado");
+
+		// Remove caracteres especiais e espaços
+		var documentoLimpo = new string(documento.Where(c => char.IsLetterOrDigit(c)).ToArray()).ToUpper();
+
+		// Verifica se é um CNPJ alfanumérico (caso especial)
+		if (documentoLimpo.Any(char.IsLetter))
+		{
+			// Aceita CNPJ alfanumérico (ex: MEI, CNPJ com letras)
+			if (documentoLimpo.Length >= 8 && documentoLimpo.Length <= 20)
+			{
+				return (true, "CNPJ_ALFANUMERICO", "CNPJ alfanumérico aceito");
+			}
+			return (false, "Invalido", "Formato de documento inválido");
+		}
+
+		// Se for apenas números
+		var apenasNumeros = documentoLimpo;
+
+		if (apenasNumeros.Length == 11)
+		{
+			// Valida CPF
+			bool isValid = ValidarCPF(apenasNumeros);
+			return isValid
+				? (true, "CPF", "CPF válido")
+				: (false, "CPF", "CPF inválido");
+		}
+		else if (apenasNumeros.Length == 14)
+		{
+			// Valida CNPJ
+			bool isValid = ValidarCNPJ(apenasNumeros);
+			return isValid
+				? (true, "CNPJ", "CNPJ válido")
+				: (false, "CNPJ", "CNPJ inválido");
+		}
+		else
+		{
+			return (false, "Invalido", $"Documento deve ter 11 dígitos (CPF) ou 14 dígitos (CNPJ). Foram informados {apenasNumeros.Length} dígitos.");
+		}
+	}
+
+	// Método para validar CPF
+	private bool ValidarCPF(string cpf)
+	{
+		// Remove caracteres não numéricos
+		cpf = new string(cpf.Where(char.IsDigit).ToArray());
+
+		if (cpf.Length != 11)
+			return false;
+
+		// Verifica se todos os dígitos são iguais
+		if (cpf.Distinct().Count() == 1)
+			return false;
+
+		// Calcula primeiro dígito verificador
+		int soma = 0;
+		for (int i = 0; i < 9; i++)
+			soma += int.Parse(cpf[i].ToString()) * (10 - i);
+
+		int primeiroDigito = 11 - (soma % 11);
+		if (primeiroDigito >= 10)
+			primeiroDigito = 0;
+
+		if (int.Parse(cpf[9].ToString()) != primeiroDigito)
+			return false;
+
+		// Calcula segundo dígito verificador
+		soma = 0;
+		for (int i = 0; i < 10; i++)
+			soma += int.Parse(cpf[i].ToString()) * (11 - i);
+
+		int segundoDigito = 11 - (soma % 11);
+		if (segundoDigito >= 10)
+			segundoDigito = 0;
+
+		return int.Parse(cpf[10].ToString()) == segundoDigito;
+	}
+
+	// Método para validar CNPJ
+	private bool ValidarCNPJ(string cnpj)
+	{
+		// Remove caracteres não numéricos
+		cnpj = new string(cnpj.Where(char.IsDigit).ToArray());
+
+		if (cnpj.Length != 14)
+			return false;
+
+		// Verifica se todos os dígitos são iguais
+		if (cnpj.Distinct().Count() == 1)
+			return false;
+
+		// Calcula primeiro dígito verificador
+		int[] multiplicador1 = { 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+		int soma = 0;
+
+		for (int i = 0; i < 12; i++)
+			soma += int.Parse(cnpj[i].ToString()) * multiplicador1[i];
+
+		int primeiroDigito = soma % 11;
+		primeiroDigito = primeiroDigito < 2 ? 0 : 11 - primeiroDigito;
+
+		if (int.Parse(cnpj[12].ToString()) != primeiroDigito)
+			return false;
+
+		// Calcula segundo dígito verificador
+		int[] multiplicador2 = { 6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+		soma = 0;
+
+		for (int i = 0; i < 13; i++)
+			soma += int.Parse(cnpj[i].ToString()) * multiplicador2[i];
+
+		int segundoDigito = soma % 11;
+		segundoDigito = segundoDigito < 2 ? 0 : 11 - segundoDigito;
+
+		return int.Parse(cnpj[13].ToString()) == segundoDigito;
+	}
+
+	// Método auxiliar para formatar com validação em tempo real
+	private (string DocumentoFormatado, string MensagemValidacao, bool IsValid) ProcessarDocumento(string documento)
+	{
+		if (string.IsNullOrWhiteSpace(documento))
+			return ("", "", false);
+
+		var formatado = FormatDocumento(documento);
+		var validacao = ValidarDocumento(formatado);
+	
+		return (formatado, validacao.Mensagem, validacao.IsValid);
+	}
+
+
 	private void Cancel() => MudDialog.Cancel();
 }
