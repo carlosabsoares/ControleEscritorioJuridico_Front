@@ -17,6 +17,7 @@
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 @inject NotificationService Notification
+@inject NavigationManager Navigation
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4">
     
@@ -625,5 +626,6 @@
 	private void Cancelar()
 	{
 		Snackbar.Add("Operação cancelada", Severity.Normal);
+		Navigation.NavigateTo("/process");
 	}
 }
