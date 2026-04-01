@@ -7,11 +7,11 @@
 @using CEJ_WebApp.Model
 @using CEJ_WebApp.Model.Dto
 @using CEJ_WebApp.Model.Enum
-@using CEJ_WebApp.Model.Exemplo
 @using MudExRichTextEditor
 @using MudBlazor
 
 @inject IClientService _clientService
+@inject ILegalProcessCategoryTypeService _legalProcessCategoryService
 @inject IExternalService _externalService
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
@@ -55,46 +55,70 @@
 
 			<MudGrid Spacing="3">
 				<!-- Linha 1 -->
-				<MudItem xs="12" sm="6" md="4">
+				<MudItem xs="12" sm="6" md="3">
 					<MudTextField Label="Número do Processo"
 								  Variant="Variant.Outlined"
 								  Margin="Margin.Dense"
 								  FullWidth="true"
-								  @bind-Value="model.NumeroProcesso"
+								  @bind-Value="model.CaseNumber"
 								  Placeholder="0000000-00.0000.0.00.0000"
+								  Mask="@_maskProcesso"
+								  MaxLength="25"
 								  Adornment="Adornment.Start"
 								  AdornmentIcon="@Icons.Material.Filled.Numbers" />
 				</MudItem>
 
-				<MudItem xs="12" sm="6" md="4">
-					<MudSelect T="string"
-							   Label="Tipo de Ação"
-							   Variant="Variant.Outlined"
-							   Margin="Margin.Dense"
-							   @bind-Value="model.TipoAcao"
-							   AdornmentIcon="@Icons.Material.Filled.Gavel">
-						@foreach (var tipo in TiposAcao)
-						{
-							<MudSelectItem Value="@tipo">@tipo</MudSelectItem>
-						}
-					</MudSelect>
-				</MudItem>
-
-				<MudItem xs="12" sm="6" md="4">
+				<MudItem xs="12" sm="6" md="3">
 					<MudDatePicker Label="Data de Abertura"
 								   Variant="Variant.Outlined"
 								   Margin="Margin.Dense"
-								   @bind-Date="model.DataAbertura"
+								   @bind-Date="model.OpenDate"
 								   AdornmentIcon="@Icons.Material.Filled.CalendarToday" />
 				</MudItem>
 
-				<!-- Linha 2 -->
-				<MudItem xs="12" sm="6" md="4">
+				<MudItem xs="12" sm="6" md="3">
+					<MudSelect T="CaseActionType"
+							   Label="Tipo de Ação"
+							   Variant="Variant.Outlined"
+							   Margin="Margin.Dense"
+							   Value="model.CaseActionType"
+							   ValueChanged="OnTipoAcaoChanged"
+							   AdornmentIcon="@Icons.Material.Filled.Gavel">
+
+						@foreach (var caseAction in Enum.GetValues<CaseActionType>())
+						{
+							<MudSelectItem Value="@caseAction">@caseAction</MudSelectItem>
+						}
+					</MudSelect>
+
+				</MudItem>
+
+				<MudItem xs="12" sm="6" md="3">
+					@if (_visibleCourt)
+					{
+						<MudSelect T="int"
+								   Label="Vara/Comarca"
+								   Variant="Variant.Outlined"
+								   Margin="Margin.Dense"
+								   @bind-Value="model.CourtDivisionCode"
+								   ToStringFunc="GetVaraNome"
+								   Placeholder="Selecione..."
+								   AdornmentIcon="@Icons.Material.Filled.AccountBalance">
+							@foreach (var item in categoriasFiltradas)
+							{
+								<MudSelectItem Value="@item.Code">@item.NamePt</MudSelectItem>
+							}
+						</MudSelect>
+					}
+
+				</MudItem>
+
+				<MudItem xs="12" sm="6" md="3">
 					<MudSelect T="PriorityType"
 							   Label="Prioridade"
 							   Variant="Variant.Outlined"
 							   Margin="Margin.Dense"
-							   @bind-Value="model.Prioridade"
+							   @bind-Value="model.Priority"
 							   AdornmentIcon="@Icons.Material.Filled.PriorityHigh"
 							   HideSelectedValue="true">
         
@@ -121,26 +145,9 @@
 					</MudSelect>
 				</MudItem>
 
-				<MudItem xs="12" sm="6" md="4">
-					<MudTextField Label="Vara/Comarca Principal"
-								  Variant="Variant.Outlined"
-								  Margin="Margin.Dense"
-								  FullWidth="true"
-								  @bind-Value="model.VaraComarca"
-								  AdornmentIcon="@Icons.Material.Filled.LocationOn" />
-				</MudItem>
 
-				<MudItem xs="12" sm="6" md="4">
-					<MudTextField Label="Vara/Comarca Secundária"
-								  Variant="Variant.Outlined"
-								  Margin="Margin.Dense"
-								  FullWidth="true"
-								  @bind-Value="model.VaraComarca2"
-								  AdornmentIcon="@Icons.Material.Filled.LocationCity" />
-				</MudItem>
 
-				<!-- Linha 3 -->
-				<MudItem xs="12" sm="6" md="4">
+				<MudItem xs="12" sm="6" md="3">
 					<MudSelect T="string"
 							   Label="Status"
 							   Variant="Variant.Outlined"
@@ -177,17 +184,17 @@
 					</MudSelect>
 				</MudItem>
 
-				<MudItem xs="12" sm="6" md="4">
+				<MudItem xs="12" sm="6" md="3">
 					<MudDatePicker Label="Prazo Processual"
 								   Variant="Variant.Outlined"
 								   Margin="Margin.Dense"
-								   @bind-Date="model.PrazoProcessual"
+								   @bind-Date="model.LegalDeadline"
 								   AdornmentIcon="@Icons.Material.Filled.Schedule" />
 				</MudItem>
 
-				<MudItem xs="12" sm="12" md="4" Class="d-flex align-center">
+				<MudItem xs="12" sm="12" md="3" Class="d-flex align-center">
 					<MudCheckBox T="bool"
-								 @bind-Checked="model.AtivarAlerta"
+								 @bind-Checked="model.ActivateAlert"
 								 Label="Ativar alerta de prazo"
 								 Color="Color.Primary"
 								 Class="mt-2" />
@@ -229,14 +236,6 @@
 								Size="Size.Medium"
 								title="Adicionar um cliente"
 								OnClick="OpenAddClient" />
-						
-						@* 						<MudTooltip Text="Adicionar novo cliente">
-							<MudFab Icon="@Icons.Material.Filled.Add"
-									Color="Color.Primary"
-									Size="Size.Small"
-									OnClick="OpenAddClient"
-									Class="mt-1" />
-						</MudTooltip> *@
 					</MudStack>
 				</MudItem>
 
@@ -252,8 +251,8 @@
 				<MudItem xs="12">
 					<MudPaper Class="pa-4" Elevation="1" Style="border-radius: 12px; background-color: #f8f9fa;">
 						<div style="min-height: 250px;">
-							<MudExRichTextEdit Value="@model.TipoAcaoDescricao"
-											   ValueChanged="@(v => model.TipoAcaoDescricao = v)"
+							<MudExRichTextEdit Value="@model.CaseActionDescription"
+											   ValueChanged="@(v => model.CaseActionDescription = v)"
 											   Style="min-height: 250px; border: none; background: white; border-radius: 8px;" />
 						</div>
 					</MudPaper>
@@ -304,21 +303,21 @@
 										</HeaderContent>
 										<RowTemplate Context="item">
 											<MudTd DataLabel="Tipo">
-												<MudChip T="string" Size="Size.Small" Color="@GetTipoColor(item.Tipo)" Variant="MudBlazor.Variant.Outlined">
-													<MudText>@item.Tipo</MudText>
+												<MudChip T="string" Size="Size.Small" Color="@GetTipoColor(item.LegalParty)" Variant="MudBlazor.Variant.Outlined">
+													<MudText>@item.LegalParty</MudText>
 												</MudChip>
 											</MudTd>
 											<MudTd DataLabel="Nome/Razão Social">
-												<MudText>@item.Nome</MudText>
+												<MudText>@item.Name</MudText>
 											</MudTd>
 											<MudTd DataLabel="CPF/CNPJ">
-												<MudText>@item.Documento</MudText>
+												<MudText>@item.Document</MudText>
 											</MudTd>
 											<MudTd DataLabel="Email">
 												<MudText>@item.Email</MudText>
 											</MudTd>
 											<MudTd DataLabel="Telefone">
-												<MudText>@item.Telefone</MudText>
+												<MudText>@item.Phone</MudText>
 											</MudTd>
 											<MudTd DataLabel="Ações">
 												<MudText>
@@ -424,16 +423,29 @@
 </MudContainer>
 
 @code {
-	private ProcessoModel model = new();
+	private LegalProcessEntity model = new();
 	public int Radio_Size { get; set; } = 3;
 	private List<ClientDto> clientsDto = new();
+
+	private List<LegalProcessCategoryTypeEntity> legalProcessCategoryAll = new();
+	private List<LegalProcessCategoryTypeEntity> categoriasFiltradas = new();
+
 	private string searchString = "";
 	private bool loading = false;
 	private bool _dialogOpen = false;
+	private bool _visibleCourt = false;
+
+	private IMask _maskProcesso = new PatternMask("0000000-00.0000.0.00.0000");
 
 	protected override async Task OnInitializedAsync()
 	{
 		await LoadManufactures();
+	}
+
+	private string GetVaraNome(int value)
+	{
+		var item = categoriasFiltradas.FirstOrDefault(x => x.Code == value);
+		return item?.NamePt ?? value.ToString();
 	}
 
 	// Adicione esta lista às suas variáveis
@@ -463,21 +475,21 @@
 		if (!result.Canceled && result.Data is PartyLegalProcessEntity novaParte)
 		{
 			listaPartes.Add(novaParte);
-			listaPartes.OrderBy(z => z.Tipo);
+			listaPartes.OrderBy(z => z.LegalParty.ToString());
 			StateHasChanged();
 		}
 	}
 
-	private Color GetTipoColor(string tipo)
+	private Color GetTipoColor(LegalPartyType legalParty)
 	{
-		return tipo switch
+		return legalParty switch
 		{
-			"Autor" => Color.Info,
-			"Réu" => Color.Error,
-			"Advogado" => Color.Success,
-			"Testemunha" => Color.Warning,
-			"Assistente" => Color.Secondary,
-			"Perito" => Color.Primary,
+			LegalPartyType.Autor => Color.Info,
+			LegalPartyType.Réu => Color.Error,
+			LegalPartyType.Advogado => Color.Success,
+			LegalPartyType.Testemunha => Color.Warning,
+			LegalPartyType.Assistente => Color.Secondary,
+			LegalPartyType.Perito => Color.Primary,
 			_ => Color.Default
 		};
 	}
@@ -490,11 +502,28 @@
 			var task = GetClientsDtoAsync();
 			await Task.WhenAll(task, Task.Delay(300));
 			clientsDto = task.Result;
+
+			legalProcessCategoryAll = await GetLegalProcessCategoryTypesDtoAsync();
+
 		}
 		finally
 		{
 			loading = false;
 		}
+	}
+
+	private void OnTipoAcaoChanged(CaseActionType value)
+	{
+		model.CaseActionType = value;
+
+		_visibleCourt = true;
+
+		categoriasFiltradas = legalProcessCategoryAll
+			.Where(x => x.legalProcessCategoryId == (int)value)
+			.ToList();
+
+		// 🔥 ESSENCIAL
+		model.CourtDivisionCode = categoriasFiltradas.FirstOrDefault().Code;
 	}
 
 	private async Task EditParte(PartyLegalProcessEntity parte)
@@ -528,7 +557,7 @@
 		if (confirm == true)
 		{
 			// Remove da lista
-			listaPartes.RemoveAll(p => p.Nome == parte.Nome);
+			listaPartes.RemoveAll(p => p.Name == parte.Name);
 			StateHasChanged();
 		}
 	}
@@ -586,6 +615,13 @@
 		}
 	}
 
+
+	private async Task<List<LegalProcessCategoryTypeEntity>> GetLegalProcessCategoryTypesDtoAsync()
+	{
+		var legalProcessCategoryTypesEntity = await _legalProcessCategoryService.GetAll();
+		return legalProcessCategoryTypesEntity.ToList();
+	}
+
 	private async Task<List<ClientDto>> GetClientsDtoAsync()
 	{
 		var clientsEntity = await _clientService.GetClientAllAsync();
@@ -599,15 +635,6 @@
 			Phone = x.PhoneNumber,
 		}).ToList();
 	}
-
-	private List<string> TiposAcao = new()
-	{
-		"Ação Civil",
-		"Ação Trabalhista",
-		"Ação Criminal",
-		"Ação Família",
-		"Ação Empresarial"
-	};
 
 	private List<string> StatusList = new()
 	{

@@ -1,4 +1,5 @@
-﻿@using MudBlazor
+﻿@using CEJ_WebApp.Model.Enum
+@using MudBlazor
 @using System.ComponentModel.DataAnnotations
 @using CEJ_WebApp.Model
 
@@ -16,34 +17,38 @@
 			<DataAnnotationsValidator />
 			<MudGrid Spacing="2">
 				<MudItem xs="12" md="6">
-					<MudSelect T="string" Label="Tipo de Participação" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Tipo">
-						<MudSelectItem Value="@("Autor")">Autor</MudSelectItem>
+					<MudSelect T="LegalPartyType" Label="Tipo de Participação" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.LegalParty">
+						@foreach (var item in Enum.GetValues<LegalPartyType>())
+						{
+							<MudSelectItem Value="@item">@item</MudSelectItem>
+						}
+@* 						<MudSelectItem Value="@("Autor")">Autor</MudSelectItem>
 						<MudSelectItem Value="@("Réu")">Réu</MudSelectItem>
 						<MudSelectItem Value="@("Advogado")">Advogado</MudSelectItem>
-						<MudSelectItem Value="@("Testemunha")">Testemunha</MudSelectItem>
+						<MudSelectItem Value="@("Testemunha")">Testemunha</MudSelectItem> *@
 					</MudSelect>
 				</MudItem>
 				<MudItem xs="12" md="6">
 					<MudTextField Label="CPF / CNPJ" 
 					              Variant="Variant.Outlined" 
 								  Margin="Margin.Dense" 
-								  @bind-Value="partiesModel.Documento" 
+								  @bind-Value="partiesModel.Document" 
 								  MaxLength="17"
 								  OnBlur="OnDocumentoBlur"
 								  />
 				</MudItem>
 				<MudItem xs="12" md="6">
-					<MudTextField Label="Nome Completo / Razão Social" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Nome" Required="true" />
+					<MudTextField Label="Nome Completo / Razão Social" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Name" Required="true" />
 				</MudItem>
 				<MudItem xs="12" md="6">
 					<MudCheckBox T="bool"
-								 @bind-Checked="partiesModel.ExistenciaUniaoEstavel"
+								 @bind-Checked="partiesModel.HasCommonLawMarriage"
 								 Label="Existência de União Estável"
 								 Color="Color.Primary"
 								 Class="mt-2" />
 				</MudItem>
 				<MudItem xs="12" md="4">
-					<MudTextField Label="Representante Legal" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.RG" />
+					<MudTextField Label="Representante Legal" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.GeneralRegistration" />
 				</MudItem>
 				<MudItem xs="12" md="4">
 					<MudTextField Label="E-mail" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Email" />
@@ -52,7 +57,7 @@
 					<MudTextField Label="Telefone"
 								  Variant="Variant.Outlined"
 								  Margin="Margin.Dense"
-								  @bind-Value="partiesModel.Telefone"
+								  @bind-Value="partiesModel.Phone"
 								  OnBlur="OnTelefoneBlur"
 								  OnKeyUp="OnTelefoneKeyUp"
 								  HelperText="Digite apenas números" />
@@ -61,14 +66,14 @@
 					<MudTextField Label="RG"
 								  Variant="Variant.Outlined"
 								  Margin="Margin.Dense"
-								  @bind-Value="partiesModel.RG" />
+								  @bind-Value="partiesModel.GeneralRegistration" />
 				</MudItem>
 
 				<MudItem xs="12" md="4">
-					<MudTextField Label="Cargo" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Cargo" />
+					<MudTextField Label="Cargo" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Position" />
 				</MudItem>
 				<MudItem xs="12" md="4">
-					<MudTextField Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Profissao" />
+					<MudTextField Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Profession" />
 				</MudItem>
 
 				<MudDivider Class="my-3" />
@@ -78,7 +83,7 @@
 
 
 				<MudItem xs="12">
-					<MudCheckBox T="string" @bind-Checked="partiesModel.Desconhecido" Label="Declaro desconhecer informações sobre o Réu" Color="Color.Primary" Dense="true" />
+					<MudCheckBox T="string" @bind-Checked="partiesModel.Unknown" Label="Declaro desconhecer informações sobre o Réu" Color="Color.Primary" Dense="true" />
 				</MudItem>
 			</MudGrid>
 		</EditForm>
@@ -101,14 +106,14 @@
 	// Formata em tempo real enquanto digita
 	private void OnTelefoneKeyUp(KeyboardEventArgs e)
 	{
-		if (!string.IsNullOrWhiteSpace(partiesModel.Telefone))
+		if (!string.IsNullOrWhiteSpace(partiesModel.Phone))
 		{
-			var apenasNumeros = new string(partiesModel.Telefone.Where(char.IsDigit).ToArray());
+			var apenasNumeros = new string(partiesModel.Phone.Where(char.IsDigit).ToArray());
 		
 			if (apenasNumeros != ultimoTelefone)
 			{
 				ultimoTelefone = apenasNumeros;
-				partiesModel.Telefone = FormatTelefoneDinamico(apenasNumeros);
+				partiesModel.Phone = FormatTelefoneDinamico(apenasNumeros);
 				StateHasChanged();
 			}
 		}
@@ -117,10 +122,10 @@
 	// Formata ao perder o foco
 	private void OnTelefoneBlur(FocusEventArgs e)
 	{
-		if (!string.IsNullOrWhiteSpace(partiesModel.Telefone))
+		if (!string.IsNullOrWhiteSpace(partiesModel.Phone))
 		{
-			var apenasNumeros = new string(partiesModel.Telefone.Where(char.IsDigit).ToArray());
-			partiesModel.Telefone = FormatTelefoneDinamico(apenasNumeros);
+			var apenasNumeros = new string(partiesModel.Phone.Where(char.IsDigit).ToArray());
+			partiesModel.Phone = FormatTelefoneDinamico(apenasNumeros);
 		}
 	}
 
@@ -178,7 +183,7 @@
 
 	private void Submit()
 	{
-		if (string.IsNullOrWhiteSpace(partiesModel.Nome))
+		if (string.IsNullOrWhiteSpace(partiesModel.Name))
 		{
 			return;
 		}
@@ -188,9 +193,9 @@
 	// Método para formatar CPF/CNPJ
 	private void OnDocumentoBlur(FocusEventArgs e)
 	{
-		if (!string.IsNullOrWhiteSpace(partiesModel.Documento))
+		if (!string.IsNullOrWhiteSpace(partiesModel.Document))
 		{
-			partiesModel.Documento = FormatDocumento(partiesModel.Documento);
+			partiesModel.Document = FormatDocumento(partiesModel.Document);
 		}
 	}
 
