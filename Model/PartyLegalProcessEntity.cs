@@ -11,6 +11,7 @@ namespace CEJ_WebApp.Model
         public string Email { get; set; }
         public string Phone { get; set; }
         public string Profession { get; set; }
+        public string LegalRepresentative { get; set; }
         public string GeneralRegistration { get; set; }
         public bool Unknown { get; set; }
         public bool HasCommonLawMarriage { get; set; }

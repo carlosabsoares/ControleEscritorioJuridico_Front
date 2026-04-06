@@ -56,7 +56,8 @@ builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IExternalService, ExternalService>();
-builder.Services.AddScoped<ILegalProcessCategoryTypeService, LegalProcessCategoryTypeService>();
+builder.Services.AddScoped<ILegalProcessCategoryTypeService, CourtDivisionService>();
+builder.Services.AddScoped<ILegalProcessService, LegalProcessService>();
 
 builder.Services.AddScoped<Parameters>();
 builder.Services.AddScoped<NotificationService>();

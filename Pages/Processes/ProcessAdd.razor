@@ -4,6 +4,7 @@
 @using CEJ_WebApp.Components.LegalProcess
 @using CEJ_WebApp.Core.Services
 @using System.ComponentModel.DataAnnotations
+@using CEJ_WebApp.Core.Shared
 @using CEJ_WebApp.Model
 @using CEJ_WebApp.Model.Dto
 @using CEJ_WebApp.Model.Enum
@@ -12,6 +13,9 @@
 
 @inject IClientService _clientService
 @inject ILegalProcessCategoryTypeService _legalProcessCategoryService
+
+@inject ILegalProcessService _legalProcessService;
+
 @inject IExternalService _externalService
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
@@ -148,287 +152,288 @@
 
 
 				<MudItem xs="12" sm="6" md="3">
-					<MudSelect T="string"
+					<MudSelect T="StatusProcessType"
 							   Label="Status"
 							   Variant="Variant.Outlined"
 							   Margin="Margin.Dense"
 							   @bind-Value="model.Status"
 							   AdornmentIcon="@Icons.Material.Filled.TrackChanges"
 							   HideSelectedValue="true">
-        
-						<!-- Itens do dropdown -->
-						@foreach (var status in StatusList)
+
+						@foreach (var status in Enum.GetValues<StatusProcessType>())
 						{
 							<MudSelectItem Value="@status">
 								<div style="display: flex; align-items: center; gap: 8px;">
-									@if (status == "Em andamento")
+
+									@if (status == StatusProcessType.Andamento)
 									{
 										<MudIcon Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Info" Size="Size.Small" />
 									}
-									else if (status == "Suspenso")
+									else if (status == StatusProcessType.Suspenso)
 									{
 										<MudIcon Icon="@Icons.Material.Filled.Pause" Color="Color.Warning" Size="Size.Small" />
 									}
-									else if (status == "Finalizado")
+									else if (status == StatusProcessType.Finalizado)
 									{
 										<MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small" />
 									}
-									else if (status == "Arquivado")
+									else if (status == StatusProcessType.Arquivado)
 									{
 										<MudIcon Icon="@Icons.Material.Filled.Archive" Color="Color.Default" Size="Size.Small" />
 									}
-									<span>@status</span>
+
+									<span>@status.GetDisplayName()</span>
 								</div>
 							</MudSelectItem>
 						}
 					</MudSelect>
 				</MudItem>
 
-				<MudItem xs="12" sm="6" md="3">
-					<MudDatePicker Label="Prazo Processual"
-								   Variant="Variant.Outlined"
-								   Margin="Margin.Dense"
-								   @bind-Date="model.LegalDeadline"
-								   AdornmentIcon="@Icons.Material.Filled.Schedule" />
-				</MudItem>
+						<MudItem xs="12" sm="6" md="3">
+							<MudDatePicker Label="Prazo Processual"
+										   Variant="Variant.Outlined"
+										   Margin="Margin.Dense"
+										   @bind-Date="model.LegalDeadline"
+										   AdornmentIcon="@Icons.Material.Filled.Schedule" />
+						</MudItem>
 
-				<MudItem xs="12" sm="12" md="3" Class="d-flex align-center">
-					<MudCheckBox T="bool"
-								 @bind-Checked="model.ActivateAlert"
-								 Label="Ativar alerta de prazo"
-								 Color="Color.Primary"
-								 Class="mt-2" />
-				</MudItem>
+						<MudItem xs="12" sm="12" md="3" Class="d-flex align-center">
+							<MudCheckBox T="bool"
+										 @bind-Checked="model.ActivateAlert"
+										 Label="Ativar alerta de prazo"
+										 Color="Color.Primary"
+										 Class="mt-2" />
+						</MudItem>
 
-				<!-- Cliente Section -->
-				<MudItem xs="12">
-					<MudText Typo="Typo.h6" Class="font-weight-bold mt-4 mb-4" Color="Color.Primary">
-						<MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Small" Class="mr-2" />
-						Informações do Cliente
-					</MudText>
-					<MudDivider Class="mb-4" />
-				</MudItem>
+						<!-- Cliente Section -->
+						<MudItem xs="12">
+							<MudText Typo="Typo.h6" Class="font-weight-bold mt-4 mb-4" Color="Color.Primary">
+								<MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Small" Class="mr-2" />
+								Informações do Cliente
+							</MudText>
+							<MudDivider Class="mb-4" />
+						</MudItem>
 
-				<MudItem xs="12" md="12">
-					<MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-						<MudSelect T="ClientDto"
-								   Label="Selecione o cliente"
-								   Variant="Variant.Outlined"
-								   Margin="Margin.Dense"
-								   @bind-Value="model.Client"
-								   Style="flex: 1;"
-								   AdornmentIcon="@Icons.Material.Filled.Person">
+						<MudItem xs="12" md="12">
+							<MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+								<MudSelect T="ClientDto"
+										   Label="Selecione o cliente"
+										   Variant="Variant.Outlined"
+										   Margin="Margin.Dense"
+										   @bind-Value="model.Client"
+										   Style="flex: 1;"
+										   AdornmentIcon="@Icons.Material.Filled.Person">
     
-							@foreach (var client in clientsDto)
-							{
-								<MudSelectItem Value="@client">
-									<MudStack Direction="Direction.Row" AlignItems="AlignItems.Start" Spacing="2">
-										<div>
-											<div>@client.Name</div>
-										</div>
-									</MudStack>
-								</MudSelectItem>
-							}
-						</MudSelect>
+									@foreach (var client in clientsDto)
+									{
+										<MudSelectItem Value="@client">
+											<MudStack Direction="Direction.Row" AlignItems="AlignItems.Start" Spacing="2">
+												<div>
+													<div>@client.Name</div>
+												</div>
+											</MudStack>
+										</MudSelectItem>
+									}
+								</MudSelect>
 
-						<MudFab Color="Color.Primary"
-								StartIcon="@Icons.Material.Filled.Add"
-								Size="Size.Medium"
-								title="Adicionar um cliente"
-								OnClick="OpenAddClient" />
-					</MudStack>
-				</MudItem>
+								<MudFab Color="Color.Primary"
+										StartIcon="@Icons.Material.Filled.Add"
+										Size="Size.Medium"
+										title="Adicionar um cliente"
+										OnClick="OpenAddClient" />
+							</MudStack>
+						</MudItem>
 
-				<!-- Descrição -->
-				<MudItem xs="12">
-					<MudText Typo="Typo.h6" Class="font-weight-bold mt-4 mb-4" Color="Color.Primary">
-						<MudIcon Icon="@Icons.Material.Filled.Description" Size="Size.Small" Class="mr-2" />
-						Descrição do Processo
-					</MudText>
-					<MudDivider Class="mb-4" />
-				</MudItem>
+						<!-- Descrição -->
+						<MudItem xs="12">
+							<MudText Typo="Typo.h6" Class="font-weight-bold mt-4 mb-4" Color="Color.Primary">
+								<MudIcon Icon="@Icons.Material.Filled.Description" Size="Size.Small" Class="mr-2" />
+								Descrição do Processo
+							</MudText>
+							<MudDivider Class="mb-4" />
+						</MudItem>
 
-				<MudItem xs="12">
-					<MudPaper Class="pa-4" Elevation="1" Style="border-radius: 12px; background-color: #f8f9fa;">
-						<div style="min-height: 250px;">
-							<MudExRichTextEdit Value="@model.CaseActionDescription"
-											   ValueChanged="@(v => model.CaseActionDescription = v)"
-											   Style="min-height: 250px; border: none; background: white; border-radius: 8px;" />
-						</div>
-					</MudPaper>
-				</MudItem>
+						<MudItem xs="12">
+							<MudPaper Class="pa-4" Elevation="1" Style="border-radius: 12px; background-color: #f8f9fa;">
+								<div style="min-height: 250px;">
+									<MudExRichTextEdit Value="@model.CaseActionDescription"
+													   ValueChanged="@(v => model.CaseActionDescription = v)"
+													   Style="min-height: 250px; border: none; background: white; border-radius: 8px;" />
+								</div>
+							</MudPaper>
+						</MudItem>
 
-				<!-- Tabs Section -->
-				<MudItem xs="12">
-					<MudText Typo="Typo.h6" Class="font-weight-bold mt-4 mb-4" Color="Color.Primary">
-						<MudIcon Icon="@Icons.Material.Filled.Folder" Size="Size.Small" Class="mr-2" />
-						Informações Complementares
-					</MudText>
-					<MudDivider Class="mb-4" />
-				</MudItem>
+						<!-- Tabs Section -->
+						<MudItem xs="12">
+							<MudText Typo="Typo.h6" Class="font-weight-bold mt-4 mb-4" Color="Color.Primary">
+								<MudIcon Icon="@Icons.Material.Filled.Folder" Size="Size.Small" Class="mr-2" />
+								Informações Complementares
+							</MudText>
+							<MudDivider Class="mb-4" />
+						</MudItem>
 
-				<MudItem xs="12">
-					<MudTabs Outlined="true"
-							 Class="mud-tab-border"
-							 Elevation="0"
-							 Style="border-radius: 12px; overflow: hidden;">
+						<MudItem xs="12">
+							<MudTabs Outlined="true"
+									 Class="mud-tab-border"
+									 Elevation="0"
+									 Style="border-radius: 12px; overflow: hidden;">
                         
-						<!-- Substitua o conteúdo do MudTabPanel "Partes Envolvidas" por: -->
-						<MudTabPanel Text="Partes Envolvidas" Icon="@Icons.Material.Filled.PeopleAlt">
-							<MudContainer Class="pa-4">
-								<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-									<MudText Typo="Typo.subtitle1" Class="font-weight-bold">Partes Adicionadas</MudText>
-									<MudButton Variant="Variant.Filled"
-											   Color="Color.Primary"
-											   StartIcon="@Icons.Material.Filled.Add"
-											   OnClick="OpenAddParteDialog">
-										Nova Parte
-									</MudButton>
-								</MudStack>
+								<!-- Substitua o conteúdo do MudTabPanel "Partes Envolvidas" por: -->
+								<MudTabPanel Text="Partes Envolvidas" Icon="@Icons.Material.Filled.PeopleAlt">
+									<MudContainer Class="pa-4">
+										<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+											<MudText Typo="Typo.subtitle1" Class="font-weight-bold">Partes Adicionadas</MudText>
+											<MudButton Variant="Variant.Filled"
+													   Color="Color.Primary"
+													   StartIcon="@Icons.Material.Filled.Add"
+													   OnClick="OpenAddParteDialog">
+												Nova Parte
+											</MudButton>
+										</MudStack>
 
-								@if (listaPartes.Any())
-								{
-									<MudTable Items="@listaPartes"
-											  Hover="true"
-											  Breakpoint="Breakpoint.Sm"
-											  Elevation="0"
-											  Dense="true">
-										<HeaderContent>
-											<MudTh>Tipo</MudTh>
-											<MudTh>Nome/Razão Social</MudTh>
-											<MudTh>CPF/CNPJ</MudTh>
-											<MudTh>Email</MudTh>
-											<MudTh>Telefone</MudTh>
-											<MudTh>Ações</MudTh>
-										</HeaderContent>
-										<RowTemplate Context="item">
-											<MudTd DataLabel="Tipo">
-												<MudChip T="string" Size="Size.Small" Color="@GetTipoColor(item.LegalParty)" Variant="MudBlazor.Variant.Outlined">
-													<MudText>@item.LegalParty</MudText>
-												</MudChip>
-											</MudTd>
-											<MudTd DataLabel="Nome/Razão Social">
-												<MudText>@item.Name</MudText>
-											</MudTd>
-											<MudTd DataLabel="CPF/CNPJ">
-												<MudText>@item.Document</MudText>
-											</MudTd>
-											<MudTd DataLabel="Email">
-												<MudText>@item.Email</MudText>
-											</MudTd>
-											<MudTd DataLabel="Telefone">
-												<MudText>@item.Phone</MudText>
-											</MudTd>
-											<MudTd DataLabel="Ações">
-												<MudText>
-													<MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary" OnClick="() => EditParte(item)" />
-													<MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="() => RemoveParte(item)" />
-												</MudText>
-											</MudTd>
-										</RowTemplate>
-									</MudTable>
+										@if (listaPartes.Any())
+										{
+											<MudTable Items="@listaPartes"
+													  Hover="true"
+													  Breakpoint="Breakpoint.Sm"
+													  Elevation="0"
+													  Dense="true">
+												<HeaderContent>
+													<MudTh>Tipo</MudTh>
+													<MudTh>Nome/Razão Social</MudTh>
+													<MudTh>CPF/CNPJ</MudTh>
+													<MudTh>Email</MudTh>
+													<MudTh>Telefone</MudTh>
+													<MudTh>Ações</MudTh>
+												</HeaderContent>
+												<RowTemplate Context="item">
+													<MudTd DataLabel="Tipo">
+														<MudChip T="string" Size="Size.Small" Color="@GetTipoColor(item.LegalParty)" Variant="MudBlazor.Variant.Outlined">
+															<MudText>@item.LegalParty</MudText>
+														</MudChip>
+													</MudTd>
+													<MudTd DataLabel="Nome/Razão Social">
+														<MudText>@item.Name</MudText>
+													</MudTd>
+													<MudTd DataLabel="CPF/CNPJ">
+														<MudText>@item.Document</MudText>
+													</MudTd>
+													<MudTd DataLabel="Email">
+														<MudText>@item.Email</MudText>
+													</MudTd>
+													<MudTd DataLabel="Telefone">
+														<MudText>@item.Phone</MudText>
+													</MudTd>
+													<MudTd DataLabel="Ações">
+														<MudText>
+															<MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary" OnClick="() => EditParte(item)" />
+															<MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="() => RemoveParte(item)" />
+														</MudText>
+													</MudTd>
+												</RowTemplate>
+											</MudTable>
 			
-									<MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
-										Total de partes: @listaPartes.Count
-									</MudText>
-								}
-								else
-								{
-									<MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-										<MudIcon Icon="@Icons.Material.Filled.Info" Class="mr-2" />
-										Nenhuma parte adicionada. Clique em "Nova Parte" para começar.
-									</MudAlert>
-								}
-							</MudContainer>
-						</MudTabPanel>
+											<MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
+												Total de partes: @listaPartes.Count
+											</MudText>
+										}
+										else
+										{
+											<MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+												<MudIcon Icon="@Icons.Material.Filled.Info" Class="mr-2" />
+												Nenhuma parte adicionada. Clique em "Nova Parte" para começar.
+											</MudAlert>
+										}
+									</MudContainer>
+								</MudTabPanel>
                         
-						<MudTabPanel Text="Documentos"
-									 Icon="@Icons.Material.Filled.UploadFile">
-							<MudContainer Class="pa-4">
-								<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4">
-									<MudText>Faça upload dos documentos relacionados a este processo.</MudText>
-								</MudAlert>
+								<MudTabPanel Text="Documentos"
+											 Icon="@Icons.Material.Filled.UploadFile">
+									<MudContainer Class="pa-4">
+										<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4">
+											<MudText>Faça upload dos documentos relacionados a este processo.</MudText>
+										</MudAlert>
                                 
-								<MudFileUploader Variant="Variant.Outlined"
-												 Label="Selecione os arquivos"
-												 Accept=".pdf,.doc,.docx,.jpg,.png"
-												 Multiple="true"
-												 Class="mt-2" />
-							</MudContainer>
-						</MudTabPanel>
+										<MudFileUploader Variant="Variant.Outlined"
+														 Label="Selecione os arquivos"
+														 Accept=".pdf,.doc,.docx,.jpg,.png"
+														 Multiple="true"
+														 Class="mt-2" />
+									</MudContainer>
+								</MudTabPanel>
                         
-						<MudTabPanel Text="Movimentação"
-									 Icon="@Icons.Material.Filled.Timeline">
-							<MudContainer Class="pa-4">
-								<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4">
-									<MudText>Histórico de movimentações e andamentos do processo.</MudText>
-								</MudAlert>
+								<MudTabPanel Text="Movimentação"
+											 Icon="@Icons.Material.Filled.Timeline">
+									<MudContainer Class="pa-4">
+										<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4">
+											<MudText>Histórico de movimentações e andamentos do processo.</MudText>
+										</MudAlert>
                                 
-								<MudTimeline Bullets="TimelineBullet.Icon" Elevation="0">
-									<MudTimelineItem Icon="@Icons.Material.Filled.Add" Color="Color.Primary">
-										<MudText Typo="Typo.caption" Class="text-muted">Hoje, 10:30</MudText>
-										<MudText>Processo criado no sistema</MudText>
-									</MudTimelineItem>
-								</MudTimeline>
-							</MudContainer>
-						</MudTabPanel>
+										<MudTimeline Bullets="TimelineBullet.Icon" Elevation="0">
+											<MudTimelineItem Icon="@Icons.Material.Filled.Add" Color="Color.Primary">
+												<MudText Typo="Typo.caption" Class="text-muted">Hoje, 10:30</MudText>
+												<MudText>Processo criado no sistema</MudText>
+											</MudTimelineItem>
+										</MudTimeline>
+									</MudContainer>
+								</MudTabPanel>
                         
-						<MudTabPanel Text="Financeiro"
-									 Icon="@Icons.Material.Filled.MonetizationOn">
-							<MudContainer Class="pa-4">
-								<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4">
-									<MudText>Informações financeiras e custas processuais.</MudText>
-								</MudAlert>
+								<MudTabPanel Text="Financeiro"
+											 Icon="@Icons.Material.Filled.MonetizationOn">
+									<MudContainer Class="pa-4">
+										<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4">
+											<MudText>Informações financeiras e custas processuais.</MudText>
+										</MudAlert>
                                 
-								<MudGrid>
-									<MudItem xs="12" md="6">
-										<MudTextField T="decimal"
-													  Label="Valor da Causa"
-													  Variant="Variant.Outlined"
-													  Adornment="Adornment.Start"
-													  AdornmentText="R$" />
-									</MudItem>
-									<MudItem xs="12" md="6">
-										<MudTextField T="decimal"
-													  Label="Custas Processuais"
-													  Variant="Variant.Outlined"
-													  Adornment="Adornment.Start"
-													  AdornmentText="R$" />
-									</MudItem>
-								</MudGrid>
-							</MudContainer>
-						</MudTabPanel>
-					</MudTabs>
-				</MudItem>
+										<MudGrid>
+											<MudItem xs="12" md="6">
+												<MudTextField T="decimal"
+															  Label="Valor da Causa"
+															  Variant="Variant.Outlined"
+															  Adornment="Adornment.Start"
+															  AdornmentText="R$" />
+											</MudItem>
+											<MudItem xs="12" md="6">
+												<MudTextField T="decimal"
+															  Label="Custas Processuais"
+															  Variant="Variant.Outlined"
+															  Adornment="Adornment.Start"
+															  AdornmentText="R$" />
+											</MudItem>
+										</MudGrid>
+									</MudContainer>
+								</MudTabPanel>
+							</MudTabs>
+						</MudItem>
 
-				<!-- Action Buttons -->
-				<MudItem xs="12">
-					<MudStack Row="true" Justify="Justify.FlexEnd" Spacing="2" Class="mt-6 pt-4">
-						<MudButton Variant="Variant.Text"
-								   Color="Color.Default"
-								   OnClick="Cancelar">
-							Cancelar
-						</MudButton>
-						<MudButton Variant="Variant.Filled"
-								   Color="Color.Primary"
-								   Type="Submit"
-								   StartIcon="@Icons.Material.Filled.Save">
-							Salvar Processo
-						</MudButton>
-					</MudStack>
-				</MudItem>
-			</MudGrid>
-		</EditForm>
-	</MudPaper>
-</MudContainer>
+						<!-- Action Buttons -->
+						<MudItem xs="12">
+							<MudStack Row="true" Justify="Justify.FlexEnd" Spacing="2" Class="mt-6 pt-4">
+								<MudButton Variant="Variant.Text"
+										   Color="Color.Default"
+										   OnClick="Cancelar">
+									Cancelar
+								</MudButton>
+								<MudButton Variant="Variant.Filled"
+										   Color="Color.Primary"
+										   Type="Submit"
+										   StartIcon="@Icons.Material.Filled.Save">
+									Salvar Processo
+								</MudButton>
+							</MudStack>
+						</MudItem>
+					</MudGrid>
+				</EditForm>
+			</MudPaper>
+		</MudContainer>
 
 @code {
 	private LegalProcessEntity model = new();
 	public int Radio_Size { get; set; } = 3;
 	private List<ClientDto> clientsDto = new();
 
-	private List<LegalProcessCategoryTypeEntity> legalProcessCategoryAll = new();
-	private List<LegalProcessCategoryTypeEntity> categoriasFiltradas = new();
+	private List<CourtDivisionEntity> legalProcessCategoryAll = new();
+	private List<CourtDivisionEntity> categoriasFiltradas = new();
 
 	private string searchString = "";
 	private bool loading = false;
@@ -469,7 +474,7 @@
 
 
 		var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-		var dialog = await DialogService.ShowAsync<PartiesLegalProcessDialog>("",parameters, options);
+		var dialog = await DialogService.ShowAsync<PartiesLegalProcessDialog>("", parameters, options);
 		var result = await dialog.Result;
 
 		if (!result.Canceled && result.Data is PartyLegalProcessEntity novaParte)
@@ -519,7 +524,7 @@
 		_visibleCourt = true;
 
 		categoriasFiltradas = legalProcessCategoryAll
-			.Where(x => x.legalProcessCategoryId == (int)value)
+			.Where(x => x.CourtId == (int)value)
 			.ToList();
 
 		// 🔥 ESSENCIAL
@@ -542,7 +547,7 @@
 		{
 			StateHasChanged();
 		}
-		
+
 	}
 
 	private async Task RemoveParte(PartyLegalProcessEntity parte)
@@ -553,7 +558,7 @@
 			"Tem certeza que deseja remover esta parte?",
 			yesText: "Sim",
 			cancelText: "Não");
-    
+
 		if (confirm == true)
 		{
 			// Remove da lista
@@ -616,7 +621,7 @@
 	}
 
 
-	private async Task<List<LegalProcessCategoryTypeEntity>> GetLegalProcessCategoryTypesDtoAsync()
+	private async Task<List<CourtDivisionEntity>> GetLegalProcessCategoryTypesDtoAsync()
 	{
 		var legalProcessCategoryTypesEntity = await _legalProcessCategoryService.GetAll();
 		return legalProcessCategoryTypesEntity.ToList();
@@ -644,10 +649,15 @@
 		"Arquivado"
 	};
 
-	private void Salvar()
+	private async Task Salvar()
 	{
-		Snackbar.Add("Processo salvo com sucesso!", Severity.Success);
-		Console.WriteLine("Salvo com sucesso!");
+
+		var result = await _legalProcessService.AddAsync(model);
+
+		if (result)
+		{
+			Notification.ExibirMensagem("Processo salvo com sucesso!", Severity.Success); 
+		}
 	}
 
 	private void Cancelar()

@@ -22,10 +22,6 @@
 						{
 							<MudSelectItem Value="@item">@item</MudSelectItem>
 						}
-@* 						<MudSelectItem Value="@("Autor")">Autor</MudSelectItem>
-						<MudSelectItem Value="@("Réu")">Réu</MudSelectItem>
-						<MudSelectItem Value="@("Advogado")">Advogado</MudSelectItem>
-						<MudSelectItem Value="@("Testemunha")">Testemunha</MudSelectItem> *@
 					</MudSelect>
 				</MudItem>
 				<MudItem xs="12" md="6">
@@ -48,7 +44,7 @@
 								 Class="mt-2" />
 				</MudItem>
 				<MudItem xs="12" md="4">
-					<MudTextField Label="Representante Legal" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.GeneralRegistration" />
+					<MudTextField Label="Representante Legal" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.LegalRepresentative" />
 				</MudItem>
 				<MudItem xs="12" md="4">
 					<MudTextField Label="E-mail" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Email" />

@@ -4,12 +4,12 @@ namespace CEJ_WebApp.Core.Services.Interface
 {
     public interface ILegalProcessCategoryTypeService
     {
-        Task<LegalProcessCategoryTypeEntity> GetByUuid(Guid uuid);
+        Task<CourtDivisionEntity> GetByUuid(Guid uuid);
 
-        Task<LegalProcessCategoryTypeEntity> GetById(long id);
+        Task<CourtDivisionEntity> GetById(long id);
 
-        Task<IEnumerable<LegalProcessCategoryTypeEntity>> GetAll();
+        Task<IEnumerable<CourtDivisionEntity>> GetAll();
 
-        Task<IEnumerable<LegalProcessCategoryTypeEntity>> GetByCategoryId(long categoryId);
+        Task<IEnumerable<CourtDivisionEntity>> GetByCategoryId(long categoryId);
     }
 }

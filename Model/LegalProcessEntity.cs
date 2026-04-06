@@ -17,7 +17,7 @@ namespace CEJ_WebApp.Model
         public LegalPartyType LegalParty { get; set; }
         public virtual ClientDto Client { get; set; } = null!;
         public string CaseActionDescription { get; set; }
-        public string Status { get; set; }
+        public StatusProcessType Status { get; set; } = StatusProcessType.Andamento;
         public DateTime? OpenDate { get; set; }
         public int CourtDivisionCode { get; set; }
         public DateTime? LegalDeadline { get; set; }

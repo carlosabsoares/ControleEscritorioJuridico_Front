@@ -2,7 +2,7 @@
 
 namespace CEJ_WebApp.Model
 {
-    public class LegalProcessCategoryTypeEntity
+    public class CourtDivisionEntity
     {
         public long Id { get; set; }
         public Guid Uuid { get; init; }
@@ -11,7 +11,7 @@ namespace CEJ_WebApp.Model
         public string? NamePt { get; set; }
 
         public int Code { get; set; }
-        public int legalProcessCategoryId { get; set; }
+        public int CourtId { get; set; }
 
     }
 }
