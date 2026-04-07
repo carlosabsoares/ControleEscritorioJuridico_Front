@@ -19,7 +19,7 @@ namespace CEJ_WebApp.Core.Shared
 
         //public string GetUrlAddress() => "https://localhost:1602/v1/";
 
-        /public string GetUrlAddress() => "https://controleescritoriojuridico-back.onrender.com/v1/";
+        public string GetUrlAddress() => "https://controleescritoriojuridico-back.onrender.com/v1/";
 
         public async Task<string> GetTokenAsync()
         {
