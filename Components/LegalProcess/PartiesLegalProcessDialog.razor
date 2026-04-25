@@ -37,40 +37,79 @@
 					<MudTextField Label="Nome Completo / Razão Social" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Name" Required="true" />
 				</MudItem>
 				<MudItem xs="12" md="6">
-					<MudCheckBox T="bool"
-								 @bind-Checked="partiesModel.HasCommonLawMarriage"
-								 Label="Existência de União Estável"
-								 Color="Color.Primary"
-								 Class="mt-2" />
-				</MudItem>
-				<MudItem xs="12" md="4">
-					<MudTextField Label="Representante Legal" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.LegalRepresentative" />
-				</MudItem>
-				<MudItem xs="12" md="4">
-					<MudTextField Label="E-mail" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Email" />
-				</MudItem>
-				<MudItem xs="12" md="4">
-					<MudTextField Label="Telefone"
-								  Variant="Variant.Outlined"
-								  Margin="Margin.Dense"
-								  @bind-Value="partiesModel.Phone"
-								  OnBlur="OnTelefoneBlur"
-								  OnKeyUp="OnTelefoneKeyUp"
-								  HelperText="Digite apenas números" />
-				</MudItem>
-				<MudItem xs="12" md="4">
-					<MudTextField Label="RG"
-								  Variant="Variant.Outlined"
-								  Margin="Margin.Dense"
-								  @bind-Value="partiesModel.GeneralRegistration" />
-				</MudItem>
 
-				<MudItem xs="12" md="4">
-					<MudTextField Label="Cargo" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Position" />
+					@if(isCpf){
+						<MudCheckBox T="bool"
+									 @bind-Checked="partiesModel.HasCommonLawMarriage"
+									 Label="Existência de União Estável"
+									 Color="Color.Primary"
+									 Class="mt-2" />
+					}
+
 				</MudItem>
-				<MudItem xs="12" md="4">
-					<MudTextField Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Profession" />
-				</MudItem>
+				@if (isCpf)
+				{
+					<MudItem xs="12" md="8">
+						<MudTextField Label="E-mail" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Email" />
+					</MudItem>
+					<MudItem xs="12" md="4">
+						<MudTextField Label="Telefone"
+									  Variant="Variant.Outlined"
+									  Margin="Margin.Dense"
+									  @bind-Value="partiesModel.Phone"
+									  OnBlur="OnTelefoneBlur"
+									  OnKeyUp="OnTelefoneKeyUp"
+									  HelperText="Digite apenas números" />
+					</MudItem>
+				}
+				else
+				{
+					<MudItem xs="12" md="4">
+						<MudTextField Label="Representante Legal" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.LegalRepresentative" />
+					</MudItem>
+					<MudItem xs="12" md="4">
+						<MudTextField Label="E-mail" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Email" />
+					</MudItem>
+					<MudItem xs="12" md="4">
+						<MudTextField Label="Telefone"
+									  Variant="Variant.Outlined"
+									  Margin="Margin.Dense"
+									  @bind-Value="partiesModel.Phone"
+									  OnBlur="OnTelefoneBlur"
+									  OnKeyUp="OnTelefoneKeyUp"
+									  HelperText="Digite apenas números" />
+					</MudItem>
+				}
+
+				@if (isCpf)
+				{
+					<MudItem xs="12" md="4">
+						<MudTextField Label="RG"
+									  Variant="Variant.Outlined"
+									  Margin="Margin.Dense"
+									  @bind-Value="partiesModel.GeneralRegistration" />
+					</MudItem>
+					<MudItem xs="12" md="8">
+						<MudTextField Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Profession" />
+					</MudItem>
+				}
+				else
+				{
+					<MudItem xs="12" md="4">
+						<MudTextField Label="RG"
+									  Variant="Variant.Outlined"
+									  Margin="Margin.Dense"
+									  @bind-Value="partiesModel.GeneralRegistration" />
+					</MudItem>
+
+					<MudItem xs="12" md="4">
+						<MudTextField Label="Cargo" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Position" />
+					</MudItem>
+					<MudItem xs="12" md="4">
+						<MudTextField Label="Profissão" Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="partiesModel.Profession" />
+					</MudItem>
+				}
+
 
 				<MudDivider Class="my-3" />
 
@@ -97,6 +136,7 @@
 	[Parameter] public bool InsertMode { get; set; }
 
 	private string ultimoTelefone = "";
+	private bool isCpf = true;
 
 
 	// Formata em tempo real enquanto digita
@@ -105,7 +145,7 @@
 		if (!string.IsNullOrWhiteSpace(partiesModel.Phone))
 		{
 			var apenasNumeros = new string(partiesModel.Phone.Where(char.IsDigit).ToArray());
-		
+
 			if (apenasNumeros != ultimoTelefone)
 			{
 				ultimoTelefone = apenasNumeros;
@@ -133,26 +173,26 @@
 
 		// Remove tudo que não é número
 		var apenasNumeros = new string(telefone.Where(char.IsDigit).ToArray());
-	
+
 		if (apenasNumeros.Length == 0)
 			return string.Empty;
 
 		// Caso tenha apenas o DDD
 		if (apenasNumeros.Length <= 2)
 			return apenasNumeros;
-	
+
 		// Telefone com 10 dígitos (fixo): (00) 0000-0000
 		if (apenasNumeros.Length == 10)
 		{
 			return $"({apenasNumeros[..2]}) {apenasNumeros.Substring(2, 4)}-{apenasNumeros[6..]}";
 		}
-	
+
 		// Telefone com 11 dígitos (celular): (00) 00000-0000
 		if (apenasNumeros.Length == 11)
 		{
 			return $"({apenasNumeros[..2]}) {apenasNumeros.Substring(2, 5)}-{apenasNumeros[7..]}";
 		}
-	
+
 		// Telefone com mais de 11 dígitos (casos especiais)
 		if (apenasNumeros.Length > 11)
 		{
@@ -160,7 +200,7 @@
 			var ultimosDigitos = apenasNumeros[^11..];
 			return $"({ultimosDigitos[..2]}) {ultimosDigitos.Substring(2, 5)}-{ultimosDigitos[7..]}";
 		}
-	
+
 		// Telefone com menos de 10 dígitos (ainda digitando)
 		if (apenasNumeros.Length <= 6)
 		{
@@ -168,12 +208,12 @@
 				return apenasNumeros;
 			return $"({apenasNumeros[..2]}) {apenasNumeros[2..]}";
 		}
-	
+
 		if (apenasNumeros.Length <= 10)
 		{
 			return $"({apenasNumeros[..2]}) {apenasNumeros.Substring(2, apenasNumeros.Length - 6)}-{apenasNumeros[^4..]}";
 		}
-	
+
 		return apenasNumeros;
 	}
 
@@ -214,6 +254,7 @@
 		// Se for apenas números, formata normalmente
 		if (apenasNumeros.Length <= 11)
 		{
+			isCpf = true;
 			// Formata CPF: 000.000.000-00
 			if (apenasNumeros.Length <= 3)
 				return apenasNumeros;
@@ -225,6 +266,7 @@
 		}
 		else
 		{
+			isCpf = false;
 			// Formata CNPJ: 00.000.000/0000-00
 			if (apenasNumeros.Length <= 2)
 				return apenasNumeros;

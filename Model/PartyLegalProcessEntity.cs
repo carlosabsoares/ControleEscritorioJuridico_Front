@@ -15,7 +15,7 @@ namespace CEJ_WebApp.Model
         public string GeneralRegistration { get; set; }
         public bool Unknown { get; set; }
         public bool HasCommonLawMarriage { get; set; }
-        public string Position { get; set; }
+        public string? Position { get; set; } = string.Empty;
 
         public long AddressId { get; set; } = 0;
         public AddressEntity Address { get; set; } = new AddressEntity();
