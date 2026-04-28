@@ -15,7 +15,7 @@ namespace CEJ_WebApp.Model
         public CaseActionType CaseActionType { get; set; } = CaseActionType.Civil;
         public PriorityType Priority { get; set; } = PriorityType.Baixa;
         public LegalPartyType LegalParty { get; set; }
-        public Guid ClientId { get; set; } = Guid.Empty;
+        public Guid ClientUuid { get; set; } = Guid.Empty;
         public virtual ClientDto Client { get; set; } = null!;
         public string? CaseActionDescription { get; set; }
         public StatusProcessType Status { get; set; } = StatusProcessType.Andamento;
