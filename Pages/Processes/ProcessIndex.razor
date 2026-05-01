@@ -7,7 +7,7 @@
 @using CEJ_WebApp.Model.Enum
 @using CEJ_WebApp.Components.Client
 
-@inject IClientService _clientService
+@inject ILegalProcessService _legalProcessService
 @inject IExternalService _externalService
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
@@ -178,6 +178,58 @@
 	private bool loading = false;
 
 	private bool _dialogOpen = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadManufactures();
+	}
+
+	async Task LoadManufactures()
+	{
+		try
+		{
+			loading = true;
+			var task = GetAllLegalProcessAsync();
+			await Task.WhenAll(task, Task.Delay(300));
+
+			processesDto = task.Result;
+		}
+		finally
+		{
+			loading = false;
+		}
+	}
+
+	private async Task ReloadGrid()
+	{
+		try
+		{
+			loading = true;
+
+			await LoadManufactures();
+			await gridProcess.ReloadServerData();
+		}
+		finally
+		{
+			loading = false;
+		}
+	}
+
+	private async Task<List<ProcessDto>> GetAllLegalProcessAsync()
+	{
+		var clientsEntity = await _legalProcessService.GetAllLegalProcessAsync();
+
+		var processesDto = clientsEntity.Select(x => new ProcessDto
+			{
+				ProcessNumber = x.CaseNumber,
+				Client = x.Client.Name,
+				Status = x.Status.ToString(),
+				OpenDate = x.OpenDate ?? DateTime.Now.Date,
+				LastMovimentationDate = null
+        }).ToList();
+
+		return processesDto;
+	}
 
 	private bool FilterProcesses(ProcessDto process)
 	{

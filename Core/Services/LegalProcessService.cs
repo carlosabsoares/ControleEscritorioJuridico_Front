@@ -49,5 +49,28 @@ namespace CEJ_WebApp.Core.Services
                 return _return;
             }
         }
+
+        public async Task<IEnumerable<LegalProcessEntity>> GetAllLegalProcessAsync()
+        {
+            try
+            {
+                var token = await Parameters.GetTokenAsync();
+
+                var request = new HttpRequestMessage(HttpMethod.Get, $"{url}{_object}");
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                var response = await Http.SendAsync(request);
+
+                response.EnsureSuccessStatusCode();
+
+                var legalProcess = await response.Content.ReadFromJsonAsync<List<LegalProcessEntity>>();
+
+                return legalProcess ?? new List<LegalProcessEntity>();
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }

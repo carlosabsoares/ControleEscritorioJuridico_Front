@@ -6,5 +6,6 @@ namespace CEJ_WebApp.Core.Services.Interface
     {
 
         Task<bool> AddAsync(LegalProcessEntity clientEntity);
+        Task<IEnumerable<LegalProcessEntity>> GetAllLegalProcessAsync();
     }
 }

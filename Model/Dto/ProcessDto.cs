@@ -6,6 +6,6 @@
         public string Status { get; set; }
         public string Client { get; set; }
         public DateTime OpenDate { get; set; }
-        public DateTime LastMovimentationDate { get; set; }
+        public DateTime? LastMovimentationDate { get; set; }
     }
 }
