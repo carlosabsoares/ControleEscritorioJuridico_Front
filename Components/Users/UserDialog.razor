@@ -39,6 +39,7 @@
                                Variant="Variant.Outlined"
                                Margin="Margin.Dense"
                                FullWidth="true"
+                               ValueChanged="OnRoleTypeChanged"
                                AdornmentIcon="@Icons.Material.Filled.Description"
                                Adornment="Adornment.Start">
                         @foreach (var role in Enum.GetValues<UserRoleType>())
@@ -48,28 +49,66 @@
                     </MudSelect>
                 </MudItem>
 
-                <MudItem xs="12" md="6">
-                    <MudTextField @bind-Value="@User.Email"
-                                  Label="Email"
-                                  Variant="Variant.Outlined"
-                                  Margin="Margin.Dense"
-                                  FullWidth="true"
-                                  AdornmentIcon="@Icons.Material.Filled.ContactMail"
-                                  Adornment="Adornment.Start" />
-                </MudItem>
-                <MudItem xs="12" md="6">
-                    @if (InsertMode)
-                    {
-                        <MudTextField @bind-Value="@User.Password"
-                                      Label="Password"
+                @if (!isLawyer)
+                {
+                    <MudItem xs="12" md="4">
+                        <MudTextField @bind-Value="@User.Email"
+                                      Label="Email"
                                       Variant="Variant.Outlined"
                                       Margin="Margin.Dense"
                                       FullWidth="true"
-                                      InputType="InputType.Password"
-                                      AdornmentIcon="@Icons.Material.Filled.Password"
-                                      Adornment="Adornment.End" />
-                    }
-                </MudItem>
+                                      AdornmentIcon="@Icons.Material.Filled.ContactMail"
+                                      Adornment="Adornment.Start" />
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        @if (InsertMode)
+                        {
+                            <MudTextField @bind-Value="@User.Password"
+                                          Label="Password"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          FullWidth="true"
+                                          InputType="InputType.Password"
+                                          AdornmentIcon="@Icons.Material.Filled.Password"
+                                          Adornment="Adornment.End" />
+                        }
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudTextField @bind-Value="@User.OABNumber"
+                                      Label="Numeno OAB"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true"
+                                      AdornmentIcon="@Icons.Material.Filled.Badge"
+                                      Adornment="Adornment.Start" />
+                    </MudItem>
+                }else{
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="@User.Email"
+                                      Label="Email"
+                                      InputType="InputType.Email"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true"
+                                      AdornmentIcon="@Icons.Material.Filled.ContactMail"
+                                      Adornment="Adornment.Start" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        @if (InsertMode)
+                        {
+                            <MudTextField @bind-Value="@User.Password"
+                                          Label="Senha"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          FullWidth="true"
+                                          InputType="InputType.Password"
+                                          AdornmentIcon="@Icons.Material.Filled.Password"
+                                          Adornment="Adornment.End" />
+                        }
+                    </MudItem>
+                }
+
+
             </MudGrid>
             <MudDivider Class="my-3" />
 
@@ -98,6 +137,12 @@
 
     [Parameter] public UserEntity User { get; set; }
     [Parameter] public bool InsertMode { get; set; }
+    private bool isLawyer = false;
+
+    private void OnRoleTypeChanged(UserRoleType type)
+    {
+        isLawyer = type != UserRoleType.Advogado;
+    }
 
     private async Task Salvar()
     {
