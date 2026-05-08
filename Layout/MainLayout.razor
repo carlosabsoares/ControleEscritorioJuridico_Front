@@ -1,12 +1,14 @@
 ﻿
 @using CEJ_WebApp.Model
 @using CEJ_WebApp.Components.Users
+@using CEJ_WebApp.Core.Services.Interface
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject IAuthService AuthService
 @inject UserSessionInformation UserSessionInformation
 @inject IDialogService DialogService
 @inject IJSRuntime JS
+@inject ISessionTimeoutService SessionTimeoutService
 
 <MudThemeProvider @ref="@_mudThemeProvider" IsDarkMode="@_isDarkMode" />
 <MudDialogProvider />
@@ -178,13 +180,16 @@
 			_isDarkMode = true;
 			_isDarkMode = await _mudThemeProvider!.GetSystemPreference();
 			StateHasChanged();
+
+			// Inicia o monitoramento de timeout de sessão
+			await SessionTimeoutService.StartMonitoringAsync();
 		}
 	}
 
 	public async Task Logout()
 	{
-		AuthService.Logout();
+		await SessionTimeoutService.StopMonitoringAsync();
+		await AuthService.Logout();
 		NavigationManager.NavigateTo("/login");
-
 	}
 }

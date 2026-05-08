@@ -1,0 +1,116 @@
+﻿@using CEJ_WebApp.Core.Services
+@using CEJ_WebApp.Model
+@using CEJ_WebApp.Model.Enum
+@using MudBlazor
+
+@inject IUserService _userService
+@inject NotificationService Notification
+
+<MudDialog MaxWidth="MaxWidth.Medium" FullWidth="true">
+    <DialogContent>
+        <MudPaper Class="pa-4 mb-4" Elevation="0" Style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@(InsertMode ? Icons.Material.Filled.PersonAdd : Icons.Material.Filled.Edit)"
+                         Size="Size.Large"
+                         Color="Color.Inherit"
+                         Style="color: white;" />
+                <MudText Typo="Typo.h5" Style="color: white; font-weight: 500;">
+                    @(InsertMode ? "Novo Usuário" : "Editar Usuário")
+                </MudText>
+            </MudStack>
+        </MudPaper>
+        <EditForm Model="@User">
+            <DataAnnotationsValidator />
+
+            <MudGrid>
+                <MudItem xs="12" md="8">
+                    <MudTextField @bind-Value="@User.Name"
+                                  Label="Nome"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  FullWidth="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Person"
+                                  Adornment="Adornment.Start" />
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudSelect T="UserRoleType"
+                               Label="Perfil"
+                               Value="User.Role"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               FullWidth="true"
+                               AdornmentIcon="@Icons.Material.Filled.Description"
+                               Adornment="Adornment.Start">
+                        @foreach (var role in Enum.GetValues<UserRoleType>())
+                        {
+                            <MudSelectItem Value="@role">@role</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="@User.Email"
+                                  Label="Email"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  FullWidth="true"
+                                  AdornmentIcon="@Icons.Material.Filled.ContactMail"
+                                  Adornment="Adornment.Start" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    @if (InsertMode)
+                    {
+                        <MudTextField @bind-Value="@User.Password"
+                                      Label="Password"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true"
+                                      InputType="InputType.Password"
+                                      AdornmentIcon="@Icons.Material.Filled.Password"
+                                      Adornment="Adornment.End" />
+                    }
+                </MudItem>
+            </MudGrid>
+            <MudDivider Class="my-3" />
+
+            <!-- ✅ NOVO COMPONENTE -->
+            <AddressForm Address="User.Address" />
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary"
+                   OnClick="Cancel"
+                   Variant="Variant.Outlined">
+            Fechar
+        </MudButton>
+        <MudButton Color="Color.Primary"
+                   OnClick="Salvar"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Save">
+            Salvar
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public UserEntity User { get; set; }
+    [Parameter] public bool InsertMode { get; set; }
+
+    private async Task Salvar()
+    {
+        bool result = InsertMode
+            ? await _userService.AddAsync(User)
+            : await _userService.EditAsync(User);
+
+        Notification.ExibirMensagem(
+            result ? "Sucesso!" : "Erro!",
+            result ? Severity.Success : Severity.Error);
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

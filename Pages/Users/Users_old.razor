@@ -1,0 +1,688 @@
+﻿@page "/users_old"
+@page "/users_old/Index"
+@using CEJ_WebApp.Core.Services
+@using CEJ_WebApp.Model
+@using CEJ_WebApp.Model.Dto
+@using CEJ_WebApp.Model.Enum
+@using CEJ_WebApp.Components.Users
+
+@inject IUserService _userService
+@inject IExternalService _externalService
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
+@inject NotificationService Notification
+
+<Modal @ref="modalScreen"
+	   UseStaticBackdrop="true"
+	   CloseOnEscape="false"
+	   IsVerticallyCentered="true"
+	   Size="ModalSize.Large">
+	<HeaderTemplate>
+		<div class="d-flex align-items-center gap-2">
+			<MudIcon Icon="@(insertMode
+							? Icons.Material.Filled.PersonAdd
+		    			    : Icons.Material.Filled.Edit)" />
+			<span>@modalTitle</span>
+		</div>
+	</HeaderTemplate>
+	<BodyTemplate>
+		<EditForm Model="@user">
+			<DataAnnotationsValidator />
+
+			<div class="row mb-2">
+				<!-- Coluna Nome -->
+				<div class="col-md-6">
+					<div class="form-group">
+						<MudTextField @bind-Value="@user.Name" Label="Nome" Variant="Variant.Outlined" Margin="Margin.Dense" />
+						<ValidationMessage For="@(() => user.Name)" />
+					</div>
+				</div>
+
+				<!-- Coluna Perfil -->
+				<div class="col-md-6">
+					<div class="form-group">
+						<MudSelect T="UserRoleType"
+								   Label="Perfil"
+								   @bind-Value="user.Role"
+								   @bind-Value:after="OnRoleChanged"
+								   Variant="Variant.Outlined"
+								   Margin="Margin.Dense">
+
+							@foreach (var role in Enum.GetValues<UserRoleType>().OrderBy(r => r.ToString()))
+							{
+								<MudSelectItem Value="@role">@role</MudSelectItem>
+							}
+						</MudSelect>
+					</div>
+				</div>
+			</div>
+
+			<div class="row mb-2">
+				<!-- Coluna Email -->
+				<div class="col-md-5">
+					<div class="form-group">
+						<MudTextField @bind-Value="@user.Email" InputType="InputType.Email" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense" />
+						<ValidationMessage For="@(() => user.Email)" />
+					</div>
+				</div>
+
+				<!-- Coluna Password -->
+				<div class="col-md-4 @(insertMode ? "" : "invisible")">
+					<MudTextField T="string"
+								  Label="Senha"
+								  @bind-Value="user!.Password"
+								  InputType="@PasswordInput"
+								  Variant="Variant.Outlined"
+								  Adornment="Adornment.End"
+								  AdornmentIcon="@PasswordInputIcon"
+								  OnAdornmentClick="ButtonShowPasswordclick"
+								  AdornmentAriaLabel="Mostrar Password"
+								  Margin="Margin.Dense"
+								  For="@(() => user.Password)" />
+				</div>
+
+				<!-- Oab -->
+				<div class="col-md-3 @(isLawyer ? "": "invisible" )">
+					<div class="form-group">
+						<MudTextField @bind-Value="@user.OABNumber" Label="Numero OAB" Variant="Variant.Outlined" Margin="Margin.Dense" />
+						<ValidationMessage For="@(() => user.OABNumber)" />
+					</div>
+				</div>
+			</div>
+
+			<div class="row mb-2">
+				<div class="card">
+					<h4 class="card-header">Endereço</h4>
+					<div class="card-body">
+						<div class="row mb-2">
+							<!-- Coluna Email -->
+							<div class="col-md-6">
+								<div class="form-group">
+
+									<MudText Typo="Typo.body2" Class="mb-1">CEP</MudText>
+
+									<MudMask T="string"
+											 Label="CEP"
+											 Mask="@cepMask"
+											 Placeholder="00000-000"
+											 @bind-Value="user.Address.ZipCode"
+											 @ref="cepField"
+											 Immediate="true"
+											 Variant="Variant.Outlined"
+											 FullWidth="true"
+											 Adornment="Adornment.End"
+											 AdornmentIcon="@Icons.Material.Filled.Search"
+											 AdornmentColor="Color.Secondary"
+											 OnAdornmentClick="OnFindCepClick"
+											 AdornmentAriaLabel="Pesquisar CEP" />
+									<ValidationMessage For="@(() => user.Address.ZipCode)" />
+								</div>
+							</div>
+						</div>
+
+						<div class="row mb-2">
+							<div class="col-md-6">
+
+								<MudTextField @bind-Value="@user!.Address!.Street" Label="Logradouro" Variant="Variant.Outlined" Margin="Margin.Dense" />
+								<ValidationMessage For="@(() => @user!.Address!.Street)" />
+							</div>
+							<div class="col-md-2">
+								<MudTextField @bind-Value="user!.Address!.Number"
+											  InputType="InputType.Number"
+											  Label="Numero"
+											  Variant="Variant.Outlined"
+											  Margin="Margin.Dense" />
+    
+								<ValidationMessage For="@(() => user!.Address!.Number)" />
+							</div>
+							<div class="col-md-3">
+								<MudTextField @bind-Value="@user!.Address!.Complement" Label="Complemento" Variant="Variant.Outlined" Margin="Margin.Dense" />
+								<ValidationMessage For="@(() => user!.Address!.Complement)" />
+							</div>
+						</div>
+
+
+						<div class="row mb-2">
+							<div class="col-md-5">
+								<MudTextField @bind-Value="@user!.Address!.Neighborhood" Label="Bairro" Variant="Variant.Outlined" Margin="Margin.Dense" />
+								<ValidationMessage For="@(() => user!.Address!.Neighborhood)" />
+							</div>
+							<div class="col-md-5">
+								<MudTextField @bind-Value="@user!.Address!.City" Label="Cidade" Variant="Variant.Outlined" Margin="Margin.Dense" />
+								<ValidationMessage For="@(() => user!.Address!.City)" />
+							</div>
+							<div class="col-md-2">
+								<div class="form-group">
+									<MudSelect T="string"
+											   Label="Estado"
+											   @bind-Value="user.Address.State"
+											   Variant="Variant.Outlined"
+											   Margin="Margin.Dense"
+											   FullWidth="true"
+											   AnchorOrigin="Origin.BottomCenter">
+
+										@foreach (var uf in Enum.GetValues<UfType>())
+										{
+											var text = uf.ToString();
+											<MudSelectItem Value="@text">@text</MudSelectItem>
+										}
+									</MudSelect>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>	
+		</EditForm>
+
+	</BodyTemplate>
+	<FooterTemplate>
+		<MudButton StartIcon="@Icons.Material.Filled.Close"
+				   Color="Color.Secondary"
+				   Variant="Variant.Filled"
+				   OnClick="OnHideModalInsertClick">
+			Fechar
+		</MudButton>
+
+		<MudButton StartIcon="@Icons.Material.Filled.Save"
+				   Color="Color.Primary"
+				   Variant="Variant.Filled"
+				   OnClick="OnPersisteModalUser">
+			Salvar
+		</MudButton>
+
+	</FooterTemplate>
+</Modal>
+
+<Modal @ref="modalDeactiveReactive"
+	   Title="@modalTitle"
+	   UseStaticBackdrop="true"
+	   CloseOnEscape="false"
+	   IsVerticallyCentered="true"
+	   Size="ModalSize.Large"
+	   HideCloseButton="true">
+	<!-- Adicione esta linha -->
+	<BodyTemplate>
+		@* <EditForm Model="@user" OnValidSubmit="@OnIncludeUser"> *@
+		<EditForm Model="@user">
+			<DataAnnotationsValidator />
+
+			<MudText Typo="Typo.h6">
+				@if (deactiveMode)
+				{
+					<MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1" />
+					<span>Deseja apagar esse usuário?</span>
+				}
+				else
+				{
+					<MudIcon Icon="@Icons.Material.Filled.ChangeCircle" Class="mr-3 mb-n1" />
+					<span>Deseja reativar esse usuário?</span>
+				}
+			</MudText>
+            
+			<MudTextField Value="@user.Name.ToString()"
+						  Label="Nome"
+						  ReadOnly="true"
+						  Variant="Variant.Outlined"
+						  FullWidth="true" />
+
+		</EditForm>
+	</BodyTemplate>
+	<FooterTemplate>
+		<MudButton StartIcon="@Icons.Material.Filled.Close"
+				   Color="Color.Secondary"
+				   Variant="Variant.Filled"
+				   OnClick="OnHideModalDeactiveClick">
+			Fechar
+		</MudButton>
+
+		<MudButton StartIcon="@Icons.Material.Filled.Save"
+				   Color="Color.Primary"
+				   Variant="Variant.Filled"
+				   OnClick="OnPersisteDeleteModalUser">
+			Confirmar
+		</MudButton>
+	</FooterTemplate>
+</Modal>
+
+
+
+<div class="card">
+	<div class="card-header">
+		<MudStack Row="true"
+				  Justify="Justify.SpaceBetween"
+				  AlignItems="MudBlazor.AlignItems.Center"
+				  Class="mb-3">
+
+			<h4>Usuário</h4>
+
+			<MudFab Color="Color.Tertiary"
+					StartIcon="@Icons.Material.Filled.Add"
+					Label="Usuário"
+					OnClick="OnShowModalInsertClick" />
+
+		</MudStack>
+	</div>
+	<div class="card-body">
+
+		<MudTable @ref="gridUser"
+				  T="UserDto"
+				  Items="@usersDto"
+				  Filter="new Func<UserDto, bool>(FilterUsers)"
+				  FilterMode="FilterMode.Filterable"
+				  FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+				  Hover="true"
+				  Bordered="true"
+				  Striped="true"
+				  Loading="@loading"
+				  Breakpoint="Breakpoint.Sm"
+				  Height="400px"
+				  FixedHeader="true"
+				  HorizontalScrollbar="true">
+
+			<!-- Toolbar com filtro -->
+			<ToolBarContent>
+				<MudText Typo="Typo.subtitle1">Lista de Usuários</MudText>
+				<MudSpacer />
+				<MudTextField @bind-Value="searchString"
+							  Placeholder="Pesquisar..."
+							  Variant="MudBlazor.Variant.Outlined"
+							  Adornment="Adornment.Start"
+							  AdornmentIcon="@Icons.Material.Filled.Search"
+							  IconSize="Size.Small"
+							  DebounceInterval="300"
+							  Immediate="true"
+							  Class="mt-0" />
+			</ToolBarContent>
+
+			<!-- Cabeçalho da tabela -->
+			<HeaderContent>
+				<MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Name)">Nome</MudTableSortLabel></MudTh>
+				<MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
+				<MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Role)">Perfil</MudTableSortLabel></MudTh>
+				<MudTh Style="width: 120px; text-align: center;">Ações</MudTh>
+			</HeaderContent>
+
+			<!-- Linhas da tabela -->
+			<RowTemplate>
+				<MudTd DataLabel="Nome">@context.Name</MudTd>
+				<MudTd DataLabel="Email">@context.Email</MudTd>
+				<MudTd DataLabel="Perfil">@context.Role</MudTd>
+				<MudTd DataLabel="Ações" Style="text-align: center;">
+					<MudStack Row="true" Spacing="1" Justify="Justify.Center">
+						@if (context.Active)
+						{
+							<!-- Botão Alterar -->
+							<MudTooltip Text="Alterar">
+								<MudIconButton Icon="@Icons.Material.Filled.Edit"
+											   Color="Color.Primary"
+											   Size="Size.Small"
+											   OnClick="@(async () => await OnShowModalEditClick(context))" />
+							</MudTooltip>
+
+							<!-- Botão Desativar -->
+							<MudTooltip Text="Desativar">
+								<MudIconButton Icon="@Icons.Material.Filled.Delete"
+											   Color="Color.Error"
+											   Size="Size.Small"
+											   OnClick="@(async () => await OnShowModalDeleteClick(context))" />
+							</MudTooltip>
+						}
+						else
+						{
+							<!-- Botão Reativar -->
+							<MudTooltip Text="Reativar">
+								<MudIconButton Icon="@Icons.Material.Filled.Refresh"
+											   Color="Color.Info"
+											   Size="Size.Small"
+											   OnClick="@(async () => await OnShowModalReactiveClick(context))" />
+							</MudTooltip>
+						}
+					</MudStack>
+				</MudTd>
+			</RowTemplate>
+
+			<!-- Paginação -->
+			<PagerContent>
+				<MudTablePager PageSizeOptions="new int[] { 5, 10, 25, 50 }" />
+			</PagerContent>
+
+			<!-- Mensagem quando não há dados -->
+			<NoRecordsContent>
+				<MudText Align="Align.Center">Nenhum usuário encontrado</MudText>
+			</NoRecordsContent>
+
+			<!-- Loading indicator -->
+			<LoadingContent>
+				<div class="d-flex justify-center align-center pa-6">
+					<MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+					<MudText Class="ml-2">Carregando usuários...</MudText>
+				</div>
+			</LoadingContent>
+		</MudTable>
+
+
+	</div>
+
+</div>
+
+<br />
+
+@code {
+
+	[Inject]
+	public ISnackbar SnackbarService { get; set; } = null!;
+
+	private MudTable<UserDto> gridUser = new();
+	private List<UserDto> users = new();
+	private string searchString = "";
+	private bool loading = false;
+
+	private IMask cepMask = new PatternMask("00000-000");
+	private MudMask cepField;
+
+	private BlazorBootstrap.Button editUserButton = default!;
+	private BlazorBootstrap.Button findCepUserButton = default!;
+
+	private Modal modalScreen = default!;
+	private Modal modalDeactiveReactive = default!;
+
+	private UserModal userModal = default!;
+
+	private readonly UserSessionInformation _userSessionInformation;
+
+	UserEntity user = new UserEntity();
+	List<UserDto> usersDto = new List<UserDto>();
+
+	bool allowRowSelectOnRowClick = true;
+	bool isPassworfShow;
+	InputType PasswordInput = InputType.Password;
+	string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+	bool insertMode = false;
+	bool isLawyer = false;
+	bool deactiveMode = false;
+	string modalTitle = string.Empty;
+
+	List<ToastMessage> messages = new List<ToastMessage>();
+
+	private void OnRoleChanged()
+	{
+		isLawyer = user.Role == UserRoleType.Advogado;
+	}
+
+	void ButtonShowPasswordclick()
+	{
+		@if (isPassworfShow)
+		{
+			isPassworfShow = false;
+			PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+			PasswordInput = InputType.Password;
+		}
+		else
+		{
+			isPassworfShow = true;
+			PasswordInputIcon = Icons.Material.Filled.Visibility;
+			PasswordInput = InputType.Text;
+		}
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadManufactures();
+	}
+
+	async Task LoadManufactures()
+	{
+		try
+		{
+			loading = true;
+
+			var task = GetUsersDtoAsync();
+
+			await Task.WhenAll(task, Task.Delay(300));
+
+			usersDto = task.Result;
+
+		}
+		finally
+		{
+			loading = false;
+		}
+	}
+
+
+	private async Task<GridDataProviderResult<UserDto>> UserDtoDataProvider(GridDataProviderRequest<UserDto> request)
+	{
+		var usersDto = await GetUsersDtoAsync();
+
+		return await Task.FromResult(request.ApplyTo(usersDto));
+	}
+
+	private async Task ExecuteAction(Func<Task<bool>> action, string successMessage)
+	{
+		try
+		{
+			if (await action())
+			{
+				Snackbar.Add(successMessage, Severity.Success);
+			}
+			else
+			{
+				Snackbar.Add("Erro na operação", Severity.Error);
+			}
+		}
+		catch (Exception ex)
+		{
+			Snackbar.Add(ex.Message, Severity.Error);
+		}
+	}
+
+
+	private async Task<List<UserDto>> GetUsersDtoAsync()
+	{
+		var usersEntity = await _userService.GetUserAllAsync();
+
+		return usersEntity.Select(x => new UserDto()
+		{
+			Uuid = x.Uuid,
+			Name = x.Name,
+			Email = x.Email,
+
+			Active = x.Active,
+			Role = x.Role.ToString(),
+		}).ToList();
+	}
+
+	private bool FilterUsers(UserDto user)
+	{
+		if (string.IsNullOrWhiteSpace(searchString))
+			return true;
+
+		return user.Name?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true ||
+						user.Email?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true ||
+						user.Role?.Contains(searchString, StringComparison.OrdinalIgnoreCase) == true;
+	}
+
+	#region	Ons
+	private async Task OnFindCepClick()
+	{
+		if (!string.IsNullOrEmpty(user?.Address?.ZipCode))
+		{
+			var address = await _externalService.GetAddressCep(user.Address.ZipCode);
+
+			if(string.IsNullOrEmpty(address.Logradouro))
+				Notification.ExibirMensagem("Cep inválido", Severity.Warning);
+
+			user.Address.City = address.Localidade;
+
+			user.Address.Neighborhood = address.Bairro;
+			user.Address.Complement = address.Complemento;
+			user.Address.State = address.Uf;
+			user.Address.Street = address.Logradouro;
+			user.Address.ZipCode = address.Cep;
+		}
+		else
+		{
+			Notification.ExibirMensagem("Cep inválido", Severity.Error);
+			await cepField.FocusAsync();
+		}
+	}
+
+	private async Task OnShowModalInsertClick()
+	{
+		user = new UserEntity()
+		{
+			Name = string.Empty,
+			Password = string.Empty,
+			Address = new AddressEntity()
+		};
+
+		insertMode = true;
+		modalTitle = "Inserir usuário";
+
+		await modalScreen.ShowAsync();
+	}
+
+	private async Task OnPersisteModalUser()
+	{
+		if (insertMode)
+			await OnIncludeUser();
+		else
+			await OnUpdateUser();
+
+		await ReloadGrid();
+
+		insertMode = false;
+		modalTitle = string.Empty;
+
+		await OnHideModalInsertClick();
+	}
+
+
+	private async Task OnPersisteDeleteModalUser()
+	{
+		if (deactiveMode)
+			await OnDeactiveUser();
+		else
+			await OnReactiveUser();
+
+		deactiveMode = false;
+		modalTitle = string.Empty;
+
+		await OnHideModalDeactiveClick();
+	}
+
+	private async Task OnUpdateUser()
+	{
+		await ExecuteAction(
+			() => _userService.EditAsync(user),
+			"Usuário atualizado com sucesso"
+		);
+	}
+
+	private async Task OnDeactiveUser()
+	{
+		await ExecuteAction(
+			() => _userService.DeactiveAsync(user.Uuid),
+			"Usuário desativado com sucesso"
+		);
+
+		await ReloadGrid();
+	}
+
+	private async Task OnReactiveUser()
+	{
+		await ExecuteAction(
+			() => _userService.ReactiveAsync(user.Uuid),
+			"Usuário reativado com sucesso"
+		);
+
+		await ReloadGrid();
+	}
+
+	private async Task ReloadGrid()
+	{
+		loading = true;
+
+		usersDto = await GetUsersDtoAsync();
+
+		loading = false;
+
+		StateHasChanged();
+	}
+	
+
+
+	private async Task OnIncludeUser()
+	{
+		await ExecuteAction(
+			() => _userService.AddAsync(user),
+			"Usuário criado com sucesso"
+		);
+	}
+
+	private async Task OnHideModalInsertClick()
+	{
+		await modalScreen.HideAsync();
+	}
+
+	private async Task OnHideModalDeactiveClick()
+	{
+		await modalDeactiveReactive.HideAsync();
+	}
+
+	private async Task OnShowModalEditClick(UserDto data)
+	{
+		insertMode = false;
+		modalTitle = "Alterar usuário";
+
+		var responseUser = await _userService.GetUserByUuidAsync(data.Uuid);
+
+		if (responseUser == null || string.IsNullOrEmpty(responseUser.Name))
+			Notification.ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
+
+		user = responseUser;
+
+		await modalScreen.ShowAsync();
+	}
+
+	private async Task OnShowModalDeleteClick(UserDto data)
+	{
+		deactiveMode = true;
+		modalTitle = "Confirma essa ação?";
+
+		var responseUser = await _userService.GetUserByUuidAsync(data.Uuid);
+
+		if (responseUser == null || string.IsNullOrEmpty(responseUser.Name))
+			Notification.ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
+
+		user = responseUser;
+
+		await modalDeactiveReactive.ShowAsync();
+	}
+
+	private async Task OnShowModalReactiveClick(UserDto data)
+	{
+		deactiveMode = false;
+		modalTitle = "Confirma essa ação?";
+
+		var responseUser = await _userService.GetUserByUuidAsync(data.Uuid);
+
+		if (responseUser == null || string.IsNullOrEmpty(responseUser.Name))
+			Notification.ExibirMensagem("Error ao recuperar usuário.", Severity.Error);
+
+		user = responseUser;
+
+		await modalDeactiveReactive.ShowAsync();
+	}
+
+	private async Task OnHideModalEditClick()
+	{
+		await modalScreen.HideAsync();
+	}
+	#endregion
+
+}

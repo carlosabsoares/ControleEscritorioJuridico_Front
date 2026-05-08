@@ -127,6 +127,48 @@
 					<MudText>@context.LastMovimentationDate</MudText>
 				</MudStack>
 			</MudTd>
+			<MudTd DataLabel="Ações" Style="text-align: center;">
+				<MudStack Row="true" Spacing="1" Justify="Justify.Center">
+
+					@if (context.Active)
+					{
+						<MudIconButton Icon="@Icons.Material.Filled.Edit"
+									   Color="Color.Primary"
+									   Size="Size.Small"
+									   title="Editar Processo"
+									   OnClick="@(async () => await OnShowModalEditClick(context))" 
+									   />
+						
+						<MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
+									   Color="Color.Error"
+									   Size="Size.Small"
+									   title="Desativar Processo"
+									   OnClick="@(async () => await OnShowModalDeleteClick(context))" />
+					}
+					else
+					{
+						<MudIconButton Icon="@Icons.Material.Filled.Restore"
+									   Color="Color.Success"
+									   Size="Size.Small"
+									   title="Reativar Processo"
+									   OnClick="@(async () => await OnShowModalReactiveClick(context))" />
+					}
+
+					<MudIconButton Icon="@Icons.Material.Filled.Gavel"
+								   Color="Color.Info"
+								   Size="Size.Small"
+								   title="Ver processos"
+								   OnClick="@(async () => await OnShowOffClick())" />
+
+					<MudIconButton Icon="@Icons.Material.Filled.AttachMoney"
+								   Color="Color.Warning"
+								   Size="Size.Small"
+								   title="Ver informações financeiras"
+								   OnClick="@(async () => await OnShowOffClick())" />
+
+
+				</MudStack>
+			</MudTd>
 		</RowTemplate>
 
 		<!-- Pager -->
@@ -213,6 +255,26 @@
 		{
 			loading = false;
 		}
+	}
+
+	private async Task OnShowModalEditClick(ProcessDto data)
+	{
+
+	}
+
+	private async Task OnShowModalDeleteClick(ProcessDto data)
+	{
+
+	}
+
+	private async Task OnShowModalReactiveClick(ProcessDto data)
+	{
+
+	}
+
+	private async Task OnShowOffClick()
+	{
+		
 	}
 
 	private async Task<List<ProcessDto>> GetAllLegalProcessAsync()
